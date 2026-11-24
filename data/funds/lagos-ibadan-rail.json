@@ -1,0 +1,214 @@
+{
+  "id": "lagos-ibadan-rail",
+  "order": 2,
+  "title": "China loan for the Lagos–Ibadan railway",
+  "category": "Foreign loans",
+  "source": "China's Export-Import Bank",
+  "amount": 1267317586,
+  "currency": "USD",
+  "date": "2017-08-18",
+  "asOf": "2026-11-19",
+  "status": "operational",
+  "summary": "A $1.27 billion loan from China's Export-Import Bank, plus Nigerian government counterpart funds, paid for a 156 km double-track standard gauge railway between Lagos and Ibadan. The line was commissioned in June 2021 and is in use.",
+  "simple": "Nigeria borrowed from a Chinese state bank to build a modern railway from Lagos to Ibadan. The train is running. Nigeria still has to pay the loan back.",
+  "verdict": [
+    {
+      "tone": "good",
+      "text": "The Lagos–Ibadan train is running (since 2021)"
+    },
+    {
+      "tone": "neutral",
+      "text": "Nigeria is still repaying the loan"
+    }
+  ],
+  "gaps": [
+    "We could not find a final audited project cost. Published figures range from $1.5 billion to $1.6 billion, while the financing we can identify comes to about $1.45 billion.",
+    "We could not find public figures for how much of the loan has been repaid so far.",
+    "Ridership and revenue figures are not published regularly."
+  ],
+  "timeline": [
+    {
+      "date": "2017-08-18",
+      "text": "China Eximbank and Nigeria sign a $1,267,317,586 loan.",
+      "evidence": [
+        0
+      ]
+    },
+    {
+      "date": "2020-12-07",
+      "text": "A limited paid passenger service starts (one return trip a day).",
+      "evidence": [
+        3,
+        4
+      ]
+    },
+    {
+      "date": "2021-06-10",
+      "text": "The President formally opens the line.",
+      "evidence": [
+        2
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "title": "China Eximbank provides $1.267bn PBC for Lagos–Ibadan railway (Project 60848)",
+      "publisher": "AidData (William & Mary)",
+      "type": "dataset",
+      "url": "https://china.aiddata.org/projects/60848"
+    },
+    {
+      "title": "Nigeria's China-built railway has to avoid debt pitfalls",
+      "publisher": "Quartz Africa",
+      "type": "news",
+      "url": "https://qz.com/africa/1958964/nigerias-china-built-railway-has-to-avoid-debt-pitfalls"
+    },
+    {
+      "title": "Lagos – Ibadan standard gauge railway opens",
+      "publisher": "International Railway Journal",
+      "type": "news",
+      "url": "https://www.railjournal.com/news/lagos-ibadan-standard-gauge-railway-opens/"
+    },
+    {
+      "title": "Finally, Lagos-Ibadan rail line begins commercial operations",
+      "publisher": "The Guardian Nigeria",
+      "type": "news",
+      "url": "https://guardian.ng/?p=1443739"
+    },
+    {
+      "title": "Commercial operations begin on Lagos-Ibadan rail line",
+      "publisher": "TheCable",
+      "type": "news",
+      "date": "2020-12-07",
+      "url": "https://www.thecable.ng/?p=503570"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "exim",
+      "type": "source",
+      "label": "China's Export-Import Bank (loan)",
+      "simple": "A Chinese state bank lent Nigeria $1.27 billion. Nigeria must repay it with interest.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "A preferential buyer's credit signed on 18 August 2017. Nigeria must repay it with interest.",
+      "evidence": [
+        {
+          "title": "Project 60848 — Lagos–Ibadan railway",
+          "publisher": "AidData",
+          "type": "dataset",
+          "url": "https://china.aiddata.org/projects/60848"
+        }
+      ]
+    },
+    {
+      "id": "fgn-cp",
+      "type": "source",
+      "label": "Nigeria's own contribution",
+      "simple": "Nigeria added about $182 million of its own money.",
+      "status": "passed_on",
+      "clarity": "reported",
+      "description": "Nigeria's own contribution, reported at about $182 million. Other reports round it to $200 million.",
+      "evidence": [
+        {
+          "title": "Nigeria's China-built railway has to avoid debt pitfalls",
+          "publisher": "Quartz Africa",
+          "type": "news",
+          "url": "https://qz.com/africa/1958964/nigerias-china-built-railway-has-to-avoid-debt-pitfalls"
+        }
+      ]
+    },
+    {
+      "id": "fmot",
+      "type": "agency",
+      "label": "Transport Ministry & Nigerian Railway Corporation",
+      "simple": "The transport ministry and the railway corporation own the project.",
+      "status": "passed_on",
+      "clarity": "reported",
+      "description": "The project owners. The Nigerian Railway Corporation runs the trains.",
+      "evidence": [
+        {
+          "title": "Project 60848: Lagos–Ibadan railway",
+          "publisher": "AidData",
+          "type": "dataset",
+          "url": "https://china.aiddata.org/projects/60848"
+        },
+        {
+          "title": "Lagos – Ibadan standard gauge railway opens",
+          "publisher": "International Railway Journal",
+          "type": "news",
+          "url": "https://www.railjournal.com/news/lagos-ibadan-standard-gauge-railway-opens/"
+        }
+      ]
+    },
+    {
+      "id": "ccecc",
+      "type": "contractor",
+      "label": "CCECC (Chinese construction company)",
+      "simple": "A Chinese construction company built the line.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "The engineering, procurement and construction (EPC) contractor for the line.",
+      "evidence": [
+        {
+          "title": "Lagos – Ibadan standard gauge railway opens",
+          "publisher": "International Railway Journal",
+          "type": "news",
+          "url": "https://www.railjournal.com/news/lagos-ibadan-standard-gauge-railway-opens/"
+        }
+      ]
+    },
+    {
+      "id": "line",
+      "type": "project",
+      "label": "Lagos–Ibadan railway (156 km)",
+      "simple": "The Lagos–Ibadan train has been running since 2021 (a limited service started in December 2020).",
+      "location": "Lagos – Ogun – Oyo",
+      "status": "operational",
+      "clarity": "documented",
+      "description": "A double-track standard gauge railway. A limited paid service started on 7 December 2020, and the line was formally opened on 10 June 2021. It is part of a planned Lagos–Kano railway.",
+      "evidence": [
+        {
+          "title": "Lagos – Ibadan standard gauge railway opens",
+          "publisher": "International Railway Journal",
+          "type": "news",
+          "url": "https://www.railjournal.com/news/lagos-ibadan-standard-gauge-railway-opens/"
+        },
+        {
+          "title": "Finally, Lagos-Ibadan rail line begins commercial operations",
+          "publisher": "The Guardian Nigeria",
+          "type": "news",
+          "url": "https://guardian.ng/?p=1443739"
+        },
+        {
+          "title": "Commercial operations begin on Lagos-Ibadan rail line",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/?p=503570"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "exim",
+      "to": "fmot",
+      "amount": 1267317586
+    },
+    {
+      "from": "fgn-cp",
+      "to": "fmot",
+      "amount": 182000000
+    },
+    {
+      "from": "fmot",
+      "to": "ccecc",
+      "amount": 1449317586
+    },
+    {
+      "from": "ccecc",
+      "to": "line",
+      "amount": 1449317586
+    }
+  ]
+}

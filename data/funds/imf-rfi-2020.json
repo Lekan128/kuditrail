@@ -1,0 +1,173 @@
+{
+  "id": "imf-rfi-2020",
+  "order": 7,
+  "title": "IMF COVID-19 emergency loan",
+  "category": "Foreign loans",
+  "source": "the International Monetary Fund (IMF)",
+  "amount": 3400000000,
+  "currency": "USD",
+  "date": "2020-04-28",
+  "asOf": "2025-05-08",
+  "status": "repaid",
+  "summary": "In April 2020 the IMF lent Nigeria $3.4 billion in emergency money to deal with the shock of COVID-19. It was general budget and balance-of-payments support, so it was not tied to any project. Nigeria repaid it in full by April 2025. We could not find a public breakdown showing what this money paid for.",
+  "simple": "During COVID, the IMF lent Nigeria $3.4 billion in emergency money. Nigeria has paid it back. But we could not find any public record of exactly what the money was spent on.",
+  "verdict": [
+    {
+      "tone": "good",
+      "text": "Repaid in full (2025)"
+    },
+    {
+      "tone": "unknown",
+      "text": "What it was spent on: no public record found"
+    }
+  ],
+  "gaps": [
+    "We could not find a public breakdown linking this $3.4 billion to specific spending, such as hospitals, vaccines, palliatives or salaries. If you know of one, please tell us."
+  ],
+  "timeline": [
+    {
+      "date": "2020-04-28",
+      "text": "The IMF Executive Board approves SDR 2,454.5 million (about $3.4 billion) under the Rapid Financing Instrument.",
+      "evidence": [
+        0
+      ]
+    },
+    {
+      "date": "2025-04-30",
+      "text": "The IMF says Nigeria has fully repaid the loan. Charges of about $30 million a year on SDR holdings continue.",
+      "evidence": [
+        2,
+        3
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "title": "IMF Executive Board approves emergency support to Nigeria (Press Release No. 20/191)",
+      "publisher": "IMF",
+      "type": "official",
+      "date": "2020-04-28",
+      "url": "https://www.imf.org/en/news/articles/2020/04/28/pr20191-nigeria-imf-executive-board-approves-emergency-support-to-address-covid-19"
+    },
+    {
+      "title": "IMF loan to Nigeria explained",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2020-04-29",
+      "url": "https://nairametrics.com/2020/04/29/imf-loan-to-nigeria-explained/"
+    },
+    {
+      "title": "IMF confirms Nigeria's full repayment of $3.4 billion COVID-19 loan",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2025-05-08",
+      "url": "https://nairametrics.com/2025/05/08/imf-confirms-nigerias-full-repayment-of-3-4-billion-covid-19-loan/"
+    },
+    {
+      "title": "Nigeria completes $3.4 billion IMF COVID-19 loan repayment, faces ongoing annual charges",
+      "publisher": "Africanews",
+      "type": "news",
+      "date": "2025-05-09",
+      "url": "https://www.africanews.com/2025/05/09/nigeria-completes-34-billion-imf-covid-19-loan-repayment-faces-ongoing-annual-charges/"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "imf",
+      "type": "source",
+      "label": "International Monetary Fund (emergency loan)",
+      "simple": "The IMF lent $3.4 billion quickly to help Nigeria through COVID. Nigeria finished paying it back in 2025.",
+      "status": "repaid",
+      "clarity": "documented",
+      "description": "SDR 2,454.5 million, about $3.4 billion, equal to 100% of Nigeria's IMF quota. It was approved on 28 April 2020 for urgent balance-of-payments needs caused by COVID-19. Repaid in full by 30 April 2025.",
+      "evidence": [
+        {
+          "title": "IMF Press Release No. 20/191",
+          "publisher": "IMF",
+          "type": "official",
+          "url": "https://www.imf.org/en/news/articles/2020/04/28/pr20191-nigeria-imf-executive-board-approves-emergency-support-to-address-covid-19"
+        },
+        {
+          "title": "IMF confirms Nigeria's full repayment of $3.4 billion COVID-19 loan",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "url": "https://nairametrics.com/2025/05/08/imf-confirms-nigerias-full-repayment-of-3-4-billion-covid-19-loan/"
+        }
+      ]
+    },
+    {
+      "id": "fgn",
+      "type": "government",
+      "label": "Federal Government of Nigeria",
+      "simple": "The money went into the government's general pot, mixed with other money.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "Rapid Financing Instrument money is general support. Once it arrives it mixes with other government money and is not tied to particular projects.",
+      "evidence": [
+        {
+          "title": "IMF loan to Nigeria explained",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "url": "https://nairametrics.com/2020/04/29/imf-loan-to-nigeria-explained/"
+        }
+      ]
+    },
+    {
+      "id": "purpose",
+      "type": "allocation",
+      "label": "What it was meant for: fighting COVID and steadying the economy",
+      "simple": "The stated goal was to fight COVID and keep the economy steady.",
+      "status": "passed_on",
+      "clarity": "reported",
+      "description": "The money was expected to help meet government spending on the fight against COVID-19 and to support the country's external position.",
+      "evidence": [
+        {
+          "title": "IMF loan to Nigeria explained",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "url": "https://nairametrics.com/2020/04/29/imf-loan-to-nigeria-explained/"
+        }
+      ]
+    },
+    {
+      "id": "unknown",
+      "type": "outcome",
+      "label": "What it was actually spent on: no public record found",
+      "simple": "We could not find any public list of what this money actually paid for.",
+      "status": "unclear",
+      "clarity": "unclear",
+      "description": "We could not find a public, itemised record linking this $3.4 billion to specific purchases, programmes or projects. That does not mean the money was misused. It means the public cannot trace it. If you have an official breakdown, please send it to us.",
+      "evidence": [
+        {
+          "title": "IMF Press Release No. 20/191 (general balance-of-payments support, not tied to projects)",
+          "publisher": "IMF",
+          "type": "official",
+          "url": "https://www.imf.org/en/news/articles/2020/04/28/pr20191-nigeria-imf-executive-board-approves-emergency-support-to-address-covid-19"
+        },
+        {
+          "title": "IMF loan to Nigeria explained",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "url": "https://nairametrics.com/2020/04/29/imf-loan-to-nigeria-explained/"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "imf",
+      "to": "fgn",
+      "amount": 3400000000
+    },
+    {
+      "from": "fgn",
+      "to": "purpose",
+      "amount": 3400000000
+    },
+    {
+      "from": "purpose",
+      "to": "unknown",
+      "amount": 3400000000
+    }
+  ]
+}

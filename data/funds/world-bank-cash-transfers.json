@@ -1,0 +1,294 @@
+{
+  "id": "world-bank-cash-transfers",
+  "order": 5,
+  "title": "World Bank loan for cash to poor families",
+  "category": "Social programmes",
+  "source": "the World Bank",
+  "amount": 800000000,
+  "currency": "USD",
+  "date": "2021-12-16",
+  "asOf": "2026-11-19",
+  "status": "ongoing",
+  "summary": "The World Bank approved an $800 million credit in December 2021 to expand cash transfers to poor households. Nigeria's Senate approved the borrowing in 2023 as relief after the petrol subsidy ended. By mid-2026 about $744.6 million (93%) had been drawn, and the closing date was moved to June 2027. In October 2026 reports said the government had paid ₦658.9 billion to 10.46 million households by September 2026. Earlier, in 2023–24, the anti-graft agency EFCC investigated alleged fraud in the wider cash-transfer programme. Payments now require BVN and NIN checks.",
+  "simple": "Nigeria borrowed $800 million from the World Bank to send cash to poor families. By mid-2026 about 93% of the loan had been paid out. The government says about 10.46 million households have received cash. We found no public breakdown that links the payments to the loan.",
+  "verdict": [
+    {
+      "tone": "good",
+      "text": "About 10.46 million poor households have received cash (reported, 2026)"
+    },
+    {
+      "tone": "neutral",
+      "text": "About 93% of the loan had been paid out by mid-2026"
+    },
+    {
+      "tone": "unknown",
+      "text": "We found no public breakdown linking the payments to the loan"
+    }
+  ],
+  "gaps": [
+    "We found no public breakdown that links the cash paid to households to the money drawn from this loan.",
+    "Government figures differ between reports. One says about ₦688 billion reached 9.2 million people over two years (March 2026). Another says ₦658.9 billion reached 10.46 million households (September 2026).",
+    "We could not find state-by-state payment figures that the public can check."
+  ],
+  "timeline": [
+    {
+      "date": "2021-12-16",
+      "text": "The World Bank approves the $800 million loan.",
+      "evidence": [
+        0
+      ]
+    },
+    {
+      "date": "2023-07",
+      "text": "The Senate approves the borrowing as relief after petrol subsidy removal.",
+      "evidence": [
+        9
+      ]
+    },
+    {
+      "date": "2023-12",
+      "text": "About $315 million has been paid out by the World Bank.",
+      "evidence": [
+        4
+      ]
+    },
+    {
+      "date": "2023–24",
+      "text": "The EFCC investigates alleged fraud in the wider cash-transfer programme. These are allegations, not court findings.",
+      "evidence": [
+        6
+      ]
+    },
+    {
+      "date": "2026-06",
+      "text": "About $744.6 million (93%) has been paid out. The loan's end date is moved to June 2027.",
+      "evidence": [
+        6,
+        10
+      ]
+    },
+    {
+      "date": "2026-09",
+      "text": "Reports say ₦658.9 billion has been paid to 10.46 million households. The World Bank urges more regular payments and a long-term funding plan.",
+      "evidence": [
+        7
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "title": "Nigeria to scale up delivery of social assistance (press release)",
+      "publisher": "World Bank",
+      "type": "official",
+      "date": "2021-12-16",
+      "url": "https://www.worldbank.org/en/news/press-release/2021/12/16/nigeria-to-scale-up-delivery-of-social-assistance-to-10-2-million-households"
+    },
+    {
+      "title": "Project P176935 — National Social Safety Net Program Scale-Up",
+      "publisher": "World Bank",
+      "type": "official",
+      "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P176935"
+    },
+    {
+      "title": "Nigeria National Social Safety Net Program Scale-Up Project (PDF)",
+      "publisher": "World Bank Documents",
+      "type": "document",
+      "url": "https://documents1.worldbank.org/curated/en/717321706545772846/pdf/Nigeria-National-Social-Safety-Net-Program-Scale-Up-Project.pdf"
+    },
+    {
+      "title": "$800 million palliative loan: World Bank disburses $299.99 million to Nigeria",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2023-11-15",
+      "url": "https://nairametrics.com/2023/11/15/800-million-palliative-loan-world-bank-disburses-299-99-million-to-nigeria/"
+    },
+    {
+      "title": "Palliative loan: World Bank increases disbursement to $315 million for Nigeria",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2023-12-26",
+      "url": "https://nairametrics.com/2023/12/26/palliative-loan-world-bank-increases-disbursement-to-315-million-for-nigeria"
+    },
+    {
+      "title": "Nigerian govt disburses N330 billion to vulnerable Nigerians — Edun",
+      "publisher": "Premium Times",
+      "type": "news",
+      "date": "2025-09",
+      "url": "https://www.premiumtimesng.com/news/top-news/821828-nigerian-govt-disburses-n330-billion-to-vulnerable-nigerians-edun.html"
+    },
+    {
+      "title": "Nigeria tightens fraud controls as World Bank disbursements reach $744m",
+      "publisher": "BusinessDay",
+      "type": "news",
+      "date": "2026-09-05",
+      "url": "https://businessday.ng/news/article/nigeria-tightens-fraud-controls-as-world-bank-disbursements-reach-744m/"
+    },
+    {
+      "title": "World Bank reacts as FG disburses N658.9bn to 10.46 million households",
+      "publisher": "Legit.ng",
+      "type": "news",
+      "date": "2026-10-19",
+      "url": "https://www.legit.ng/business-economy/money/1736800-fg-disburses-n6589bn-1046-million-households-world-bank-seeks-reforms/"
+    },
+    {
+      "title": "Nigeria's cash transfers need an audit trail, not just tighter controls (editorial)",
+      "publisher": "BusinessDay",
+      "type": "news",
+      "url": "https://businessday.ng/editorial/article/nigerias-cash-transfers-need-an-audit-trail-not-just-tighter-controls/"
+    },
+    {
+      "title": "Nigeria's Senate approves Tinubu's $800m World Bank loan request (Reuters)",
+      "publisher": "TimesLIVE / Reuters",
+      "type": "news",
+      "date": "2023-07-14",
+      "url": "https://www.timeslive.co.za/news/africa/2023-07-14-nigerias-senate-approves-tinubus-800m-world-bank-loan-request/"
+    },
+    {
+      "title": "IDA Statement of Credits and Grants: loan IDA70190 (monthly data)",
+      "publisher": "World Bank Finances One",
+      "type": "dataset",
+      "url": "https://financesone.worldbank.org/ida-statement-of-credits-grants-and-guarantees-historical-data/DS00976"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "wb",
+      "type": "source",
+      "label": "World Bank (loan)",
+      "simple": "The World Bank agreed to lend $800 million to help poor families with cash. It is a loan: Nigeria starts paying it back in January 2027 and finishes in July 2051.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "An $800 million credit (IDA70190) for the National Social Safety Net Program Scale-Up (P176935), approved on 16 December 2021. It is a loan from the World Bank's IDA fund for poorer countries. The World Bank's records show repayments due from 15 January 2027 to 15 July 2051, with a 2% service charge.",
+      "evidence": [
+        {
+          "title": "World Bank press release, 16 Dec 2021",
+          "publisher": "World Bank",
+          "type": "official",
+          "url": "https://www.worldbank.org/en/news/press-release/2021/12/16/nigeria-to-scale-up-delivery-of-social-assistance-to-10-2-million-households"
+        },
+        {
+          "title": "Project P176935",
+          "publisher": "World Bank",
+          "type": "official",
+          "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P176935"
+        },
+        {
+          "title": "IDA Statement of Credits and Grants: loan IDA70190 (monthly data)",
+          "publisher": "World Bank Finances One",
+          "type": "dataset",
+          "url": "https://financesone.worldbank.org/ida-statement-of-credits-grants-and-guarantees-historical-data/DS00976"
+        }
+      ]
+    },
+    {
+      "id": "disbursed",
+      "type": "allocation",
+      "label": "Paid out to Nigeria (by mid-2026)",
+      "simple": "About $744.6 million, or 93% of the loan, had been paid out by mid-2026.",
+      "status": "disbursed",
+      "clarity": "documented",
+      "description": "The World Bank's own records show $744.61 million paid out (93% of the loan) by 31 October 2026. The last payment was on 21 September 2026. The loan's closing date was moved to 30 June 2027.",
+      "evidence": [
+        {
+          "title": "IDA Statement of Credits and Grants: loan IDA70190 (monthly data)",
+          "publisher": "World Bank Finances One",
+          "type": "dataset",
+          "url": "https://financesone.worldbank.org/ida-statement-of-credits-grants-and-guarantees-historical-data/DS00976"
+        },
+        {
+          "title": "Nigeria tightens fraud controls as World Bank disbursements reach $744m",
+          "publisher": "BusinessDay",
+          "type": "news",
+          "date": "2026-09-05",
+          "url": "https://businessday.ng/news/article/nigeria-tightens-fraud-controls-as-world-bank-disbursements-reach-744m/"
+        },
+        {
+          "title": "Project P176935 (see \"Financing\")",
+          "publisher": "World Bank",
+          "type": "official",
+          "url": "https://projects.worldbank.org/en/projects-operations/project-detail/P176935"
+        }
+      ]
+    },
+    {
+      "id": "undrawn",
+      "type": "allocation",
+      "label": "Not yet paid out",
+      "simple": "The rest had not been paid out yet. The World Bank's records show about $13.8 million left on 31 October 2026.",
+      "status": "not_disbursed",
+      "clarity": "documented",
+      "description": "$800 million minus the $744.61 million paid out is $55.39 million. But the loan is counted in the IMF's basket of currencies (SDR), not in dollars, so the dollar value of what is left changes with exchange rates. On 31 October 2026 the World Bank's records valued the undisbursed balance at about $13.8 million.",
+      "evidence": [
+        {
+          "title": "IDA Statement of Credits and Grants: loan IDA70190 (monthly data)",
+          "publisher": "World Bank Finances One",
+          "type": "dataset",
+          "url": "https://financesone.worldbank.org/ida-statement-of-credits-grants-and-guarantees-historical-data/DS00976"
+        },
+        {
+          "title": "Nigeria tightens fraud controls as World Bank disbursements reach $744m",
+          "publisher": "BusinessDay",
+          "type": "news",
+          "url": "https://businessday.ng/news/article/nigeria-tightens-fraud-controls-as-world-bank-disbursements-reach-744m/"
+        }
+      ]
+    },
+    {
+      "id": "transfers",
+      "type": "project",
+      "label": "Cash paid to poor families (₦25,000 each time)",
+      "simple": "The government says it has paid ₦658.9 billion to about 10.46 million poor households (by September 2026).",
+      "location": "Nationwide",
+      "status": "ongoing",
+      "clarity": "reported",
+      "description": "Families get payments of ₦25,000 a month for three months. Reports in October 2026 said the government had paid ₦658.9 billion to 10.46 million households by September 2026. Beneficiaries now need a BVN and NIN, to stop fraud. NASSCO keeps the beneficiary register. It does not pay out the money itself. We found no public breakdown that matches these payments to the World Bank money.",
+      "evidence": [
+        {
+          "title": "World Bank reacts as FG disburses N658.9bn to 10.46 million households",
+          "publisher": "Legit.ng",
+          "type": "news",
+          "date": "2026-10-19",
+          "url": "https://www.legit.ng/business-economy/money/1736800-fg-disburses-n6589bn-1046-million-households-world-bank-seeks-reforms/"
+        },
+        {
+          "title": "FG disburses N658.9bn to 10.46 million poor households, says World Bank",
+          "publisher": "Economic Confidential",
+          "type": "news",
+          "url": "https://economicconfidential.com/poor-households-world-bank/"
+        },
+        {
+          "title": "Nigeria tightens fraud controls as World Bank disbursements reach $744m",
+          "publisher": "BusinessDay",
+          "type": "news",
+          "url": "https://businessday.ng/news/article/nigeria-tightens-fraud-controls-as-world-bank-disbursements-reach-744m/"
+        },
+        {
+          "title": "NASSCO: $800m World Bank loan to cushion effects of economic shocks",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/nassco-800m-world-bank-loan-to-cushion-effects-of-economic-shocks-on-poor-nigerians"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "wb",
+      "to": "disbursed",
+      "amount": 744610000
+    },
+    {
+      "from": "wb",
+      "to": "undrawn",
+      "amount": 55390000
+    },
+    {
+      "from": "disbursed",
+      "to": "transfers",
+      "amount": 744610000
+    }
+  ],
+  "live": {
+    "worldbankProject": "P176935"
+  }
+}

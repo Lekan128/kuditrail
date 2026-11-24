@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>KudiTrail: follow Nigeria's public money</title>
+  <meta name="description" content="Follow Nigeria's loans and public funds from the lender to the project, with evidence for every step and updates from citizens on the ground.">
+  <meta name="theme-color" content="#0b6e4f">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/flow.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#app">Skip to content</a>
+  <header class="site-head">
+    <div class="container head-inner">
+      <a class="brand" href="#/" aria-label="KudiTrail home">
+        <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" class="logo-bg"/><path d="M7 22c4 0 5-12 9-12s5 12 9 12" class="logo-line"/><circle cx="7" cy="22" r="2.4" class="logo-dot"/><circle cx="25" cy="22" r="2.4" class="logo-dot"/></svg>
+        <span>Kudi<b>Trail</b></span>
+      </a>
+      <button id="nav-toggle" class="icon-btn nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav">☰</button>
+      <nav class="nav" id="nav" aria-label="Main">
+        <a href="#/">Funds</a>
+        <a href="#/budget">Budget</a>
+        <a href="#/about">About</a>
+        <a href="#/contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"><div class="loading">Loading…</div></main>
+
+  <footer class="site-foot">
+    <div class="container foot-inner">
+      <div>
+        <p class="brand small">Kudi<b>Trail</b></p>
+        <p>An independent, non-partisan public-interest project. Information is compiled from public sources, may be incomplete, and is not a finding of wrongdoing against any person or organisation.</p>
+      </div>
+      <div class="foot-links">
+        <a href="#/about">How it works</a>
+        <a href="#/design">Design system</a>
+        <a href="#/disclaimer">Disclaimer &amp; terms</a>
+        <a href="#/contact?type=correction">Report an error</a>
+        <a href="#/contact?type=right_of_reply">Right of reply</a>
+        <a href="#/contact?type=takedown">Takedown request</a>
+      </div>
+    </div>
+    <div class="container foot-bottom">© <span id="year"></span> KudiTrail. Content links to original sources. Citizen updates are moderated.</div>
+  </footer>
+  <div id="modal-root"></div>
+</body>
+</html>

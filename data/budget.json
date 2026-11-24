@@ -1,0 +1,1411 @@
+{
+  "asOf": "2026-11-19",
+  "parts": {
+    "capital": {
+      "label": "Projects",
+      "simple": "Building things: roads, schools, hospitals, power and other projects.",
+      "tech": "Capital spending"
+    },
+    "debt": {
+      "label": "Paying debts",
+      "simple": "Interest and repayments on money Nigeria borrowed before.",
+      "tech": "Debt service"
+    },
+    "recurrent": {
+      "label": "Running the government",
+      "simple": "Salaries, pensions and the day-to-day costs of ministries and agencies.",
+      "tech": "Recurrent (non-debt) spending"
+    },
+    "statutory": {
+      "label": "Fixed shares set by law",
+      "simple": "Money the law says must go to bodies such as the National Assembly, the courts and basic education (UBEC).",
+      "tech": "Statutory transfers"
+    }
+  },
+  "checkYourself": [
+    {
+      "title": "Budget Office of the Federation: quarterly reports",
+      "text": "The official reports on how much was collected and spent each quarter. Every number on this page comes from them.",
+      "url": "https://budgetoffice.gov.ng/index.php/resources/internal-resources/reports/quarterly-budget-implementation"
+    },
+    {
+      "title": "Open Treasury Portal",
+      "text": "The government's daily list of payments it has made.",
+      "url": "https://opentreasury.gov.ng/"
+    },
+    {
+      "title": "GovSpend by BudgIT",
+      "text": "An independent, searchable list of federal government payments.",
+      "url": "https://govspend.ng/"
+    }
+  ],
+  "years": [
+    {
+      "year": 2026,
+      "title": "The 2026 budget",
+      "total": 68323310000000,
+      "signed": "2026-04-17",
+      "simple": "This is the government's plan for spending in 2026, the biggest in Nigeria's history. It expects to collect ₦36.87 trillion, so almost half of the plan (₦31.46 trillion) is a gap, to be filled mostly by borrowing. In the first half of 2026, debts were paid in full, but ministries got nothing for 2026 projects. They were still spending the 2025 projects budget.",
+      "split": [
+        {
+          "part": "capital",
+          "amount": 32287060000000,
+          "evidence": [
+            0
+          ]
+        },
+        {
+          "part": "debt",
+          "amount": 15809360000000,
+          "evidence": [
+            0
+          ]
+        },
+        {
+          "part": "recurrent",
+          "amount": 15427260000000,
+          "evidence": [
+            0
+          ]
+        },
+        {
+          "part": "statutory",
+          "amount": 4799630000000,
+          "evidence": [
+            0
+          ]
+        }
+      ],
+      "splitHeadline": "Almost half is planned for projects, and nearly a quarter for paying debts",
+      "splitSub": "Federal budget as signed into law. Figures from the Budget Office.",
+      "splitNote": "\"Projects\" here includes projects paid for by loans, aid and government-owned companies, not only ministries. Ministries' own projects are ₦15.68 trillion of it.",
+      "verdict": [
+        {
+          "tone": "bad",
+          "text": "Ministries got ₦0 for 2026 projects by 30 June 2026",
+          "evidence": [
+            0,
+            1
+          ]
+        },
+        {
+          "tone": "bad",
+          "text": "Debts were paid in full: ₦7.90 trillion. For every ₦100 the government collected, ₦66 went on debts",
+          "evidence": [
+            0
+          ]
+        },
+        {
+          "tone": "bad",
+          "text": "The government collected ₦11.88 trillion, about two-thirds of what it planned for January to June",
+          "evidence": [
+            0
+          ]
+        },
+        {
+          "tone": "neutral",
+          "text": "For every ₦100 it spent, about ₦42 was borrowed, mostly from lenders inside Nigeria",
+          "evidence": [
+            0
+          ]
+        }
+      ],
+      "progress": {
+        "headline": "Debts were paid in full. Ministries got nothing for 2026 projects",
+        "title": "Plan versus what happened (January to June 2026)",
+        "note": "\"Planned\" is half of the yearly budget. From the Budget Office's report for April to June 2026, published 7 November 2026.",
+        "rows": [
+          {
+            "label": "Money collected",
+            "actual": 11884330000000,
+            "planned": 18433340000000,
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "Paying debts",
+            "actual": 7900240000000,
+            "planned": 7904680000000,
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "Running the government",
+            "actual": 6699580000000,
+            "planned": 7713630000000,
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "Fixed shares set by law",
+            "actual": 1823910000000,
+            "planned": 2399810000000,
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "All project spending",
+            "actual": 4177340000000,
+            "planned": 16143530000000,
+            "more": "This includes projects paid for by loans, aid and government-owned companies.",
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "Ministries' 2026 projects",
+            "actual": 0,
+            "planned": 7840880000000,
+            "evidence": [
+              0,
+              1
+            ]
+          }
+        ]
+      },
+      "areas": {
+        "headline": "Defence and security was the biggest of the areas the President named",
+        "title": "Biggest areas in the President's proposal",
+        "note": "From the budget speech of December 2025. The signed budget is larger, and the final amounts for each area may differ.",
+        "rows": [
+          {
+            "label": "Defence and security",
+            "amount": 5410000000000
+          },
+          {
+            "label": "Infrastructure",
+            "amount": 3560000000000
+          },
+          {
+            "label": "Education",
+            "amount": 3520000000000
+          },
+          {
+            "label": "Health",
+            "amount": 2480000000000
+          }
+        ],
+        "evidence": [
+          2
+        ]
+      },
+      "gaps": [
+        "The Budget Office has not yet published its report for July to September 2026.",
+        "The reports do not list which projects the money paid for.",
+        "The Budget Office sometimes changes earlier figures in later reports. We use the most recent report."
+      ],
+      "evidence": [
+        {
+          "title": "Second Quarter 2026 Budget Implementation Report (January to June 2026)",
+          "publisher": "Budget Office of the Federation",
+          "type": "document",
+          "date": "2026-11-07",
+          "url": "https://budgetoffice.gov.ng/index.php/second-quarter-2026-budget-implementation-report/second-quarter-2026-budget-implementation-report/download"
+        },
+        {
+          "title": "2026 Q1 Budget Implementation Report (January to March 2026)",
+          "publisher": "Budget Office of the Federation",
+          "type": "document",
+          "date": "2026-11-02",
+          "url": "https://budgetoffice.gov.ng/index.php/2026-q1-budget-implementation-report/2026-q1-budget-implementation-report/download"
+        },
+        {
+          "title": "2026 Budget Speech",
+          "publisher": "State House, Abuja",
+          "type": "official",
+          "date": "2025-12-19",
+          "url": "https://statehouse.gov.ng/2026-budget-speech/"
+        },
+        {
+          "title": "Tinubu signs 2026 Appropriation Bill, 2025 budget extension",
+          "publisher": "Channels Television",
+          "type": "news",
+          "date": "2026-04-17",
+          "url": "https://www.channelstv.com/2026/04/17/tinubu-signs-2026-appropriation-bill-2025-budget-extension/"
+        },
+        {
+          "title": "Budget that won't die: Tinubu extends 2025 capital budget for a fourth time",
+          "publisher": "The Digger News",
+          "type": "news",
+          "date": "2026-10-01",
+          "url": "https://www.thediggernews.com/2026/10/01/news-analysis-budget-that-wont-die-tinubu-extends-2025-capital-budget-for-a-fourth-time-as-spending-lags/"
+        },
+        {
+          "title": "Nigeria's actual external debt service payments, January to June 2026",
+          "publisher": "Debt Management Office",
+          "type": "document",
+          "url": "https://www.dmo.gov.ng/6110-nigeria-s-actual-external-debt-service-payments-from-january-to-june-2026/file"
+        },
+        {
+          "title": "Federal Government actual domestic debt service, January to June 2026",
+          "publisher": "Debt Management Office",
+          "type": "document",
+          "url": "https://www.dmo.gov.ng/6111-federal-government-actual-domestic-debt-service-for-january-to-june-2026/file"
+        },
+        {
+          "title": "House of Reps approves ₦68.3trn budget for 2026",
+          "publisher": "The Sun",
+          "type": "news",
+          "date": "2026-03-31",
+          "url": "https://thesun.ng/house-of-reps-approves-%E2%82%A668-3trn-budget-for-2026/"
+        },
+        {
+          "title": "NASS jacks up 2026 budget to N68.30trn, passes Appropriation Bill",
+          "publisher": "Leadership",
+          "type": "news",
+          "url": "https://leadership.ng/nass-jacks-up-2026-budget-to-n68-30trn-passes-appropriation-bill/"
+        }
+      ],
+      "trees": {
+        "period": "January to June 2026",
+        "planNote": "half of the yearly plan",
+        "planned": {
+          "out": {
+            "label": "The 2026 budget",
+            "amount": 68323310000000,
+            "ev": [
+              0
+            ],
+            "children": [
+              {
+                "label": "Projects",
+                "amount": 32287060000000,
+                "part": "capital",
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Ministries' projects",
+                    "amount": 15681760000000
+                  },
+                  {
+                    "label": "Project funds held centrally",
+                    "amount": 8423430000000,
+                    "note": "Project money not yet given to a ministry."
+                  },
+                  {
+                    "label": "Projects of government-owned companies",
+                    "amount": 2961260000000
+                  },
+                  {
+                    "label": "Projects paid for by project loans",
+                    "amount": 2048920000000
+                  },
+                  {
+                    "label": "Projects paid for by the development levy",
+                    "amount": 1804540000000
+                  },
+                  {
+                    "label": "Projects paid for by grants and aid",
+                    "amount": 1367150000000
+                  }
+                ]
+              },
+              {
+                "label": "Paying debts",
+                "amount": 15809360000000,
+                "part": "debt",
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Debts owed inside Nigeria",
+                    "amount": 10160860000000
+                  },
+                  {
+                    "label": "Debts owed to foreign lenders",
+                    "amount": 5359970000000
+                  },
+                  {
+                    "label": "Savings to repay bonds (sinking fund)",
+                    "amount": 288540000000
+                  }
+                ]
+              },
+              {
+                "label": "Running the government",
+                "amount": 15427260000000,
+                "part": "recurrent",
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Salaries in ministries and agencies",
+                    "amount": 8354180000000
+                  },
+                  {
+                    "label": "Other government-wide costs",
+                    "amount": 2012370000000,
+                    "note": "Costs paid centrally for all of government."
+                  },
+                  {
+                    "label": "Pensions and gratuities",
+                    "amount": 1376500000000
+                  },
+                  {
+                    "label": "Running costs of ministries",
+                    "amount": 1254620000000,
+                    "note": "Office costs, travel, fuel, utilities."
+                  },
+                  {
+                    "label": "Salaries in government-owned companies",
+                    "amount": 1017410000000
+                  },
+                  {
+                    "label": "Running costs of government-owned companies",
+                    "amount": 1002200000000
+                  },
+                  {
+                    "label": "Amnesty programme, special interventions and others",
+                    "amount": 409980000000
+                  }
+                ]
+              },
+              {
+                "label": "Fixed shares set by law",
+                "amount": 4799630000000,
+                "part": "statutory",
+                "ev": [
+                  7,
+                  8
+                ],
+                "note": "Amounts as passed by the National Assembly, from news reports.",
+                "children": [
+                  {
+                    "label": "INEC (elections)",
+                    "amount": 1010000000000,
+                    "note": "Reported as ₦1.01 trillion."
+                  },
+                  {
+                    "label": "Six regional development commissions",
+                    "amount": 949670000000,
+                    "note": "North East ₦244.07 billion, North West ₦145.61 billion, and four others at ₦140 billion each."
+                  },
+                  {
+                    "label": "Niger Delta Development Commission",
+                    "amount": 618130000000
+                  },
+                  {
+                    "label": "Courts (National Judicial Council)",
+                    "amount": 610170000000
+                  },
+                  {
+                    "label": "National Assembly",
+                    "amount": 577850000000
+                  },
+                  {
+                    "label": "Basic education (UBEC)",
+                    "amount": 490280000000
+                  },
+                  {
+                    "label": "Basic health care fund",
+                    "amount": 245140000000
+                  },
+                  {
+                    "label": "Science and engineering agency (NASENI)",
+                    "amount": 245140000000
+                  },
+                  {
+                    "label": "Others not named in the reports",
+                    "amount": 53250000000
+                  }
+                ]
+              }
+            ]
+          },
+          "in": {
+            "label": "Money planned to come in",
+            "amount": 68323310000000,
+            "ev": [
+              0
+            ],
+            "children": [
+              {
+                "label": "Money the government collects",
+                "amount": 36866680000000,
+                "part": "r1",
+                "children": [
+                  {
+                    "label": "Oil money",
+                    "amount": 14049260000000
+                  },
+                  {
+                    "label": "Taxes: company tax, VAT and customs",
+                    "amount": 8833090000000
+                  },
+                  {
+                    "label": "Income of government agencies",
+                    "amount": 5181330000000
+                  },
+                  {
+                    "label": "Income of government-owned companies",
+                    "amount": 4980880000000
+                  },
+                  {
+                    "label": "Levies, grants and other income",
+                    "amount": 3822120000000
+                  }
+                ]
+              },
+              {
+                "label": "Borrowing and other financing",
+                "amount": 31456630000000,
+                "part": "r2",
+                "children": [
+                  {
+                    "label": "Borrowing inside Nigeria (government bonds)",
+                    "amount": 18428190000000
+                  },
+                  {
+                    "label": "Borrowing from abroad",
+                    "amount": 10790370000000
+                  },
+                  {
+                    "label": "Loans tied to specific projects",
+                    "amount": 2048920000000
+                  },
+                  {
+                    "label": "Selling government assets",
+                    "amount": 189160000000
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "spent": {
+          "out": {
+            "label": "Spent so far",
+            "amount": 20601070000000,
+            "ev": [
+              0
+            ],
+            "plan": 34161650000000,
+            "children": [
+              {
+                "label": "Paying debts",
+                "amount": 7900240000000,
+                "part": "debt",
+                "plan": 7904680000000,
+                "ev": [
+                  0,
+                  6,
+                  5
+                ],
+                "children": [
+                  {
+                    "label": "Debts owed inside Nigeria",
+                    "amount": 5282860000000,
+                    "plan": 5080430000000,
+                    "ev": [
+                      6
+                    ],
+                    "children": [
+                      {
+                        "label": "Interest on government bonds",
+                        "amount": 3350410000000,
+                        "note": "Federal government bonds, bought mostly by Nigerian banks and pension funds."
+                      },
+                      {
+                        "label": "Interest on treasury bills",
+                        "amount": 1491740000000,
+                        "note": "Short-term government borrowing."
+                      },
+                      {
+                        "label": "Paying off old IOUs (promissory notes)",
+                        "amount": 333960000000,
+                        "note": "IOUs the government gave for old debts it owed."
+                      },
+                      {
+                        "label": "Payments on Islamic bonds for roads (Sukuk)",
+                        "amount": 92290000000
+                      },
+                      {
+                        "label": "Savings bonds and green bonds",
+                        "amount": 14460000000
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Debts owed to foreign lenders",
+                    "amount": 2553700000000,
+                    "plan": 2679980000000,
+                    "ev": [
+                      5
+                    ],
+                    "note": "Paid in dollars: $1.82 billion, of which $1.11 billion was interest.",
+                    "children": [
+                      {
+                        "label": "People who bought Nigeria's dollar bonds (Eurobonds)",
+                        "amount": 902868325670,
+                        "usd": 645160000,
+                        "note": "Investors who bought Nigeria's international bonds."
+                      },
+                      {
+                        "label": "World Bank",
+                        "amount": 689508376306,
+                        "usd": 492700000,
+                        "note": "Its two lending arms, IDA and IBRD."
+                      },
+                      {
+                        "label": "China (Exim Bank and China Development Bank)",
+                        "amount": 362205313488,
+                        "usd": 258820000
+                      },
+                      {
+                        "label": "Banks that lent together (syndicated loans)",
+                        "amount": 255231454578,
+                        "usd": 182380000,
+                        "note": "Including First Abu Dhabi Bank, Afrexim Bank and Deutsche Bank."
+                      },
+                      {
+                        "label": "African Development Bank group",
+                        "amount": 210617029905,
+                        "usd": 150500000
+                      },
+                      {
+                        "label": "Others: France, Germany, Islamic Development Bank and more",
+                        "amount": 133269500052,
+                        "usd": 95230000
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Savings to repay bonds (sinking fund)",
+                    "amount": 63680000000,
+                    "plan": 144270000000
+                  }
+                ]
+              },
+              {
+                "label": "Running the government",
+                "amount": 6699580000000,
+                "part": "recurrent",
+                "plan": 7713630000000,
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Salaries in ministries and agencies",
+                    "amount": 3574170000000,
+                    "plan": 4177090000000
+                  },
+                  {
+                    "label": "Salaries in government-owned companies",
+                    "amount": 1026650000000,
+                    "plan": 508710000000
+                  },
+                  {
+                    "label": "Running costs of government-owned companies",
+                    "amount": 962340000000,
+                    "plan": 501100000000
+                  },
+                  {
+                    "label": "Pensions and gratuities",
+                    "amount": 666200000000,
+                    "plan": 688250000000
+                  },
+                  {
+                    "label": "Running costs of ministries",
+                    "amount": 284490000000,
+                    "plan": 627310000000
+                  },
+                  {
+                    "label": "Amnesty programme, special interventions and others",
+                    "amount": 113820000000,
+                    "plan": 204990000000
+                  },
+                  {
+                    "label": "Other government-wide costs",
+                    "amount": 71910000000,
+                    "plan": 1006180000000
+                  }
+                ]
+              },
+              {
+                "label": "Projects",
+                "amount": 4177340000000,
+                "part": "capital",
+                "plan": 16143530000000,
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Projects paid for by project loans",
+                    "amount": 1024460000000,
+                    "plan": 1024460000000
+                  },
+                  {
+                    "label": "Projects paid for by the development levy",
+                    "amount": 949250000000,
+                    "plan": 902270000000
+                  },
+                  {
+                    "label": "2025 projects still being paid for",
+                    "amount": 677140000000,
+                    "note": "From the 2025 projects budget, extended into 2026."
+                  },
+                  {
+                    "label": "Universities and colleges fund (TETFund)",
+                    "amount": 515330000000
+                  },
+                  {
+                    "label": "Projects of government-owned companies",
+                    "amount": 494380000000,
+                    "plan": 1480630000000
+                  },
+                  {
+                    "label": "Projects paid for by grants and aid",
+                    "amount": 454440000000,
+                    "plan": 683580000000
+                  },
+                  {
+                    "label": "Project funds held centrally",
+                    "amount": 62340000000,
+                    "plan": 4211720000000
+                  },
+                  {
+                    "label": "Ministries' 2026 projects",
+                    "amount": 0,
+                    "plan": 7840880000000,
+                    "note": "Nothing was released by 30 June 2026."
+                  }
+                ]
+              },
+              {
+                "label": "Fixed shares set by law",
+                "amount": 1823910000000,
+                "part": "statutory",
+                "plan": 2399810000000,
+                "ev": [
+                  0
+                ],
+                "note": "The reports do not say which bodies received this money."
+              }
+            ]
+          },
+          "in": {
+            "label": "Money that came in",
+            "amount": 20950840000000,
+            "ev": [
+              0
+            ],
+            "note": "A little more came in than was spent.",
+            "children": [
+              {
+                "label": "Money the government collected",
+                "amount": 11884330000000,
+                "part": "r1",
+                "plan": 18433340000000,
+                "children": [
+                  {
+                    "label": "Oil money",
+                    "amount": 3467700000000,
+                    "plan": 7024630000000
+                  },
+                  {
+                    "label": "Taxes: company tax, VAT and customs",
+                    "amount": 3183140000000,
+                    "plan": 4416540000000
+                  },
+                  {
+                    "label": "Income of government-owned companies",
+                    "amount": 2483370000000,
+                    "plan": 2490440000000
+                  },
+                  {
+                    "label": "Levies, grants and other income",
+                    "amount": 1525430000000,
+                    "plan": 1911060000000
+                  },
+                  {
+                    "label": "Income of government agencies",
+                    "amount": 1224690000000,
+                    "plan": 2590670000000
+                  }
+                ]
+              },
+              {
+                "label": "Borrowed or raised",
+                "amount": 9066510000000,
+                "part": "r2",
+                "plan": 15728320000000,
+                "children": [
+                  {
+                    "label": "Borrowing inside Nigeria (government bonds)",
+                    "amount": 8029490000000,
+                    "plan": 9214100000000
+                  },
+                  {
+                    "label": "Loans tied to specific projects",
+                    "amount": 1024460000000,
+                    "plan": 1024460000000
+                  },
+                  {
+                    "label": "Selling government assets",
+                    "amount": 12560000000,
+                    "plan": 94580000000
+                  },
+                  {
+                    "label": "Borrowing from abroad",
+                    "amount": 0,
+                    "plan": 5395180000000,
+                    "note": "None so far."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "year": 2025,
+      "title": "The 2025 budget",
+      "total": 48316240000000,
+      "signed": "2025-02-28",
+      "totalNote": "Signed at ₦54.99 trillion in February 2025, then cut to ₦48.32 trillion in December 2025.",
+      "simple": "This was the government's plan for spending in 2025. It was signed at ₦54.99 trillion. In December 2025, after little money had been released for projects, it was cut to ₦48.32 trillion, mostly by reducing projects. The projects part was extended four times and is still being spent in 2026.",
+      "split": [
+        {
+          "part": "capital",
+          "amount": 16765330000000.002,
+          "evidence": [
+            0,
+            3
+          ]
+        },
+        {
+          "part": "debt",
+          "amount": 14317140000000,
+          "evidence": [
+            0,
+            3
+          ]
+        },
+        {
+          "part": "recurrent",
+          "amount": 13588010000000,
+          "evidence": [
+            0,
+            3
+          ]
+        },
+        {
+          "part": "statutory",
+          "amount": 3645760000000,
+          "evidence": [
+            0,
+            3
+          ]
+        }
+      ],
+      "splitHeadline": "After the cut, about a third was for projects and nearly a third for paying debts",
+      "splitSub": "The 2025 budget as re-enacted in December 2025. Figures from the Budget Office.",
+      "splitNote": "Before the cut, ₦23.44 trillion of the ₦54.99 trillion was for projects (Budget Office report for April to June 2025).",
+      "verdict": [
+        {
+          "tone": "bad",
+          "text": "By September 2025, less than ₦0.5 trillion had been released to ministries for 2025 projects",
+          "evidence": [
+            2,
+            1,
+            0
+          ]
+        },
+        {
+          "tone": "bad",
+          "text": "Debts got more than planned: ₦12.63 trillion. For every ₦100 the government collected, ₦68 went on debts",
+          "evidence": [
+            0
+          ]
+        },
+        {
+          "tone": "bad",
+          "text": "The government collected ₦18.63 trillion, about 6 in 10 naira of what it planned",
+          "evidence": [
+            0
+          ]
+        },
+        {
+          "tone": "neutral",
+          "text": "The budget was cut from ₦54.99 trillion to ₦48.32 trillion in December 2025, mostly from projects",
+          "evidence": [
+            3,
+            4
+          ]
+        }
+      ],
+      "progress": {
+        "headline": "Debts got more than planned, while ministries got about 1 in 10 naira planned for projects",
+        "title": "Plan versus what happened (January to September 2025)",
+        "note": "\"Planned\" is three-quarters of the yearly budget as cut in December 2025. From the Budget Office's reviewed report for July to September 2025, published 24 August 2026.",
+        "rows": [
+          {
+            "label": "Money collected",
+            "actual": 18632820000000,
+            "planned": 30667320000000,
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "Paying debts",
+            "actual": 12632910000000,
+            "planned": 10737860000000,
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "Running the government",
+            "actual": 7622250000000,
+            "planned": 10191010000000,
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "Fixed shares set by law",
+            "actual": 1305070000000,
+            "planned": 2734320000000,
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "All project spending",
+            "actual": 6600010000000,
+            "planned": 12574000000000,
+            "more": "This includes projects paid for by loans, aid and government-owned companies.",
+            "evidence": [
+              0
+            ]
+          },
+          {
+            "label": "Released to ministries for 2025 projects",
+            "actual": 444260000000,
+            "planned": 4288050000000,
+            "more": "₦34.32 billion (January to March), ₦393.86 billion (April to June) and ₦16.08 billion (July to September).",
+            "evidence": [
+              2,
+              1,
+              0
+            ]
+          }
+        ]
+      },
+      "gaps": [
+        "The Budget Office reports disagree with each other on project money released to ministries. The text of each report adds up to about ₦444 billion by September 2025. A table in the July to September report shows only ₦17.71 billion. We show the larger figure.",
+        "The President's December 2025 budget speech said ₦3.10 trillion had been released for 2025 projects by September 2025. That is far more than the Budget Office reports show for ministries. The two may count different things.",
+        "We have not found a final report for the whole of 2025.",
+        "The reports do not list which projects the money paid for."
+      ],
+      "evidence": [
+        {
+          "title": "Reviewed 2025 Third Quarter Budget Implementation Report (January to September 2025)",
+          "publisher": "Budget Office of the Federation",
+          "type": "document",
+          "date": "2026-08-24",
+          "url": "https://budgetoffice.gov.ng/index.php/reviewed-2025-third-quarter-macroeconomics-financial-analysis/reviewed-2o25-third-quarter-macroeconomics-financial-analysis/download"
+        },
+        {
+          "title": "Second Quarter 2025 Budget Implementation Report",
+          "publisher": "Budget Office of the Federation",
+          "type": "document",
+          "date": "2025-12-22",
+          "url": "https://budgetoffice.gov.ng/index.php/second-quarter-2025-budget-implementation-report/second-quarter-2025-budget-implementation-report/download"
+        },
+        {
+          "title": "First Quarter 2025 Budget Implementation Report",
+          "publisher": "Budget Office of the Federation",
+          "type": "document",
+          "date": "2025-12-22",
+          "url": "https://budgetoffice.gov.ng/index.php/first-quarter-2025-budget-implementation-report/first-quarter-2025-budget-implementation-report/download"
+        },
+        {
+          "title": "National Assembly okays repeal, re-enactment of 2024, 2025 Appropriation Acts",
+          "publisher": "allAfrica (ThisDay)",
+          "type": "news",
+          "date": "2025-12-24",
+          "url": "https://allafrica.com/stories/202512240240.html"
+        },
+        {
+          "title": "Tinubu seeks repeal, extension of 2025 budget",
+          "publisher": "Daily Trust",
+          "type": "news",
+          "url": "https://dailytrust.com/tinubu-seeks-repeal-extension-of-2025-budget/"
+        },
+        {
+          "title": "Tinubu signs ₦54.99trn 2025 budget into law",
+          "publisher": "ICIR",
+          "type": "news",
+          "date": "2025-02-28",
+          "url": "https://www.icirnigeria.org/tinubu-signs-%E2%82%A654-99trn-2025-budget-into-law/"
+        },
+        {
+          "title": "Budget that won't die: Tinubu extends 2025 capital budget for a fourth time",
+          "publisher": "The Digger News",
+          "type": "news",
+          "date": "2026-10-01",
+          "url": "https://www.thediggernews.com/2026/10/01/news-analysis-budget-that-wont-die-tinubu-extends-2025-capital-budget-for-a-fourth-time-as-spending-lags/"
+        },
+        {
+          "title": "2026 Budget Speech",
+          "publisher": "State House, Abuja",
+          "type": "official",
+          "date": "2025-12-19",
+          "url": "https://statehouse.gov.ng/2026-budget-speech/"
+        },
+        {
+          "title": "Nigeria's actual external debt service payments, January to September 2025",
+          "publisher": "Debt Management Office",
+          "type": "document",
+          "url": "https://www.dmo.gov.ng/5729-nigeria-s-actual-external-debt-service-payments-from-january-to-september-2025/file"
+        },
+        {
+          "title": "Federal Government actual domestic debt service, January to September 2025",
+          "publisher": "Debt Management Office",
+          "type": "document",
+          "url": "https://www.dmo.gov.ng/5726-federal-government-actual-domestic-debt-service-for-january-september-2025/file"
+        }
+      ],
+      "trees": {
+        "period": "January to September 2025",
+        "planNote": "three-quarters of the yearly plan",
+        "planned": {
+          "out": {
+            "label": "The 2025 budget (after the cut)",
+            "amount": 48316240000000,
+            "ev": [
+              0
+            ],
+            "children": [
+              {
+                "label": "Projects",
+                "amount": 16765330000000,
+                "part": "capital",
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Project funds held centrally",
+                    "amount": 6140840000000
+                  },
+                  {
+                    "label": "Ministries' projects",
+                    "amount": 5717400000000
+                  },
+                  {
+                    "label": "Projects paid for by project loans",
+                    "amount": 3364280000000
+                  },
+                  {
+                    "label": "Projects of government-owned companies",
+                    "amount": 820910000000
+                  },
+                  {
+                    "label": "Projects paid for by grants and aid",
+                    "amount": 721910000000
+                  }
+                ]
+              },
+              {
+                "label": "Paying debts",
+                "amount": 14317140000000,
+                "part": "debt",
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Debts owed inside Nigeria",
+                    "amount": 7191200000000
+                  },
+                  {
+                    "label": "Debts owed to foreign lenders",
+                    "amount": 6748650000000
+                  },
+                  {
+                    "label": "Savings to repay bonds (sinking fund)",
+                    "amount": 377300000000
+                  }
+                ]
+              },
+              {
+                "label": "Running the government",
+                "amount": 13588010000000,
+                "part": "recurrent",
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Salaries in ministries and agencies",
+                    "amount": 7595670000000
+                  },
+                  {
+                    "label": "Pensions and gratuities",
+                    "amount": 1444020000000
+                  },
+                  {
+                    "label": "Running costs of ministries",
+                    "amount": 1216340000000
+                  },
+                  {
+                    "label": "Other government-wide costs",
+                    "amount": 1057870000000
+                  },
+                  {
+                    "label": "Salaries in government-owned companies",
+                    "amount": 1017410000000
+                  },
+                  {
+                    "label": "Running costs of government-owned companies",
+                    "amount": 892200000000
+                  },
+                  {
+                    "label": "Amnesty programme, special interventions and others",
+                    "amount": 364500000000
+                  }
+                ]
+              },
+              {
+                "label": "Fixed shares set by law",
+                "amount": 3645760000000,
+                "part": "statutory",
+                "ev": [
+                  0
+                ],
+                "note": "We have not found a breakdown by body for 2025."
+              }
+            ]
+          },
+          "in": {
+            "label": "Money planned to come in",
+            "amount": 48316240000000,
+            "ev": [
+              0
+            ],
+            "children": [
+              {
+                "label": "Money the government collects",
+                "amount": 40889760000000,
+                "part": "r1",
+                "children": [
+                  {
+                    "label": "Oil money",
+                    "amount": 21004810000000
+                  },
+                  {
+                    "label": "Taxes: company tax, VAT and customs",
+                    "amount": 8867950000000
+                  },
+                  {
+                    "label": "Income of government agencies",
+                    "amount": 5261700000000
+                  },
+                  {
+                    "label": "Levies, grants and other income",
+                    "amount": 2885030000000
+                  },
+                  {
+                    "label": "Income of government-owned companies",
+                    "amount": 2870270000000
+                  }
+                ]
+              },
+              {
+                "label": "The gap: money to borrow",
+                "amount": 7426480000000,
+                "part": "r2"
+              }
+            ]
+          }
+        },
+        "spent": {
+          "out": {
+            "label": "Spent so far",
+            "amount": 28160240000000,
+            "ev": [
+              0
+            ],
+            "plan": 36237180000000,
+            "children": [
+              {
+                "label": "Paying debts",
+                "amount": 12632910000000,
+                "part": "debt",
+                "plan": 10737860000000,
+                "ev": [
+                  0,
+                  9,
+                  8
+                ],
+                "children": [
+                  {
+                    "label": "Debts owed inside Nigeria",
+                    "amount": 6225820000000,
+                    "plan": 5393400000000,
+                    "ev": [
+                      9
+                    ],
+                    "childSource": true,
+                    "note": "The parts below come from the Debt Management Office and add up to ₦6.32 trillion, a little more than the Budget Office's ₦6.23 trillion.",
+                    "children": [
+                      {
+                        "label": "Interest on government bonds",
+                        "amount": 4173000000000
+                      },
+                      {
+                        "label": "Interest on treasury bills",
+                        "amount": 1808300000000
+                      },
+                      {
+                        "label": "Paying off old IOUs (promissory notes)",
+                        "amount": 262050000000
+                      },
+                      {
+                        "label": "Payments on Islamic bonds for roads (Sukuk)",
+                        "amount": 70720000000
+                      },
+                      {
+                        "label": "Savings bonds and green bonds",
+                        "amount": 10680000000
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Debts owed to foreign lenders",
+                    "amount": 6298920000000,
+                    "plan": 5061490000000,
+                    "ev": [
+                      8
+                    ],
+                    "note": "Paid in dollars: $3.34 billion in total.",
+                    "children": [
+                      {
+                        "label": "People who bought Nigeria's dollar bonds (Eurobonds)",
+                        "amount": 2101882218732,
+                        "usd": 1115520000,
+                        "note": "Investors who bought Nigeria's international bonds."
+                      },
+                      {
+                        "label": "IMF",
+                        "amount": 1538067839509,
+                        "usd": 816290000,
+                        "note": "Repaying the 2020 COVID-19 emergency loan."
+                      },
+                      {
+                        "label": "World Bank",
+                        "amount": 1155590544991,
+                        "usd": 613300000,
+                        "note": "Its two lending arms, IDA and IBRD."
+                      },
+                      {
+                        "label": "China's Exim Bank",
+                        "amount": 896454122926,
+                        "usd": 475770000,
+                        "note": "The table also lists $6.64 million to China Development Bank that is not in its totals."
+                      },
+                      {
+                        "label": "African Development Bank group",
+                        "amount": 339177978157,
+                        "usd": 180010000
+                      },
+                      {
+                        "label": "Others: France, Germany, Islamic Development Bank and more",
+                        "amount": 176419277234,
+                        "usd": 93630000
+                      },
+                      {
+                        "label": "Banks that lent together, and Deutsche Bank",
+                        "amount": 91328018451,
+                        "usd": 48470000
+                      }
+                    ]
+                  },
+                  {
+                    "label": "Savings to repay bonds (sinking fund)",
+                    "amount": 108170000000,
+                    "plan": 282970000000
+                  }
+                ]
+              },
+              {
+                "label": "Running the government",
+                "amount": 7622250000000,
+                "part": "recurrent",
+                "plan": 10191010000000,
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Salaries in ministries and agencies",
+                    "amount": 5092210000000,
+                    "plan": 5696750000000
+                  },
+                  {
+                    "label": "Salaries in government-owned companies",
+                    "amount": 763060000000,
+                    "plan": 763060000000
+                  },
+                  {
+                    "label": "Running costs of government-owned companies",
+                    "amount": 669150000000,
+                    "plan": 669150000000
+                  },
+                  {
+                    "label": "Pensions and gratuities",
+                    "amount": 571940000000,
+                    "plan": 1083010000000
+                  },
+                  {
+                    "label": "Running costs of ministries",
+                    "amount": 290020000000,
+                    "plan": 912250000000
+                  },
+                  {
+                    "label": "Amnesty programme, special interventions and others",
+                    "amount": 120310000000,
+                    "plan": 273380000000
+                  },
+                  {
+                    "label": "Other government-wide costs",
+                    "amount": 115570000000,
+                    "plan": 793400000000
+                  }
+                ]
+              },
+              {
+                "label": "Projects",
+                "amount": 6600010000000,
+                "part": "capital",
+                "plan": 12574000000000,
+                "ev": [
+                  0
+                ],
+                "children": [
+                  {
+                    "label": "Projects paid for by project loans",
+                    "amount": 4786460000000,
+                    "plan": 2523210000000
+                  },
+                  {
+                    "label": "Projects paid for by grants and aid",
+                    "amount": 1080060000000,
+                    "plan": 541430000000
+                  },
+                  {
+                    "label": "Projects of government-owned companies",
+                    "amount": 615680000000,
+                    "plan": 615680000000
+                  },
+                  {
+                    "label": "Project funds held centrally",
+                    "amount": 100100000000,
+                    "plan": 4605630000000
+                  },
+                  {
+                    "label": "Ministries' projects",
+                    "amount": 17710000000,
+                    "plan": 4288050000000,
+                    "note": "This is the table figure. The text of the quarterly reports adds up to ₦444.26 billion."
+                  }
+                ]
+              },
+              {
+                "label": "Fixed shares set by law",
+                "amount": 1305070000000,
+                "part": "statutory",
+                "plan": 2734320000000,
+                "ev": [
+                  0
+                ],
+                "note": "The reports do not say which bodies received this money."
+              }
+            ]
+          },
+          "in": {
+            "label": "Money that came in",
+            "amount": 30679810000000,
+            "ev": [
+              0
+            ],
+            "note": "More came in than was spent.",
+            "children": [
+              {
+                "label": "Money the government collected",
+                "amount": 18632820000000,
+                "part": "r1",
+                "plan": 30667320000000,
+                "children": [
+                  {
+                    "label": "Oil money",
+                    "amount": 5887450000000,
+                    "plan": 15753610000000
+                  },
+                  {
+                    "label": "Taxes: company tax, VAT and customs",
+                    "amount": 5545390000000,
+                    "plan": 6650960000000
+                  },
+                  {
+                    "label": "Income of government agencies",
+                    "amount": 2613240000000,
+                    "plan": 3946270000000
+                  },
+                  {
+                    "label": "Levies, grants and other income",
+                    "amount": 2434040000000,
+                    "plan": 2164270000000
+                  },
+                  {
+                    "label": "Income of government-owned companies",
+                    "amount": 2152700000000,
+                    "plan": 2152700000000
+                  }
+                ]
+              },
+              {
+                "label": "Borrowed or raised",
+                "amount": 12046990000000,
+                "part": "r2",
+                "children": [
+                  {
+                    "label": "Borrowing inside Nigeria (government bonds)",
+                    "amount": 7075000000000
+                  },
+                  {
+                    "label": "Loans tied to specific projects",
+                    "amount": 4786460000000
+                  },
+                  {
+                    "label": "Selling government assets",
+                    "amount": 185530000000
+                  },
+                  {
+                    "label": "Borrowing from abroad",
+                    "amount": 0,
+                    "note": "None so far."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

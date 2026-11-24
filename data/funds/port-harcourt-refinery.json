@@ -1,0 +1,255 @@
+{
+  "id": "port-harcourt-refinery",
+  "order": 3,
+  "title": "Port Harcourt refinery repair",
+  "category": "Oil & refineries",
+  "source": "NNPC's own money, the federal budget and an Afreximbank loan",
+  "amount": 1500000000,
+  "currency": "USD",
+  "date": "2021-03",
+  "asOf": "2026-11-19",
+  "status": "stalled",
+  "simple": "In 2021 the government approved $1.5 billion to repair the old Port Harcourt refinery so Nigeria could make its own fuel. It restarted in late 2024, was shut for maintenance in May 2025, and in 2026 it was still not working steadily.",
+  "verdict": [
+    {
+      "tone": "bad",
+      "text": "Restarted in Nov 2024, then shut for maintenance in May 2025"
+    },
+    {
+      "tone": "bad",
+      "text": "Not working steadily in 2026"
+    },
+    {
+      "tone": "unknown",
+      "text": "How much of the $1.5 billion was spent, and on what: no public breakdown found"
+    }
+  ],
+  "summary": "In March 2021 the Federal Executive Council approved $1.5 billion to repair the Port Harcourt refinery, and the Italian firm Tecnimont was hired to do the work. The money was to come from NNPC's own revenue, the federal budget and a loan arranged with Afreximbank. NNPC restarted the older plant (60,000 barrels a day) in November 2024 and announced a maintenance shutdown from 24 May 2025. In February 2026 the oil workers' union PENGASSAN said the plant was about 90% repaired and could restart within a week, while NNPC said a restart had to make commercial sense.",
+  "gaps": [
+    "We found no public breakdown of how much of the $1.5 billion has been spent, or how much came from each source (NNPC, the budget and Afreximbank).",
+    "We found no regular public reports of how much fuel the refinery has produced.",
+    "We could not confirm the refinery's exact state in November 2026."
+  ],
+  "timeline": [
+    {
+      "date": "2021-03",
+      "text": "The Federal Executive Council approves $1.5 billion to repair the refinery.",
+      "evidence": [
+        0,
+        1
+      ]
+    },
+    {
+      "date": "2021-04",
+      "text": "The repair contract is signed with Tecnimont.",
+      "evidence": [
+        2
+      ]
+    },
+    {
+      "date": "2024-11",
+      "text": "NNPC restarts the older plant (60,000 barrels a day).",
+      "evidence": [
+        4
+      ]
+    },
+    {
+      "date": "2025-05-24",
+      "text": "NNPC announces a planned maintenance shutdown, expected to last about a month.",
+      "evidence": [
+        5
+      ]
+    },
+    {
+      "date": "2026-02",
+      "text": "The oil workers' union says the plant is 90% repaired and could restart within a week. NNPC says a restart must make commercial sense.",
+      "evidence": [
+        6,
+        7
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "title": "Nigeria approves $1.5 billion Port Harcourt refinery upgrade",
+      "publisher": "Hydrocarbon Processing",
+      "type": "news",
+      "date": "2021-03",
+      "url": "https://www.hydrocarbonprocessing.com/news/2021/03/nigeria-approves-15-billion-port-harcourt-refinery-upgrade"
+    },
+    {
+      "title": "Nigeria approves $1.5bn for rehabilitation of Port Harcourt refinery",
+      "publisher": "BusinessDay",
+      "type": "news",
+      "date": "2021-03",
+      "url": "https://businessday.ng/energy/oilandgas/article/nigeria-approves-1-5bn-for-rehabilitation-of-port-harcourt-refinery/"
+    },
+    {
+      "title": "EPC contract signed for the rehabilitation works of the Port Harcourt refinery complex",
+      "publisher": "Hydrocarbon Processing",
+      "type": "news",
+      "date": "2021-04",
+      "url": "https://hydrocarbonprocessing.com/news/2021/04/epc-contract-signed-for-the-rehabilitation-works-of-the-port-harcourt-refinery-complex/"
+    },
+    {
+      "title": "NNPC agrees loan to allow refinery rehab work to begin",
+      "publisher": "bne IntelliNews",
+      "type": "news",
+      "url": "https://www.intellinews.com/nnpc-agrees-loan-to-allow-refinery-rehab-work-to-begin-203477"
+    },
+    {
+      "title": "Nigeria's NNPCL restarts Port Harcourt refinery",
+      "publisher": "Oil & Gas Journal",
+      "type": "news",
+      "date": "2024-11-27",
+      "url": "https://ogj.com/refining-processing/refining/article/55246417/nigerias-nnpcl-restarts-port-harcourt-refinery"
+    },
+    {
+      "title": "Maintenance: NNPCL announces planned shutdown of Port Harcourt refinery effective May 24",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2025-05-24",
+      "url": "https://nairametrics.com/2025/05/24/maintenance-nnpcl-announces-planned-shutdown-of-port-harcourt-refinery-effective-may-24/"
+    },
+    {
+      "title": "Port Harcourt refinery rehabilitated to 90%, can be functional within one week — Osifo",
+      "publisher": "Channels TV",
+      "type": "news",
+      "date": "2026-02-10",
+      "url": "https://www.channelstv.com/2026/02/10/port-harcourt-refinery-rehabilitated-to-90-can-be-functional-within-one-week-osifo/"
+    },
+    {
+      "title": "Port Harcourt Refinery 90% ready, can resume in one week — PENGASSAN",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2026-02-10",
+      "url": "https://nairametrics.com/2026/02/10/port-harcourt-refinery-90-ready-can-resume-in-one-week-pengassan/"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "funding",
+      "type": "source",
+      "label": "Funding: NNPC revenue, federal budget, Afreximbank loan",
+      "simple": "The $1.5 billion was to come from NNPC's own money, the federal budget and a bank loan. The split has not been published.",
+      "status": "passed_on",
+      "clarity": "reported",
+      "description": "The Petroleum Minister said in 2021 that the money would come from NNPC's own revenue, budget allocations and Afreximbank. Reports differ on how much Afreximbank provided. We found no official split.",
+      "evidence": [
+        {
+          "title": "Nigeria approves $1.5bn for rehabilitation of Port Harcourt refinery",
+          "publisher": "BusinessDay",
+          "type": "news",
+          "date": "2021-03",
+          "url": "https://businessday.ng/energy/oilandgas/article/nigeria-approves-1-5bn-for-rehabilitation-of-port-harcourt-refinery/"
+        },
+        {
+          "title": "NNPC agrees loan to allow refinery rehab work to begin",
+          "publisher": "bne IntelliNews",
+          "type": "news",
+          "url": "https://www.intellinews.com/nnpc-agrees-loan-to-allow-refinery-rehab-work-to-begin-203477"
+        }
+      ]
+    },
+    {
+      "id": "nnpc",
+      "type": "agency",
+      "label": "NNPC (owner of the refinery)",
+      "simple": "NNPC, the state oil company, owns the refinery and managed the repair.",
+      "status": "passed_on",
+      "clarity": "reported",
+      "description": "NNPC Limited owns the Port Harcourt Refining Company and managed the repair project.",
+      "evidence": [
+        {
+          "title": "Nigeria approves $1.5 billion Port Harcourt refinery upgrade",
+          "publisher": "Hydrocarbon Processing",
+          "type": "news",
+          "date": "2021-03",
+          "url": "https://www.hydrocarbonprocessing.com/news/2021/03/nigeria-approves-15-billion-port-harcourt-refinery-upgrade"
+        }
+      ]
+    },
+    {
+      "id": "tecnimont",
+      "type": "contractor",
+      "label": "Tecnimont (Italian engineering firm)",
+      "simple": "An Italian engineering firm was hired to do the repair work.",
+      "status": "passed_on",
+      "clarity": "reported",
+      "description": "Tecnimont, part of the Maire Tecnimont group, signed the engineering, procurement and construction contract in April 2021. The work was planned in phases.",
+      "evidence": [
+        {
+          "title": "EPC contract signed for the rehabilitation works of the Port Harcourt refinery complex",
+          "publisher": "Hydrocarbon Processing",
+          "type": "news",
+          "date": "2021-04",
+          "url": "https://hydrocarbonprocessing.com/news/2021/04/epc-contract-signed-for-the-rehabilitation-works-of-the-port-harcourt-refinery-complex/"
+        },
+        {
+          "title": "Nigeria approves $1.5 billion Port Harcourt refinery upgrade",
+          "publisher": "Hydrocarbon Processing",
+          "type": "news",
+          "date": "2021-03",
+          "url": "https://www.hydrocarbonprocessing.com/news/2021/03/nigeria-approves-15-billion-port-harcourt-refinery-upgrade"
+        }
+      ]
+    },
+    {
+      "id": "refinery",
+      "type": "project",
+      "label": "Port Harcourt refinery",
+      "location": "Eleme, Rivers State",
+      "simple": "It restarted in late 2024 but was shut for maintenance in May 2025. In 2026 it was still not working steadily.",
+      "status": "stalled",
+      "clarity": "reported",
+      "description": "NNPC restarted the older plant in November 2024 and began loading products. It announced a maintenance shutdown from 24 May 2025, expected to last about a month. In February 2026 the oil workers' union said the plant was about 90% repaired and could run within a week, but NNPC said a restart had to make commercial sense. We could not confirm its exact state in November 2026.",
+      "evidence": [
+        {
+          "title": "Nigeria's NNPCL restarts Port Harcourt refinery",
+          "publisher": "Oil & Gas Journal",
+          "type": "news",
+          "date": "2024-11-27",
+          "url": "https://ogj.com/refining-processing/refining/article/55246417/nigerias-nnpcl-restarts-port-harcourt-refinery"
+        },
+        {
+          "title": "Maintenance: NNPCL announces planned shutdown of Port Harcourt refinery effective May 24",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "date": "2025-05-24",
+          "url": "https://nairametrics.com/2025/05/24/maintenance-nnpcl-announces-planned-shutdown-of-port-harcourt-refinery-effective-may-24/"
+        },
+        {
+          "title": "Port Harcourt refinery rehabilitated to 90%, can be functional within one week — Osifo",
+          "publisher": "Channels TV",
+          "type": "news",
+          "date": "2026-02-10",
+          "url": "https://www.channelstv.com/2026/02/10/port-harcourt-refinery-rehabilitated-to-90-can-be-functional-within-one-week-osifo/"
+        },
+        {
+          "title": "Port Harcourt Refinery 90% ready, can resume in one week — PENGASSAN",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "date": "2026-02-10",
+          "url": "https://nairametrics.com/2026/02/10/port-harcourt-refinery-90-ready-can-resume-in-one-week-pengassan/"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "funding",
+      "to": "nnpc",
+      "amount": 1500000000
+    },
+    {
+      "from": "nnpc",
+      "to": "tecnimont",
+      "amount": 1500000000
+    },
+    {
+      "from": "tecnimont",
+      "to": "refinery",
+      "amount": 1500000000
+    }
+  ]
+}

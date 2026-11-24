@@ -1,0 +1,1025 @@
+// KudiTrail web app: vanilla JS, hash routing, no build step.
+'use strict';
+
+(function () {
+  // Labels and formatting
+  const STATUS = {
+    passed_on: { label: 'Sent onward', help: 'This money was sent on to the next step.' },
+    completed: { label: 'Completed', help: 'Reported as finished.' },
+    operational: { label: 'In use', help: 'Finished and in use by the public.' },
+    ongoing: { label: 'Work ongoing', help: 'Still being built or paid out.' },
+    stalled: { label: 'Stalled', help: 'Work has stopped or not started.' },
+    defects: { label: 'Defects reported', help: 'Finished, but problems have since been reported.' },
+    under_review: { label: 'Under investigation', help: 'Being looked into by an official body. Allegations are not findings.' },
+    disbursed: { label: 'Paid out', help: 'The money was released.' },
+    not_disbursed: { label: 'Not paid out', help: 'Approved but not released.' },
+    repaid: { label: 'Repaid', help: 'The loan has been paid back.' },
+    unclear: { label: 'Unclear', help: 'We could not find a public record of where this money ended up.' },
+    pending_data: { label: 'Data pending', help: 'Information exists or is expected, but we have not added it yet.' },
+  };
+  const CLARITY = {
+    documented: { label: 'Official record', help: 'Confirmed by an official or primary source (a government, lender or court document).' },
+    reported: { label: 'News reports', help: 'Reported by credible media or secondary sources, but not confirmed by an official document we have found.' },
+    unclear: { label: 'No public record', help: 'We could not find a public record of where this money went. That is not proof of wrongdoing, but the public cannot trace it.' },
+    pending: { label: 'Not listed here yet', help: 'The detail exists in public sources, but we have not added it to KudiTrail yet. You can help.' },
+  };
+  const TYPES = { source: 'Source', government: 'Government', agency: 'Agency', contractor: 'Contractor', allocation: 'Allocation', project: 'Project', section: 'Section', outcome: 'End point' };
+  const OBSERVED = { completed: 'Completed', operational: 'In use', ongoing: 'Work ongoing', stalled: 'Stalled', defects: 'Has defects', abandoned: 'Abandoned', not_started: 'Not started', unsure: 'Not sure' };
+  const EVTYPE = { official: ['🏛️', 'Official'], document: ['📄', 'Document'], dataset: ['📊', 'Dataset'], news: ['📰', 'News report'], reference: ['📚', 'Reference'] };
+  const CONTACT_TYPES = { correction: 'Report an error / correction', right_of_reply: 'Right of reply (I am named or represent someone named)', takedown: 'Request removal of content', new_evidence: 'Share new evidence', suggest_fund: 'Suggest a fund to track', general: 'General enquiry' };
+
+  function money(n, cur, short) {
+    const sym = cur === 'NGN' ? '₦' : cur === 'USD' ? '$' : cur + ' ';
+    const a = Math.abs(n);
+    const units = short ? [[1e12, 'trn'], [1e9, 'bn'], [1e6, 'm'], [1e3, 'k']] : [[1e12, ' trillion'], [1e9, ' billion'], [1e6, ' million'], [1e3, ' thousand']];
+    for (const [v, u] of units) if (a >= v) {
+      const x = n / v; const dec = x >= 10 ? 1 : 2;
+      return sym + x.toFixed(dec).replace(/\.0+$|(\.\d*[1-9])0+$/, '$1') + u;
+    }
+    return sym + n.toLocaleString('en-NG');
+  }
+  function fmtDate(d) {
+    if (!d) return '';
+    const p = d.split('-');
+    const mo = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    if (p.length === 1) return p[0];
+    if (p.length === 2) return `${mo[+p[1] - 1]} ${p[0]}`;
+    return `${+p[2]} ${mo[+p[1] - 1]} ${p[0]}`;
+  }
+  const CLARITY_SHORT = { documented: 'proven by official papers', reported: 'reported in the news', pending: 'not listed here yet', unclear: 'no public record' };
+  // Naira equivalents use today's rate from data/settings.json: rough guides only
+  function toNgn(amount, cur) { return cur === 'NGN' ? amount : cur === 'USD' && CONFIG.usdToNgn ? amount * CONFIG.usdToNgn : null; }
+  function nairaHint(amount, cur) { if (cur !== 'USD') return ''; const n = toNgn(amount, cur); return n == null ? '' : `≈ ${money(n, 'NGN')}`; }
+  function perPerson(amount, cur) {
+    const n = toNgn(amount, cur); if (n == null || !CONFIG.population) return '';
+    const v = n / CONFIG.population; const r = v >= 1000 ? Math.round(v / 100) * 100 : Math.round(v);
+    return '₦' + r.toLocaleString('en-NG');
+  }
+  const statusLabel = k => (STATUS[k] || { label: k }).label;
+  const typeLabel = k => TYPES[k] || k;
+  window.KT = { money, statusLabel, typeLabel };
+
+  // Tiny DOM helper (always uses textContent, never innerHTML for data)
+  function h(tag, attrs, ...kids) {
+    const e = document.createElement(tag);
+    if (attrs) for (const k in attrs) {
+      const v = attrs[k];
+      if (v == null || v === false) continue;
+      if (k === 'class') e.className = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+      else if (k === 'dataset') Object.assign(e.dataset, v);
+      else e.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids.flat(Infinity)) if (kid != null && kid !== false) e.append(kid.nodeType ? kid : String(kid));
+    return e;
+  }
+  // replace an element's children, skipping null/false and flattening arrays
+  const fill = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter(k => k != null && k !== false));
+  const SYMBOLS = {
+    good: ['✅', 'Done, or paid back'],
+    progress: ['⏳', 'Still in progress'],
+    bad: ['⚠️', 'Problem reported, or under investigation'],
+    unknown: ['❓', 'We found no public record of where the money went. This is not an accusation.'],
+    neutral: ['ℹ️', 'Good to know'],
+  };
+  const verdictList = (v, cls) => v && v.length ? h('ul', { class: `verdict ${cls || ''}` },
+    v.map(x => h('li', { class: `tone-${x.tone}` }, h('span', { class: 'v-icon', 'aria-hidden': 'true' }, (SYMBOLS[x.tone] || SYMBOLS.neutral)[0]), h('span', null, x.text)))) : null;
+  const symbolKey = () => h('section', { class: 'key' }, h('h2', null, 'What the symbols mean'),
+    h('ul', { class: 'verdict' }, Object.entries(SYMBOLS).map(([t, [icon, text]]) => h('li', { class: `tone-${t}` }, h('span', { class: 'v-icon', 'aria-hidden': 'true' }, icon), h('span', null, text)))));
+  const pill = (status, extra) => h('span', { class: `pill status-${status} ${extra || ''}`, title: (STATUS[status] || {}).help }, h('i'), statusLabel(status));
+  const clarityTag = c => h('span', { class: `clarity-tag clarity-${c}`, title: CLARITY[c].help }, CLARITY[c].label);
+  function domain(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (_) { return ''; } }
+
+  // ===== Design system components (live reference at #/design, rules in docs/DESIGN-SYSTEM.md) =====
+  // Money in words: write million / billion / trillion in full (GOV.UK style guide)
+  function naira(n) {
+    if (n === 0) return '₦0';
+    for (const [v, u] of [[1e12, 'trillion'], [1e9, 'billion'], [1e6, 'million']])
+      if (Math.abs(n) >= v) return `₦${(n / v).toFixed(2)} ${u}`; // same 2 decimals everywhere, so lists line up
+    return '₦' + Math.round(n).toLocaleString('en-NG');
+  }
+  // A percentage in everyday words, using "x in 10" where it helps (natural frequencies)
+  function plainShare(p) {
+    const t = [[0.5, 'none'], [5, 'almost none'], [15, 'about 1 in 10'], [23, 'about 1 in 5'], [29, 'about a quarter'], [38, 'about a third'],
+      [45, 'about 4 in 10'], [56, 'about half'], [63, 'about 6 in 10'], [71, 'about two-thirds'], [78, 'about three-quarters'], [85, 'about 8 in 10'],
+      [95, 'about 9 in 10'], [99.5, 'almost all'], [100.5, 'all of it'], [Infinity, 'more than planned']];
+    return t.find(([max]) => p < max)[1];
+  }
+  // Split 100 into whole parts that add up exactly (largest remainder)
+  function per100Shares(values) {
+    const total = values.reduce((a, b) => a + b, 0) || 1;
+    const raw = values.map(v => v / total * 100); const out = raw.map(Math.floor);
+    let left = 100 - out.reduce((a, b) => a + b, 0);
+    raw.map((r, i) => [r - Math.floor(r), i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => { if (left > 0) { out[i]++; left--; } });
+    return out;
+  }
+  // Figure: one big number and what it means for one person
+  const figure = ({ label, value, context, note }) => h('div', { class: 'figure' },
+    label ? h('span', { class: 'fig-label' }, label) : null, h('strong', { class: 'fig-value' }, value),
+    context ? h('span', { class: 'fig-context' }, context) : null, note ? h('span', { class: 'fig-note' }, note) : null);
+  // Source chip: opens just the sources behind one statement
+  function sourceChip(items, about) {
+    items = (items || []).filter(Boolean); if (!items.length) return null;
+    const label = items.length === 1 ? 'Source' : `${items.length} sources`;
+    return h('button', { type: 'button', class: 'src-chip', 'aria-label': `${label} for: ${about}`, onclick: () => showEvidence(about, items) }, label);
+  }
+  // Chart block: headline states the message, subtitle says what/where/when, numbers available as a table
+  function chartBlock({ headline, sub, visual, table, after }) {
+    return h('section', { class: 'chart' },
+      h('h2', { class: 'chart-h' }, headline), sub ? h('p', { class: 'chart-sub' }, sub) : null, visual,
+      table ? h('details', { class: 'chart-table' }, h('summary', null, 'See the numbers as a table'),
+        h('div', { class: 'table-scroll' }, h('table', { class: 'data-table' },
+          h('thead', null, h('tr', null, table.head.map((c, i) => h('th', { class: (table.num || []).includes(i) ? 'num' : null, scope: 'col' }, c)))),
+          h('tbody', null, table.rows.map(r => h('tr', null, r.map((c, i) => h(i === 0 ? 'th' : 'td', { class: (table.num || []).includes(i) ? 'num' : null, scope: i === 0 ? 'row' : null }, c)))))))) : null,
+      after || null);
+  }
+  // Out of every ₦100: 10 x 10 icon array, filled in the same order as the list beside it
+  function per100(parts) {
+    const shares = per100Shares(parts.map(p => p.amount));
+    const cells = []; shares.forEach((n, i) => { for (let k = 0; k < n; k++) cells.push(h('i', { class: parts[i].cls })); });
+    while (cells.length < 100) cells.push(h('i'));
+    return h('div', { class: 'per100' },
+      h('div', { class: 'waffle', role: 'img', 'aria-label': 'Out of every ₦100: ' + parts.map((p, i) => `₦${shares[i]} for ${p.label.toLowerCase()}`).join(', ') }, cells),
+      h('ul', { class: 'per100-list' }, parts.map((p, i) => h('li', { class: p.cls },
+        h('span', { class: 'sw', 'aria-hidden': 'true' }), h('span', null, h('span', { class: 'p-name' }, p.label)), h('span', { class: 'p-share' }, `₦${shares[i]}`),
+        h('span', { class: 'p-more' }, naira(p.amount), '. ', p.more || '', ' ', p.chip || '')))));
+  }
+  // Plan versus actual: bars start at zero; the text says it in words too
+  function pva(rows) {
+    return h('ul', { class: 'pva' }, rows.map(r => {
+      const pct = r.pct != null ? r.pct : r.planned ? r.actual / r.planned * 100 : 0;
+      const bar = h('span', { class: 'pva-bar', 'aria-hidden': 'true' }, h('i')); bar.firstChild.style.width = Math.max(0, Math.min(100, pct)) + '%';
+      if (r.color) bar.style.setProperty('--c', r.color);
+      return h('li', null,
+        h('div', { class: 'sl-top' }, h('strong', null, r.label), h('span', { class: 'sl-amt' }, r.right != null ? r.right : `${Math.round(pct)}%`)),
+        bar, h('p', null, r.text, ' ', r.chip || ''));
+    }));
+  }
+  // Branch bars: a tree with connecting lines, every level open. Each part has a bar sized to its money,
+  // all on the same scale as the total, so the biggest parts look biggest at any level.
+  const dollars = n => { for (const [v, u] of [[1e9, 'billion'], [1e6, 'million']]) if (Math.abs(n) >= v) return `$${(n / v).toFixed(2)} ${u}`; return '$' + Math.round(n).toLocaleString('en-NG'); };
+  const pctTxt = f => f > 0 && f < 0.005 ? 'under 1' : String(Math.round(f * 100));
+  // A part's Source covers the parts inside it, unless a part has its own sources.
+  function branchBars({ root, colourOf, chipFor, techOf, spent, openDepth = window.matchMedia('(min-width: 760px)').matches ? 2 : 1 }) {
+    const total = root.amount || 1;
+    const bar = (n, cls, meta, depth) => {
+      const f = n.amount / total;
+      const b = h('span', { class: `bb-bar ${cls}`, 'aria-hidden': 'true' }, h('i')); b.firstChild.style.width = `max(${n.amount > 0 ? 3 : 0}px, calc(var(--bbw) * ${f.toFixed(5)}))`;
+      // main branches also say the share in everyday words ("about 4 in 10")
+      return h('span', { class: 'bb-barline' }, b, h('span', { class: 'bb-pct' }, `${pctTxt(f)}%`, depth === 1 ? h('span', { class: 'bb-words' }, ` · ${plainShare(f * 100)}`) : null), meta);
+    };
+    const amountEl = n => h('span', { class: 'bb-amt' }, n.usd != null ? dollars(n.usd) : naira(n.amount), n.usd != null ? h('small', null, ` (about ${naira(n.amount)})`) : null);
+    const metaEl = (n, parent, depth, ev, parentEv) => {
+      const bits = [];
+      if (parent && parent !== root) bits.push(`${pctTxt(n.amount / parent.amount)}% of ${parent.label.toLowerCase()}`);
+      if (spent && n.plan) {
+        const p = n.amount / n.plan;
+        bits.push(!parent ? `${pctTxt(p)}% of the ${naira(n.plan)} planned for this time. That is ${plainShare(p * 100)}`
+          : depth === 1 ? `${p < 0.5 ? 'only ' : ''}${pctTxt(p)}% of what was planned (${plainShare(p * 100)})`
+          : p < 0.5 ? `only ${pctTxt(p)}% of plan` : `${pctTxt(p)}% of plan`);
+      }
+      if (spent && !n.plan && n.amount > 0 && parent && parent.plan) bits.push('not in the plan');
+      const chip = ev && (depth <= 1 || ev !== parentEv) && chipFor(ev, n.label);
+      return bits.length || chip ? h('span', { class: 'bb-meta' }, bits.join(' · '), chip ? [' ', chip] : null) : null;
+    };
+    const node = (n, depth, cls, parent, parentEv) => {
+      const kids = n.children || [];
+      const ev = n.ev && n.ev.length ? n.ev : parentEv;
+      const tech = depth === 1 && techOf && techOf(n);
+      const li = h('li', { class: `bb-li ${cls}` });
+      li.append(h('div', { class: 'bb-row' },
+        h('span', { class: 'bb-top' }, h('span', { class: 'bb-name' }, n.label), amountEl(n)),
+        bar(n, cls, metaEl(n, parent, depth, ev, parentEv), depth),
+        n.note || tech ? h('span', { class: 'bb-note' }, n.note || '', n.note && tech ? ' ' : '', tech ? h('span', { class: 'tech' }, `Official term: ${tech}.`) : null) : null));
+      if (kids.length) {
+        const ul = h('ul', { class: 'bb-list' }, kids.map((k, i) => node(k, depth + 1, depth === 0 ? colourOf(k, i) : cls, n, ev)));
+        if (depth >= openDepth) {
+          ul.hidden = true;
+          const t = h('button', { type: 'button', class: 'bb-toggle', 'aria-expanded': 'false' }, h('span', { 'aria-hidden': 'true', class: 'bb-caret' }, '▸'), ` See the ${kids.length} parts`);
+          t.addEventListener('click', () => { const open = ul.hidden; ul.hidden = !open; t.setAttribute('aria-expanded', String(open)); t.lastChild.textContent = open ? ' Hide the parts' : ` See the ${kids.length} parts`; });
+          li.firstChild.append(t);
+        }
+        li.append(ul);
+      }
+      return li;
+    };
+    const rootLi = node(root, 0, 'root', null, null);
+    const tree = h('div', { class: 'bbtree' }, h('ul', { class: 'bb-rootlist' }, rootLi));
+    const all = h('button', { type: 'button', class: 'bb-all', onclick: () => {
+      const toggles = [...tree.querySelectorAll('.bb-toggle')]; const open = toggles.some(t => t.getAttribute('aria-expanded') === 'false');
+      toggles.forEach(t => { if ((t.getAttribute('aria-expanded') === 'false') === open) t.click(); });
+      all.textContent = open ? 'Close the parts' : 'Open every part';
+    } }, 'Open every part');
+    return h('div', { class: 'bbwrap' }, tree.querySelector('.bb-toggle') ? all : null, tree);
+  }
+  // The same tree as table rows for chartBlock: every part, indented by level
+  function branchTable(root, spent) {
+    const rows = [];
+    const walk = (n, depth) => {
+      rows.push([h('span', { style: `padding-left:${depth * 14}px` }, n.label), naira(n.amount), `${pctTxt(n.amount / (root.amount || 1))}%`].concat(spent ? [n.plan ? naira(n.plan) : '—'] : []));
+      (n.children || []).forEach(k => walk(k, depth + 1));
+    };
+    walk(root, 0);
+    return { head: ['Part', spent ? 'Spent' : 'Amount', 'Share of total'].concat(spent ? ['Planned'] : []), num: spent ? [1, 2, 3] : [1, 2], rows };
+  }
+
+  // Stamp: when a person last checked this, or that it updates by itself
+  const stamp = ({ auto, date, extra }) => h('p', { class: `stamp${auto ? ' auto' : ''}` },
+    h('b', null, auto ? 'Updates automatically' : 'Checked by a person'), ` · ${auto ? 'last updated' : 'last checked'} ${fmtDate(date)}`, extra ? ['. ', extra] : '');
+
+  // Plain words first, official words second (used on the About and design pages)
+  const GLOSSARY = [
+    ['Projects', 'Capital expenditure', 'Money to build or buy things that last: roads, schools, hospitals, power, equipment.'],
+    ['Paying debts', 'Debt service', 'Interest and repayments on money borrowed before.'],
+    ['Running the government', 'Recurrent (non-debt) expenditure', 'Salaries, pensions and the day-to-day costs of ministries.'],
+    ['Fixed shares set by law', 'Statutory transfers', 'Money the law says must go to bodies such as the National Assembly, the courts and UBEC.'],
+    ['The budget law', 'Appropriation Act', 'The law that allows the government to spend money in a year.'],
+    ['Ministries and agencies', 'MDAs', 'Ministries, departments and agencies: the parts of government that spend the money.'],
+    ['Released', 'Cash release / warrant', 'When the Finance Ministry actually gives a ministry money that was budgeted for it.'],
+    ['Paid out', 'Disbursed', 'When a lender or the treasury actually sends the money.'],
+    ['Money collected', 'Revenue', 'Taxes, oil money and other income the government receives.'],
+    ['The gap to borrow', 'Deficit', 'How much more the government plans to spend than it expects to collect.'],
+    ['Extended', 'Budget extension or rollover', 'When the National Assembly lets an old budget keep being spent after its year ends.'],
+  ];
+
+  // API
+  async function api(path, opts = {}) {
+    const res = await fetch('/api/' + path, { ...opts, headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) } });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+    return data;
+  }
+  let CONFIG = { contactEmail: '' };
+  const fundCache = new Map();
+  async function getFund(id) { if (!fundCache.has(id)) fundCache.set(id, await api('funds/' + encodeURIComponent(id))); return fundCache.get(id); }
+
+  // Modal
+  const modalRoot = () => document.getElementById('modal-root');
+  let lastFocus = null;
+  function openModal(title, body, { wide } = {}) {
+    lastFocus = document.activeElement;
+    const close = () => { root.textContent = ''; document.body.classList.remove('modal-open'); lastFocus && lastFocus.focus && lastFocus.focus(); document.removeEventListener('keydown', onKey); };
+    const onKey = e => { if (e.key === 'Escape') close(); };
+    const root = modalRoot();
+    const dlg = h('div', { class: `modal${wide ? ' wide' : ''}`, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'modal-title' },
+      h('div', { class: 'modal-head' }, h('h2', { id: 'modal-title' }, title), h('button', { class: 'icon-btn', 'aria-label': 'Close', onclick: close }, '✕')),
+      h('div', { class: 'modal-body' }, body));
+    root.textContent = '';
+    root.append(h('div', { class: 'modal-backdrop', onclick: e => { if (e.target === e.currentTarget) close(); } }, dlg));
+    document.body.classList.add('modal-open');
+    document.addEventListener('keydown', onKey);
+    setTimeout(() => (dlg.querySelector('input, textarea, select, a, button.primary') || dlg.querySelector('button')).focus(), 30);
+    return close;
+  }
+
+  function showEvidence(title, evidence, fund) {
+    const list = (evidence || []).length
+      ? h('ul', { class: 'evidence-list' }, evidence.map(ev => {
+        const [icon, label] = EVTYPE[ev.type] || ['🔗', 'Link'];
+        return h('li', null,
+          h('span', { class: 'ev-icon', 'aria-hidden': 'true' }, icon),
+          h('div', { class: 'ev-main' },
+            h('a', { href: ev.url, target: '_blank', rel: 'noopener noreferrer nofollow' }, ev.title),
+            h('div', { class: 'ev-meta' }, [label, ev.publisher, ev.date && fmtDate(ev.date), domain(ev.url)].filter(Boolean).join(' · '))),
+          h('a', { class: 'btn small', href: ev.url, target: '_blank', rel: 'noopener noreferrer nofollow', 'aria-label': `Open ${ev.title}` }, ev.type === 'document' ? 'Download ↓' : 'Open ↗'));
+      }))
+      : h('p', { class: 'empty' }, 'We have no public evidence for this step yet. That itself is worth knowing. If you have a document, link or photo, please share it.');
+    openModal(`Evidence: ${title}`, [
+      list,
+      h('p', { class: 'fine' }, 'These links go to third-party websites and documents that KudiTrail does not control. Sources can disagree, so we label what is documented and what is only reported. Spotted a broken or wrong link? ',
+        h('a', { href: `#/contact?type=correction${fund ? '&fund=' + fund.id : ''}`, onclick: () => modalRoot().textContent = '' }, 'Tell us'), '.'),
+    ]);
+  }
+
+  // Photo: re-encode on device (strips EXIF/GPS metadata, shrinks size)
+  function encodePhoto(file) {
+    return new Promise((resolve, reject) => {
+      if (!/^image\//.test(file.type)) return reject(new Error('Please choose an image file'));
+      const img = new Image(); const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const max = 1600, r = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas'); c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        resolve(c.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read that image')); };
+      img.src = url;
+    });
+  }
+
+  function updateForm(fund, node) {
+    let photo = null;
+    const msg = h('div', { class: 'form-msg', role: 'status', 'aria-live': 'polite' });
+    const preview = h('div', { class: 'photo-preview' });
+    const statusChips = h('div', { class: 'chips', role: 'radiogroup', 'aria-label': 'What state is it in?' },
+      Object.entries(OBSERVED).map(([k, v], i) => h('label', { class: 'chip' }, h('input', { type: 'radio', name: 'status', value: k, checked: i === 7 }), h('span', null, v))));
+    const form = h('form', { class: 'form', novalidate: true },
+      h('p', { class: 'lead-sm' }, 'Have you seen or experienced ', h('strong', null, node.label), ' first-hand? Tell people what it looks like today.'),
+      h('fieldset', null, h('legend', null, 'What state is it in?'), statusChips),
+      h('div', { class: 'row2' },
+        h('label', null, 'Where exactly?', h('input', { name: 'location', maxlength: 160, placeholder: 'e.g. Km 42, Ibadan-bound, near Ogere' })),
+        h('label', null, 'When did you see it?', h('input', { name: 'observedOn', type: 'date', max: new Date().toISOString().slice(0, 10) }))),
+      h('label', null, 'What did you see? *', h('textarea', { name: 'message', required: true, minlength: 20, maxlength: 2000, rows: 5, placeholder: 'Describe what you saw: is work happening, is it finished, are there problems? Stick to facts you observed.' })),
+      h('label', null, 'Links (optional, one per line)', h('textarea', { name: 'links', rows: 2, placeholder: 'https://… a news report, video or document' })),
+      h('label', null, 'Photo (optional)', h('input', { type: 'file', accept: 'image/*', onchange: async e => {
+        const f = e.target.files[0]; preview.textContent = ''; photo = null; if (!f) return;
+        try { photo = await encodePhoto(f); preview.append(h('img', { src: photo, alt: 'Selected photo preview' }), h('span', null, 'Location data in the photo has been removed.')); }
+        catch (err) { preview.append(h('span', { class: 'err' }, err.message)); }
+      } })), preview,
+      h('div', { class: 'row2' },
+        h('label', null, 'Your name (optional, shown publicly)', h('input', { name: 'name', maxlength: 80, placeholder: 'Leave blank to post as Anonymous' })),
+        h('label', null, 'Email or phone (optional, private)', h('input', { name: 'contact', maxlength: 120, placeholder: 'Only so we can verify. Never published.' }))),
+      h('input', { name: 'website', class: 'hp', tabindex: -1, autocomplete: 'off', 'aria-hidden': 'true' }),
+      h('div', { class: 'guidelines' },
+        h('strong', null, 'Before you send:'),
+        h('ul', null,
+          h('li', null, 'Share only what you saw yourself, or link to where you found it.'),
+          h('li', null, 'Do not accuse named people of crimes. Describe the project, not the person.'),
+          h('li', null, 'No faces of private people, children, or anyone\'s personal details.'),
+          h('li', null, 'Every update is checked by a moderator before it goes public.'))),
+      h('label', { class: 'check' }, h('input', { type: 'checkbox', name: 'consent' }),
+        h('span', null, 'I confirm this is true to the best of my knowledge, it is my own work or I have the right to share it, and I agree to the ', h('a', { href: '#/disclaimer', target: '_blank' }, 'terms'), '.')),
+      msg,
+      h('div', { class: 'actions' }, h('button', { class: 'btn primary', type: 'submit' }, 'Send update for review')));
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault(); msg.className = 'form-msg'; msg.textContent = '';
+      const fd = new FormData(form);
+      const body = {
+        fundId: fund.id, nodeId: node.id, status: fd.get('status'), location: fd.get('location'), observedOn: fd.get('observedOn'),
+        message: fd.get('message'), links: String(fd.get('links') || '').split(/\s*\n\s*/).filter(Boolean),
+        name: fd.get('name'), contact: fd.get('contact'), consent: fd.get('consent') === 'on', website: fd.get('website'), photo,
+      };
+      if ((body.message || '').trim().length < 20) { msg.className = 'form-msg err'; msg.textContent = 'Please describe what you saw (at least 20 characters).'; return; }
+      if (!body.consent) { msg.className = 'form-msg err'; msg.textContent = 'Please tick the confirmation box.'; return; }
+      const btn = form.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Sending…';
+      try {
+        await api('updates', { method: 'POST', body: JSON.stringify(body) });
+        form.replaceWith(h('div', { class: 'success' }, h('div', { class: 'big' }, '✓'), h('h3', null, 'Thank you. Your update is in the review queue.'),
+          h('p', null, 'A moderator will check it, usually within a few days. Once approved it will appear on this project for everyone to see.')));
+      } catch (err) { msg.className = 'form-msg err'; msg.textContent = err.message; btn.disabled = false; btn.textContent = 'Send update for review'; }
+    });
+    openModal('Send an update', form);
+  }
+
+  // Layout pieces
+  const app = () => document.getElementById('app');
+  function setTitle(t) { document.title = t ? `${t} · KudiTrail` : 'KudiTrail: follow Nigeria\'s public money'; }
+
+  function legend() {
+    return h('div', { class: 'legend' },
+      h('div', { class: 'legend-group' }, h('span', { class: 'legend-title' }, 'How sure are we?'),
+        Object.keys(CLARITY).map(c => h('span', { class: 'legend-item', title: CLARITY[c].help }, h('span', { class: `swatch clarity-${c}` }), CLARITY[c].label))),
+      h('div', { class: 'legend-group' }, h('span', { class: 'legend-title' }, 'Where it stands'),
+        ['completed', 'operational', 'ongoing', 'defects', 'under_review', 'unclear', 'pending_data', 'repaid'].map(s => pill(s))));
+  }
+
+  function clarityBar(c) {
+    const segs = ['documented', 'reported', 'pending', 'unclear'].filter(k => c[k] > 0.001);
+    return h('div', { class: 'clarity-bar-wrap' },
+      h('div', { class: 'clarity-bar', role: 'img', 'aria-label': segs.map(k => `${Math.round(c[k] * 100)}% ${CLARITY_SHORT[k]}`).join(', ') },
+        segs.map(k => { const d = h('span', { class: `seg clarity-${k}`, title: `${Math.round(c[k] * 100)}% ${CLARITY_SHORT[k]}` }); d.style.width = (c[k] * 100) + '%'; return d; })),
+      h('div', { class: 'clarity-bar-key' }, segs.map(k => h('span', null, h('i', { class: `dot clarity-${k}` }), `${Math.round(c[k] * 100)}% ${CLARITY_SHORT[k]}`))));
+  }
+
+  // Pages
+  let currentGraph = null;
+  let homeFilter = 'All', homeQuery = '';
+
+  async function pageHome() {
+    setTitle('');
+    const funds = await api('funds');
+    app().replaceChildren(h('div', { class: 'home container narrow' },
+      h('h1', null, 'Where did the money go?'),
+      h('p', { class: 'lead' }, 'Nigeria borrows and spends a lot of money. We follow some of it to see what it paid for. Every step links to its source.'),
+      h('a', { class: 'budget-entry', href: '#/budget' },
+        h('span', { class: 'be-main' }, h('strong', null, 'Check the national budget'), h('span', null, 'How the government planned to spend its money this year, and what really happened.')),
+        h('span', { class: 'chev', 'aria-hidden': 'true' }, '›')),
+      h('h2', { class: 'list-h' }, 'Loans and funds we follow'),
+      h('ol', { class: 'fund-list' }, funds.map(f => {
+        const ngn = nairaHint(f.amount, f.currency).replace('≈ ', '');
+        return h('li', null,
+          h('h2', null, h('a', { href: `#/fund/${f.id}` }, f.title)),
+          h('p', { class: 'fl-amount' }, h('strong', null, money(f.amount, f.currency)), ngn ? ` (about ${ngn})` : '', ' · ', fmtDate(f.date)),
+          verdictList(f.verdict),
+          h('a', { class: 'fl-go', href: `#/fund/${f.id}`, 'aria-label': `See how the money moved: ${f.title}` }, 'See how the money moved →'));
+      })),
+      symbolKey(),
+      h('section', { class: 'home-foot' },
+        h('h2', null, 'Something wrong or missing?'),
+        h('p', null, 'If you spot a mistake, have a better source, or know a fund we should follow, ', h('a', { href: '#/contact' }, 'tell us'), '.'),
+        rateNote())));
+  }
+
+  function rateNote() {
+    return h('p', { class: 'fine' }, `Naira amounts use ₦${(CONFIG.usdToNgn || 0).toLocaleString('en-NG')} to $1`,
+      CONFIG.rateSource ? [' (', h('a', { href: CONFIG.rateSource.url, target: '_blank', rel: 'noopener noreferrer' }, CONFIG.rateAuto ? 'Central Bank of Nigeria rate' : CONFIG.rateSource.title), `, ${fmtDate(CONFIG.rateDate)})`] : '',
+      '. "For every Nigerian" uses a population of about ', `${Math.round((CONFIG.population || 0) / 1e5) / 10} million`,
+      CONFIG.populationNote ? ` (${CONFIG.populationNote})` : '', '. ',
+      CONFIG.rateAuto ? 'These update automatically. ' : '', 'They are rough guides only.');
+  }
+
+  // National budget
+  let budgetYear = null;
+  function budgetView() { try { const v = localStorage.getItem('kt-budget-view'); if (v === 'tree' || v === 'details') return v; } catch (_) { } return 'tree'; }
+
+  async function pageBudget(params) {
+    setTitle('The national budget');
+    const B = await api('budget');
+    const years = B.years.map(y => y.year);
+    let yr = Number(params.get('year')) || budgetYear || years[0];
+    if (!years.includes(yr)) yr = years[0];
+    budgetYear = yr;
+    const Y = B.years.find(y => y.year === yr);
+    const ev = idxs => (idxs || []).map(i => Y.evidence[i]).filter(Boolean);
+    const chip = (idxs, about) => sourceChip(ev(idxs), about);
+    const pp = perPerson(Y.total, 'NGN');
+    const toggle = years.length > 1 ? h('nav', { class: 'view-toggle year-toggle', 'aria-label': 'Choose a year' },
+      years.map(y => h('a', { href: `#/budget?year=${y}`, class: y === yr ? 'on' : null, 'aria-current': y === yr ? 'page' : null }, String(y)))) : null;
+    const splitTotal = Y.split.reduce((a, x) => a + x.amount, 0);
+    const parts = Y.split.map((x, i) => {
+      const P = B.parts[x.part];
+      return { label: P.label, amount: x.amount, cls: 'c' + (i + 1), more: [P.simple, ' ', h('span', { class: 'tech' }, `Official term: ${P.tech}.`)], chip: chip(x.evidence, `${Y.title}: ${P.label}`) };
+    });
+    const prog = Y.progress;
+    const progRows = prog ? prog.rows.map(r => {
+      const pct = r.pct != null ? r.pct : r.planned ? r.actual / r.planned * 100 : 0;
+      const text = (r.planned ? `${naira(r.actual)} of the ${naira(r.planned)} planned. That is ${plainShare(pct)}.`
+        : `${naira(r.actual)}. That is ${plainShare(pct)} of what was planned.`) + (r.more ? ' ' + r.more : '');
+      return { label: r.label, pct, text, chip: chip(r.evidence, `${prog.title}: ${r.label}`) };
+    }) : [];
+    const maxArea = Y.areas ? Math.max(...Y.areas.rows.map(r => r.amount)) : 1;
+    const view = Y.trees ? budgetView() : 'details';
+    const setView = v => { try { localStorage.setItem('kt-budget-view', v); } catch (_) { } pageBudget(params); };
+    const viewToggle = Y.trees ? h('div', { class: 'view-toggle', role: 'group', 'aria-label': 'How to show the budget' },
+      [['tree', 'Tree'], ['details', 'Details']].map(([v, t]) => h('button', { type: 'button', class: v === view ? 'on' : null, 'aria-pressed': String(v === view), onclick: () => v !== view && setView(v) }, t))) : null;
+    const verdictEl = [h('h2', { class: 'small-h' }, 'Was it spent?'),
+      h('ul', { class: 'verdict big' }, Y.verdict.map(x => h('li', { class: `tone-${x.tone}` },
+        h('span', { class: 'v-icon', 'aria-hidden': 'true' }, (SYMBOLS[x.tone] || SYMBOLS.neutral)[0]), h('span', null, x.text, ' ', chip(x.evidence, x.text)))))];
+    const head = [
+      h('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' }, h('a', { href: '#/' }, '← All funds')),
+      h('h1', null, 'The national budget'),
+      h('div', { class: 'budget-toggles' }, toggle, viewToggle),
+      figure({ label: Y.title, value: naira(Y.total), context: pp ? `About ${pp} for every Nigerian` : '', note: Y.totalNote || `Signed into law on ${fmtDate(Y.signed)}.` })];
+    const moreAbout = h('section', { class: 'more-about' },
+      h('details', { open: true }, h('summary', null, 'What we could not find'),
+        h('ul', { class: 'gaps' }, Y.gaps.map(g => h('li', null, g))),
+        h('p', null, h('a', { href: '#/contact?type=new_evidence' }, 'Have a document that fills a gap? Tell us.'))),
+      h('details', null, h('summary', null, 'Words used on this page'),
+        h('dl', { class: 'gloss-list' }, GLOSSARY.slice(0, 7).flatMap(([plain, official, means]) => [h('dt', null, plain, h('span', { class: 'tech' }, ` (${official})`)), h('dd', null, means)]))),
+      h('details', null, h('summary', null, 'Check it yourself'),
+        h('ul', { class: 'check-list' }, B.checkYourself.map(c => h('li', null,
+          h('a', { href: c.url, target: '_blank', rel: 'noopener noreferrer' }, c.title, ' ↗'), h('span', null, c.text))))));
+
+    if (view === 'tree') {
+      const TR = Y.trees;
+      let mode = 'spent'; try { const m = localStorage.getItem('kt-tree-mode'); if (m === 'planned' || m === 'spent') mode = m; } catch (_) { }
+      const spent = mode === 'spent';
+      const setMode = m => { try { localStorage.setItem('kt-tree-mode', m); } catch (_) { } pageBudget(params); };
+      const colourOf = (n, i) => n.part ? ({ capital: 'c1', debt: 'c2', recurrent: 'c3', statutory: 'c4', r1: 'r1', r2: 'r2' })[n.part] : 'c' + (i + 1);
+      const chipFor = (ev, about) => sourceChip((ev || []).map(i => Y.evidence[i]), about);
+      const techOf = n => (B.parts[n.part] || {}).tech;
+      const modeToggle = h('div', { class: 'view-toggle mode-toggle', role: 'group', 'aria-label': 'Show what was spent or what was planned' },
+        [['spent', 'What was spent'], ['planned', 'What was planned']].map(([m, t]) => h('button', { type: 'button', class: m === mode ? 'on' : null, 'aria-pressed': String(m === mode), onclick: () => m !== mode && setMode(m) }, t)));
+      const T = TR[mode];
+      // Headlines state the message (Analysis Function rule), worked out from the data
+      const per = (n, of) => Math.round(n.amount / (of.amount || 1) * 100);
+      const top = [...T.out.children].sort((a, b) => b.amount - a.amount)[0];
+      const borrowed = T.in.children.find(c => c.part === 'r2');
+      const outHead = spent ? `${top.label} took the most: ₦${per(top, T.out)} of every ₦100 spent` : `The plan gave the most to ${top.label.toLowerCase()}: ₦${per(top, T.out)} of every ₦100`;
+      const inHead = !borrowed ? (spent ? 'Where the money came from' : 'Where the money was planned to come from')
+        : spent ? `₦${per(borrowed, T.in)} of every ₦100 the government had was borrowed or raised` : `The plan was to borrow or raise ₦${per(borrowed, T.in)} of every ₦100`;
+      const src = spent ? `${TR.period}, from the Budget Office and Debt Management Office reports. Later months are not published yet.` : `The ${Y.year} budget law.`;
+      app().replaceChildren(h('div', { class: 'budget-page container narrow' }, head,
+        verdictEl,
+        chartBlock({ headline: outHead, sub: `Where the money ${spent ? 'went' : 'was planned to go'}. ${src} A longer bar means more money.`,
+          visual: [modeToggle, branchBars({ root: T.out, colourOf, chipFor, techOf, spent })], table: branchTable(T.out, spent) }),
+        chartBlock({ headline: inHead, sub: `Where the money ${spent ? 'came' : 'was planned to come'} from. ${src}`,
+          visual: branchBars({ root: T.in, colourOf, chipFor, techOf, spent }), table: branchTable(T.in, spent) }),
+        moreAbout,
+        h('p', null, h('button', { class: 'btn', onclick: () => setView('details') }, 'See the details and charts →')),
+        stamp({ date: B.asOf, extra: ['Figures from the Budget Office and Debt Management Office reports. ', h('a', { href: '#/disclaimer' }, 'Read the disclaimer'), '.'] })));
+      return;
+    }
+
+    app().replaceChildren(h('div', { class: 'budget-page container narrow' },
+      head,
+      h('p', { class: 'fh-simple' }, Y.simple),
+
+      verdictEl,
+
+      chartBlock({
+        headline: Y.splitHeadline, sub: `Out of every ₦100 in the ${Y.year} budget. ${Y.splitSub || ''}`, visual: per100(parts),
+        table: { head: ['Part', 'Amount', 'Share'], num: [1, 2], rows: Y.split.map(x => [B.parts[x.part].label, naira(x.amount), `${(x.amount / splitTotal * 100).toFixed(1)}%`]) },
+        after: Y.splitNote ? h('p', { class: 'fine' }, Y.splitNote) : null }),
+
+      prog ? chartBlock({
+        headline: prog.headline, sub: prog.title + '. ' + prog.note, visual: pva(progRows),
+        table: { head: ['', 'What happened', 'Planned', 'Share'], num: [1, 2, 3], rows: prog.rows.map((r, i) => [r.label, naira(r.actual), r.planned ? naira(r.planned) : '—', `${Math.round(progRows[i].pct)}%`]) } }) : null,
+
+      Y.areas ? chartBlock({
+        headline: Y.areas.headline || Y.areas.title, sub: Y.areas.note, visual: pva(Y.areas.rows.map(r => ({ label: r.label, pct: r.amount / maxArea * 100, right: naira(r.amount), text: '' }))),
+        table: { head: ['Area', 'Amount'], num: [1], rows: Y.areas.rows.map(r => [r.label, naira(r.amount)]) },
+        after: h('p', { class: 'fine' }, chip(Y.areas.evidence, Y.areas.title)) }) : null,
+
+      h('p', null, h('button', { class: 'btn', onclick: () => showEvidence(Y.title, Y.evidence) }, `📎 All sources for this page (${Y.evidence.length})`)),
+
+      moreAbout,
+      stamp({ date: B.asOf, extra: ['Government reports come out months late, so the latest months are not shown yet. ', h('a', { href: '#/disclaimer' }, 'Read the disclaimer'), '.'] })));
+  }
+
+  function preferredView() {
+    try { const v = localStorage.getItem('kt-view'); if (v === 'steps' || v === 'diagram') return v; } catch (_) { }
+    return window.matchMedia('(max-width: 760px)').matches ? 'steps' : 'diagram';
+  }
+
+  // depth of each node = longest path from a source
+  function depths(fund) {
+    const d = new Map(fund.nodes.map(n => [n.id, 0]));
+    for (let i = 0; i < fund.nodes.length; i++) {
+      let changed = false;
+      for (const l of fund.links) if (d.get(l.from) + 1 > d.get(l.to)) { d.set(l.to, d.get(l.from) + 1); changed = true; }
+      if (!changed) break;
+    }
+    return d;
+  }
+
+  // Official figures fetched automatically by the server (see live.js)
+  function liveBox(fund) {
+    const w = fund.liveData && fund.liveData.worldbank;
+    if (!w) return null;
+    const row = (k, v) => v ? h('li', null, h('span', null, k), h('strong', null, v)) : null;
+    const usd = n => money(n, 'USD', true);
+    return h('section', { class: 'live-box' },
+      h('h2', { class: 'small-h' }, 'Latest official figures', h('span', { class: 'auto-tag' }, 'Updates automatically')),
+      h('ul', { class: 'live-list' },
+        row('Paid out so far', `${usd(w.disbursed)} of ${usd(w.original)} (${Math.round(w.disbursed / w.original * 100)}%)`),
+        row('Still to be paid out', w.undisbursed > 0 ? usd(w.undisbursed) : 'Nothing'),
+        w.repaid > 0 ? row('Paid back so far', usd(w.repaid)) : null,
+        row('Nigeria starts paying back', w.repaid > 0 ? null : fmtDate(w.firstRepayment)),
+        row('Last repayment due', fmtDate(w.lastRepayment))),
+      stamp({ auto: true, date: w.fetchedAt.slice(0, 10), extra: ['From the World Bank\'s own loan records, with figures up to ', fmtDate(w.asOf), '. ',
+        h('a', { href: w.sourcePage, target: '_blank', rel: 'noopener noreferrer' }, 'See the record ↗')] }));
+  }
+
+  async function pageFund(id, nodeId) {
+    const [fund, updates] = await Promise.all([getFund(id), api('updates?fund=' + encodeURIComponent(id))]);
+    setTitle(fund.title);
+    const counts = {}; updates.forEach(u => counts[u.nodeId] = (counts[u.nodeId] || 0) + 1);
+    const nodeById = new Map(fund.nodes.map(n => [n.id, n]));
+    const inflow = nid => fund.links.filter(l => l.to === nid);
+    const outflow = nid => fund.links.filter(l => l.from === nid);
+    const nodeValue = nid => Math.max(inflow(nid).reduce((a, l) => a + l.amount, 0), outflow(nid).reduce((a, l) => a + l.amount, 0));
+    const amountText = (n, short) => n.amountDisclosed === false ? 'Amount not disclosed' : money(nodeValue(n.id), fund.currency, short);
+
+    let view = preferredView();
+    const graphBox = h('div', { class: 'graph', tabindex: -1 });
+    const stepsBox = h('div', { class: 'steps' });
+    const panel = h('aside', { class: 'panel', 'aria-live': 'polite' });
+    const backdrop = h('div', { class: 'sheet-backdrop', 'aria-hidden': 'true', onclick: () => selectNode(null) });
+    const updatesBox = h('div', { class: 'updates' });
+    const selectNode = (nid, opts = {}) => {
+      currentGraph.select(nid, opts);
+      if (nid && opts.focus && view === 'steps') stepsBox.querySelector(`[data-id="${CSS.escape(nid)}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    // Simple step list (default on phones)
+    const d = depths(fund); const maxD = Math.max(...d.values());
+    stepsBox.append(h('p', { class: 'steps-hint' }, 'Read from top to bottom. Tap a step to see its sources.'));
+    const stepTitle = i => i === 0 ? 'Where the money came from' : i === maxD ? 'Where it ended up' : 'Then it went to';
+    for (let i = 0; i <= maxD; i++) {
+      const col = fund.nodes.filter(n => d.get(n.id) === i);
+      const parentSets = new Set(col.map(n => inflow(n.id).map(l => l.from).join(',')));
+      if (i > 0) {
+        const moving = fund.links.filter(l => d.get(l.to) === i).reduce((a, l) => a + l.amount, 0);
+        stepsBox.append(h('div', { class: 'step-arrow', 'aria-hidden': 'true' }, h('span', null, '↓'), h('em', null, money(moving, fund.currency, true))));
+      }
+      stepsBox.append(h('section', { class: 'step' },
+        h('h3', { class: 'step-h' }, h('span', { class: 'step-n' }, `Step ${i + 1}`), stepTitle(i)),
+        col.length > 1 ? h('p', { class: 'step-split' }, `The money was split ${col.length} ways:`) : null,
+        h('div', { class: 'step-cards' }, col.map(n => {
+          const isEnd = !outflow(n.id).length; const ev = (n.evidence || []).length; const up = counts[n.id] || 0;
+          const parents = inflow(n.id).map(l => nodeById.get(l.from).label);
+          if (!isEnd) return h('button', { class: `step-row step-card status-${n.status} clarity-${n.clarity}`, dataset: { id: n.id }, onclick: () => selectNode(n.id), 'aria-label': `${n.label}, ${amountText(n)}. Tap for details.` },
+            h('span', { class: 'sr-main' }, h('span', { class: 'n-type-tag' }, typeLabel(n.type)), h('strong', null, n.label)),
+            h('span', { class: 'sr-side' }, n.status !== 'passed_on' ? pill(n.status) : null, h('span', { class: 'sr-amt' }, amountText(n, true)), h('span', { class: 'chev', 'aria-hidden': 'true' }, '›')));
+          return h('button', { class: `step-card status-${n.status} clarity-${n.clarity}`, dataset: { id: n.id }, onclick: () => selectNode(n.id) },
+            h('div', { class: 'sc-top' }, h('span', { class: 'n-type-tag' }, typeLabel(n.type)), pill(n.status)),
+            h('strong', { class: 'sc-label' }, n.clarity === 'unclear' ? '❓ ' : '', n.label),
+            h('div', { class: 'sc-amount' }, amountText(n), n.amountDisclosed === false ? null : nairaHint(nodeValue(n.id), fund.currency) ? h('small', null, ' ' + nairaHint(nodeValue(n.id), fund.currency)) : null),
+            n.simple ? h('p', { class: 'sc-simple' }, n.simple) : null,
+            parentSets.size > 1 && parents.length ? h('p', { class: 'sc-from' }, 'From: ', parents.join(' + ')) : null,
+            isEnd ? h('p', { class: 'sc-end' }, '🏁 The trail ends here') : null,
+            h('div', { class: 'sc-foot' }, h('span', null, `📎 ${ev} source${ev === 1 ? '' : 's'}`), up ? h('span', null, `💬 ${up}`) : null, h('span', { class: 'go' }, 'Details →')));
+        }))));
+    }
+
+    const renderPanel = node => {
+      stepsBox.querySelectorAll('.step-card').forEach(c => c.classList.toggle('selected', !!node && c.dataset.id === node.id));
+      panel.classList.toggle('open', !!node);
+      backdrop.classList.toggle('open', !!node);
+      document.body.classList.toggle('sheet-open', !!node);
+      if (!node) {
+        if (history.replaceState && location.hash !== `#/fund/${fund.id}`) history.replaceState(null, '', `#/fund/${fund.id}`);
+        fill(panel, h('div', { class: 'panel-empty' },
+          h('div', { class: 'tap-hint', 'aria-hidden': 'true' }, '👆'),
+          h('h3', null, view === 'steps' ? 'Tap any step' : 'Tap any box'),
+          h('p', null, 'You\'ll see how much went there, what state it is in now, and the proof behind it.'),
+          view === 'diagram' ? h('p', { class: 'fine' }, 'Tip: drag to move around. Use + and − to zoom. Thicker ribbons mean more money.') : null));
+        return;
+      }
+      const inF = inflow(node.id), outF = outflow(node.id), val = nodeValue(node.id);
+      const nodeUpdates = updates.filter(u => u.nodeId === node.id);
+      const nm = nid => nodeById.get(nid).label;
+      const estimated = inF.some(l => l.estimated);
+      const sameHelp = node.status === 'unclear' && node.clarity === 'unclear';
+      const pp = node.amountDisclosed === false ? '' : perPerson(val, fund.currency);
+      fill(panel,
+        h('div', { class: 'panel-head' },
+          h('span', { class: 'n-type-tag' }, typeLabel(node.type)),
+          h('button', { class: 'icon-btn', 'aria-label': 'Close details', onclick: () => selectNode(null) }, '✕')),
+        h('h2', null, node.label),
+        node.location ? h('p', { class: 'loc' }, '📍 ', node.location) : null,
+        h('div', { class: 'panel-amount' }, node.amountDisclosed === false ? h('span', { class: 'nd' }, 'Amount not disclosed') : money(val, fund.currency),
+          node.amountDisclosed !== false && nairaHint(val, fund.currency) ? h('span', { class: 'ngn' }, ' ' + nairaHint(val, fund.currency)) : null,
+          pp ? h('small', null, `About ${pp} for every Nigerian`) : null,
+          node.amountDisclosed === false && estimated ? h('small', null, 'The diagram shows an equal share so you can see the flow. The real split has not been published.') : null),
+        h('div', { class: 'panel-tags' }, pill(node.status, 'lg')),
+        h('p', { class: 'src-line' }, 'Based on: ', CLARITY[node.clarity].label.toLowerCase(), '.'),
+        node.simple ? h('div', { class: 'simple-box' }, h('span', null, 'In simple words'), h('p', null, node.simple)) : null,
+        h('div', { class: 'panel-actions' },
+          h('button', { class: 'btn primary', onclick: () => showEvidence(node.label, node.evidence, fund) }, `📎 See the sources (${(node.evidence || []).length})`),
+          h('button', { class: 'btn', onclick: () => updateForm(fund, node) }, '📣 I\'ve seen this: send an update')),
+        (inF.length || outF.length) ? h('div', { class: 'flows' },
+          inF.length ? h('div', null, h('span', { class: 'flow-h' }, 'Money came from'), inF.map(l => h('button', { class: 'flow-link', onclick: () => selectNode(l.from, { focus: true }) }, '← ', nm(l.from), h('em', null, l.estimated ? 'n/d' : money(l.amount, fund.currency, true))))) : null,
+          outF.length ? h('div', null, h('span', { class: 'flow-h' }, 'Money went to'), outF.map(l => h('button', { class: 'flow-link', onclick: () => selectNode(l.to, { focus: true }) }, '→ ', nm(l.to), h('em', null, l.estimated ? 'n/d' : money(l.amount, fund.currency, true))))) : h('div', { class: 'endpoint-note' }, '🏁 This is where the trail ends. The status above is the latest we know.')) : null,
+        h('details', { class: 'more', open: window.matchMedia('(min-width: 1001px)').matches },
+          h('summary', null, 'More detail'),
+          h('p', { class: 'status-help' }, sameHelp ? '' : (STATUS[node.status] || {}).help + ' ', CLARITY[node.clarity].help),
+          h('p', { class: 'desc' }, node.description)),
+        nodeUpdates.length ? h('div', { class: 'panel-updates' }, h('h3', null, `Citizen updates (${nodeUpdates.length})`), nodeUpdates.slice(0, 3).map(u => updateCard(u)),
+          nodeUpdates.length > 3 ? h('a', { href: '#updates', onclick: e => { e.preventDefault(); updatesBox.scrollIntoView({ behavior: 'smooth' }); } }, 'See all updates ↓') : null) : null,
+        h('p', { class: 'fine' }, 'Information as of ', fmtDate(fund.asOf), '. ', h('a', { href: `#/contact?type=correction&fund=${fund.id}` }, 'Something wrong? Tell us.')));
+      if (history.replaceState) history.replaceState(null, '', `#/fund/${fund.id}/${node.id}`);
+    };
+
+    const renderUpdates = () => {
+      updatesBox.textContent = '';
+      updatesBox.append(h('div', { class: 'sec-head' }, h('h2', { id: 'updates' }, 'From the ground: citizen updates'),
+        h('p', null, 'Reports from people who have seen these projects. A moderator checks each one before it is published, but the views are the senders\' own.')));
+      if (!updates.length) updatesBox.append(h('div', { class: 'empty-box' }, h('p', null, 'No updates yet. Have you seen one of these projects? Tap it above and choose ', h('strong', null, '“send an update”'), '.')));
+      else updatesBox.append(h('div', { class: 'update-grid' }, updates.map(u => updateCard(u, fund))));
+    };
+    const updateCard = (u, f) => h('article', { class: 'update' },
+      h('div', { class: 'u-head' }, h('span', { class: `pill obs obs-${u.status}` }, h('i'), OBSERVED[u.status] || 'Not sure'),
+        f ? h('span', { class: 'u-node' }, f.nodes.find(n => n.id === u.nodeId)?.label) : null),
+      u.photo ? h('a', { href: u.photo, target: '_blank', rel: 'noopener' }, h('img', { src: u.photo, alt: `Photo sent by ${u.name}`, loading: 'lazy' })) : null,
+      h('p', null, u.message),
+      u.links?.length ? h('ul', { class: 'u-links' }, u.links.map(l => h('li', null, h('a', { href: l, target: '_blank', rel: 'noopener noreferrer nofollow ugc' }, domain(l) + ' ↗')))) : null,
+      h('div', { class: 'u-meta' }, [u.name, u.location, u.observedOn ? 'seen ' + fmtDate(u.observedOn) : ''].filter(Boolean).join(' · ')));
+
+    // view toggle
+    const diagramTools = h('div', { class: 'gt-btns' },
+      h('button', { class: 'icon-btn', 'aria-label': 'Zoom out', title: 'Zoom out', onclick: () => currentGraph.zoomBy(1 / 1.25) }, '−'),
+      h('button', { class: 'icon-btn', 'aria-label': 'Zoom in', title: 'Zoom in', onclick: () => currentGraph.zoomBy(1.25) }, '+'),
+      h('button', { class: 'icon-btn wide', title: 'Show everything', onclick: () => currentGraph.fit(true, true) }, 'Fit'),
+      h('button', { class: 'icon-btn wide', title: 'Put boxes back', onclick: () => currentGraph.resetLayout() }, 'Reset'));
+    const legendEl = legend();
+    const toggle = h('div', { class: 'view-toggle', role: 'tablist', 'aria-label': 'How to show the money trail' },
+      h('button', { role: 'tab', dataset: { v: 'steps' } }, 'Steps'),
+      h('button', { role: 'tab', dataset: { v: 'diagram' } }, 'Diagram'));
+    const wrap = h('div', { class: 'graph-wrap' }, h('div', { class: 'graph-tools' }, toggle, diagramTools), stepsBox, graphBox, legendEl);
+    const setView = v => {
+      view = v; try { localStorage.setItem('kt-view', v); } catch (_) { }
+      wrap.classList.toggle('view-steps', v === 'steps'); wrap.classList.toggle('view-diagram', v === 'diagram');
+      toggle.querySelectorAll('button').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
+      if (currentGraph && !currentGraph.selected) renderPanel(null);
+    };
+    toggle.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); });
+
+    const ngn = nairaHint(fund.amount, fund.currency); const pp = perPerson(fund.amount, fund.currency);
+    const main = h('div', { class: 'fund-page' },
+      h('nav', { class: 'crumbs container', 'aria-label': 'Breadcrumb' }, h('a', { href: '#/' }, '← All funds')),
+      h('header', { class: 'fund-head container narrow-left' },
+        h('h1', null, fund.title),
+        figure({ value: money(fund.amount, fund.currency), context: [ngn ? `About ${ngn.replace('≈ ', '')}` : '', pp ? `${ngn ? ', or a' : 'A'}bout ${pp} for every Nigerian` : ''].join('') || null,
+          note: `From ${fund.source}, ${fmtDate(fund.date)}.` }),
+        h('h2', { class: 'small-h' }, 'Where did the money go?'),
+        verdictList(fund.verdict, 'big'),
+        fund.simple ? h('p', { class: 'fh-simple' }, fund.simple) : null,
+        stamp({ date: fund.asOf, extra: ['Built from public reports. ', h('a', { href: '#/disclaimer' }, 'Read the disclaimer'), '.'] }),
+        liveBox(fund),
+        h('button', { class: 'btn', onclick: () => showEvidence(fund.title, fund.evidence, fund) }, `📎 See the sources (${fund.evidence.length})`)),
+      h('h2', { class: 'container section-h' }, 'How the money moved'),
+      h('section', { class: 'explorer container' }, wrap, panel, backdrop),
+      h('section', { class: 'container narrow-left more-about' },
+        h('h2', { class: 'section-h' }, 'More about this money'),
+        h('details', { open: true }, h('summary', null, 'What we could not find'),
+          h('ul', { class: 'gaps' }, fund.gaps.map(g => h('li', null, g))),
+          h('p', null, h('a', { href: `#/contact?type=new_evidence&fund=${fund.id}` }, 'Can you help fill a gap? Tell us.'))),
+        h('details', null, h('summary', null, 'Timeline'),
+          h('ol', { class: 'timeline' }, fund.timeline.map(t => h('li', null, h('time', null, fmtDate(t.date)), h('p', null, t.text, ' ',
+            sourceChip((t.evidence || []).map(i => fund.evidence[i]), `${fmtDate(t.date)}: ${t.text}`)))))),
+        h('details', null, h('summary', null, 'The full story'),
+          h('p', null, fund.summary),
+          h('p', { class: 'fine' }, 'How much of the money can be traced:'), clarityBar(fund.clarityBreakdown))),
+      h('section', { class: 'container' }, updatesBox));
+    app().replaceChildren(main);
+    renderUpdates();
+
+    if (currentGraph) currentGraph.destroy();
+    currentGraph = new window.FlowGraph(graphBox, fund, { updateCounts: counts, onSelect: renderPanel });
+    setView(view);
+    if (nodeId && nodeById.has(nodeId)) setTimeout(() => selectNode(nodeId, { focus: true }), 60);
+  }
+
+  function pageContact(params) {
+    setTitle('Contact & corrections');
+    const msg = h('div', { class: 'form-msg', role: 'status', 'aria-live': 'polite' });
+    const fundSel = h('select', { name: 'fundId' }, h('option', { value: '' }, '(None / not about a specific fund)'));
+    api('funds').then(fs => fs.forEach(f => fundSel.append(h('option', { value: f.id, selected: params.get('fund') === f.id }, f.title)))).catch(() => {});
+    const form = h('form', { class: 'form card-form', novalidate: true },
+      h('label', null, 'What is this about? *', h('select', { name: 'type' }, Object.entries(CONTACT_TYPES).map(([k, v]) => h('option', { value: k, selected: params.get('type') === k }, v)))),
+      h('label', null, 'Which fund?', fundSel),
+      h('div', { class: 'row2' },
+        h('label', null, 'Your name *', h('input', { name: 'name', required: true, maxlength: 100, autocomplete: 'name' })),
+        h('label', null, 'Email *', h('input', { name: 'email', type: 'email', required: true, maxlength: 160, autocomplete: 'email' }))),
+      h('label', null, 'Organisation (if any)', h('input', { name: 'organisation', maxlength: 160 })),
+      h('label', null, 'Your message *', h('textarea', { name: 'message', required: true, rows: 6, maxlength: 5000, placeholder: 'Tell us what is wrong or missing, and what the correct information is. Please include sources where you can.' })),
+      h('label', null, 'Supporting links (optional, one per line)', h('textarea', { name: 'links', rows: 2 })),
+      h('input', { name: 'website', class: 'hp', tabindex: -1, autocomplete: 'off', 'aria-hidden': 'true' }),
+      msg, h('div', { class: 'actions' }, h('button', { class: 'btn primary', type: 'submit' }, 'Send message')));
+    form.addEventListener('submit', async e => {
+      e.preventDefault(); const fd = new FormData(form); msg.className = 'form-msg'; msg.textContent = '';
+      const body = Object.fromEntries(fd.entries()); body.links = String(body.links || '').split(/\s*\n\s*/).filter(Boolean);
+      const btn = form.querySelector('button[type=submit]'); btn.disabled = true;
+      try {
+        const r = await api('contact', { method: 'POST', body: JSON.stringify(body) });
+        form.replaceWith(h('div', { class: 'success card-form' }, h('div', { class: 'big' }, '✓'), h('h3', null, 'Message received'),
+          h('p', null, 'Your reference is ', h('strong', null, r.reference || '—'), '. We aim to acknowledge corrections and right-of-reply requests within 3 working days, and to act on clear factual errors promptly.')));
+      } catch (err) { msg.className = 'form-msg err'; msg.textContent = err.message; btn.disabled = false; }
+    });
+    app().replaceChildren(h('div', { class: 'container prose-page' },
+      h('h1', null, 'Contact, corrections & right of reply'),
+      h('p', { class: 'lead' }, 'We want to be accurate and fair. If something on KudiTrail is wrong, out of date or unfair to you or your organisation, tell us and we will review it.'),
+      h('div', { class: 'contact-grid' }, form,
+        h('div', { class: 'contact-side' },
+          h('h3', null, 'What happens next'),
+          h('ol', null,
+            h('li', null, 'We acknowledge your message and give you a reference.'),
+            h('li', null, 'We check your information against sources.'),
+            h('li', null, 'If we got something wrong, we correct it and note the correction on the page.'),
+            h('li', null, 'If you are named, we will publish your response alongside the record on request.')),
+          h('h3', null, 'Urgent legal matters'),
+          h('p', null, 'For takedown or legal notices you can also email ', CONFIG.contactEmail ? h('a', { href: 'mailto:' + CONFIG.contactEmail }, CONFIG.contactEmail) : 'us', '. While a request is being reviewed we may temporarily hide the disputed content.')))));
+  }
+
+  function pageDisclaimer() {
+    setTitle('Disclaimer & terms');
+    const sec = (title, ...ps) => h('section', null, h('h2', null, title), ...ps.map(p => typeof p === 'string' ? h('p', null, p) : p));
+    app().replaceChildren(h('div', { class: 'container prose-page prose' },
+      h('h1', null, 'Disclaimer & terms of use'),
+      h('p', { class: 'lead' }, 'Please read this before you rely on, share or contribute to KudiTrail.'),
+      sec('1. What KudiTrail is',
+        'KudiTrail is an independent, non-partisan public-interest project. It brings together publicly available information about how public funds are borrowed, received and spent in Nigeria. It is not affiliated with any government, lender, political party or contractor.'),
+      sec('2. Information only, not findings of wrongdoing',
+        'Everything on this site is for general information. It comes from public sources such as official documents, lender publications, court records and media reports, which we link as evidence. We label each step as Documented, Reported, Unclear or Not yet itemised.',
+        h('p', null, h('strong', null, '“Unclear” means only that we could not find a public record'), ' of where money went. It is not an allegation, suggestion or finding that any person or organisation has done anything wrong. Where we mention investigations or allegations, we say so plainly. Allegations are not proven, and everyone is presumed innocent unless a court decides otherwise.')),
+      sec('3. Accuracy',
+        'We work hard to be accurate, but sources can be incomplete, out of date or contradict each other. Amounts are as reported and may be rounded or estimated. Where a split has not been published, the diagram shows an estimated equal share, labelled “amount not disclosed”. Each fund shows the date it was last checked. Please check the original sources before you rely on anything here. KudiTrail accepts no liability for any loss arising from use of this site, to the extent the law allows.'),
+      sec('4. Third-party links',
+        'Evidence links go to websites and documents run by others. We do not control them and are not responsible for their content or availability.'),
+      sec('5. Citizen updates',
+        'Updates are sent by members of the public and reflect their own views and observations, not KudiTrail\'s. Every update is checked by a moderator before it is published. We may edit, decline or remove updates, for example ones that contain allegations against named people, personal data, hateful content or content that may be unlawful. By sending an update you confirm it is truthful to the best of your knowledge and that you have the right to share it. You also give KudiTrail a free, non-exclusive licence to publish it. Photos are re-encoded on your device to remove location data. Contact details you give are never published.'),
+      sec('6. Corrections, right of reply and takedown',
+        h('p', null, 'If you think something here is inaccurate or unfair, especially if you or your organisation is mentioned, please ', h('a', { href: '#/contact?type=correction' }, 'contact us'), '. We review every request, correct factual errors, and will publish a response from anyone named on request. While a complaint is being reviewed we may temporarily hide disputed content.')),
+      sec('7. Privacy',
+        'We collect only what you choose to send. For abuse prevention we store a one-way hash of your network address, never the address itself. We do not sell data or use advertising trackers.'),
+      sec('8. Changes',
+        'We may update these terms. The version on this page is the one that applies.'),
+      h('p', { class: 'fine' }, 'This MVP text is a starting point and is not legal advice. Have it reviewed by a Nigerian lawyer before public launch.')));
+  }
+
+  function pageAbout() {
+    setTitle('About');
+    app().replaceChildren(h('div', { class: 'container narrow prose-page prose' },
+      h('h1', null, 'About KudiTrail'),
+      h('p', { class: 'lead' }, 'Nigeria borrows and spends a lot of money for us. KudiTrail follows some of that money, step by step, to see what it paid for. Kudi means money.'),
+      h('h2', null, 'How we check facts'),
+      h('ul', null,
+        h('li', null, 'Every fact links to where we found it. Tap “See the sources” on any page.'),
+        h('li', null, 'We use official papers first: government, lender and court documents. When we only have news reports, we say so.'),
+        h('li', null, 'When sources disagree, we say so, and we show the figure we trust most.'),
+        h('li', null, 'If we cannot find a source for something, we leave it out.'),
+        h('li', null, 'Every page shows the date we last checked it.'),
+        h('li', null, 'Investigations and allegations are not proof. Everyone is innocent until a court decides.')),
+      symbolKey(),
+      h('h2', null, 'How sure are we?'),
+      h('p', null, 'Each step shows what it is based on:'),
+      h('ul', null, Object.entries(CLARITY).map(([k, v]) => h('li', null, h('strong', null, v.label), ': ', v.help))),
+      h('h2', null, 'Where we get information'),
+      h('p', null, 'Government and lender websites (IMF, World Bank, US Department of Justice, NSIA, Debt Management Office, Budget Office, federal ministries), research datasets such as AidData, and Nigerian newspapers and TV.'),
+      h('h2', null, 'Words we use'),
+      h('dl', { class: 'gloss-list' }, GLOSSARY.flatMap(([plain, official, means]) => [h('dt', null, plain, h('span', { class: 'tech' }, ` (official term: ${official})`)), h('dd', null, means)])),
+      h('h2', null, 'What updates automatically'),
+      h('p', null, 'Some official sources publish data that computers can read. Twice a day we fetch:'),
+      h('ul', null,
+        h('li', null, 'the dollar exchange rate, from the Central Bank of Nigeria;'),
+        h('li', null, 'Nigeria\'s population, from the World Bank;'),
+        h('li', null, 'how much of a World Bank loan has been paid out and paid back, from the World Bank\'s own loan records.')),
+      h('p', null, 'These figures are marked “Updates automatically”. If a source is down, we keep showing the last good figure and its date. Everything else, including the budget page, is checked by a person, because most Nigerian government reports are published as PDFs and news stories, not as data.'),
+      h('h2', null, 'Found a mistake?'),
+      h('p', null, 'Please ', h('a', { href: '#/contact?type=correction' }, 'tell us'), '. We check every message and fix mistakes quickly. If a page mentions you or your organisation, you can ', h('a', { href: '#/contact?type=right_of_reply' }, 'reply'), ', and we will add your response.')));
+  }
+
+  // Living design system: the rules, with the real components rendered from the same code the site uses
+  function pageDesign() {
+    setTitle('Design system');
+    const src = (title, url) => h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, title);
+    const ex = (tag, ...kids) => h('div', { class: 'ds-example' }, h('span', { class: 'ex-tag' }, tag), ...kids);
+    const dd = (good, bad) => h('div', { class: 'dodont' }, h('div', { class: 'do' }, h('b', null, 'Do'), good), h('div', { class: 'dont' }, h('b', null, 'Don\'t'), bad));
+    const demoEv = [{ title: 'Budget Office of the Federation', publisher: 'Federal Government of Nigeria', type: 'official', url: 'https://budgetoffice.gov.ng/' }];
+    const principles = [
+      ['Answer first', 'Every page opens with the answer in one or two lines. Detail comes after, or behind a tap.', ['Inverted pyramid; NN/g on deferring secondary content', 'https://www.nngroup.com/articles/defer-secondary-content-for-mobile/']],
+      ['One thing at a time', 'Show what most people need. Put the rest in "More about this" sections that open on a tap.', ['NN/g: writing for mobile', 'https://www.nngroup.com/articles/mobile-content/']],
+      ['Plain words', 'Everyday words first, the official term after it. Sentences under 25 words, paragraphs under 5 sentences.', ['GOV.UK: use clear language', 'https://guidance.publishing.service.gov.uk/writing-to-gov-uk-standards/writing-guidelines/clear-language/']],
+      ['Numbers people can feel', 'Write numbers as digits and write million, billion and trillion in full. Add what it means for one person ("₦287,600 for every Nigerian") or "out of every ₦100".', ['Barrio, Goldstein & Hofman (CHI 2016): perspectives improve understanding of numbers', 'https://www.microsoft.com/en-us/research/publication/improving-comprehension-of-numbers-in-the-news/']],
+      ['Charts that say the answer', 'Each chart has a headline that states its message. Bars start at zero, there are four colours at most, labels go on the chart, and the numbers are also available as a table.', ['UK Government Analysis Function: charts', 'https://analysisfunction.civilservice.gov.uk/policy-store/data-visualisation-charts']],
+      ['Honest about gaps', 'Say what we could not find, how sure we are, and when we last checked. Missing proof is not proof of wrongdoing.', ['GAO on USAspending.gov: make data limitations prominent', 'https://www.gao.gov/products/gao-22-104127']],
+      ['Proof one tap away', 'Every number and claim has a Source button that opens the exact documents behind it.', ['IBP: The Power of Making It Simple (citizens budgets)', 'https://internationalbudget.org/wp-content/uploads/Citizen-Budget-Guide.pdf']],
+      ['Fast on any phone', 'Most Nigerian web traffic is on phones. No web fonts, no frameworks, the whole app under 100 KB compressed, and it works on slow 3G.', ['Alex Russell: real-world performance budgets', 'https://infrequently.org/2017/10/can-you-afford-it-real-world-web-performance-budgets/']],
+      ['Everyone can use it', 'Meet WCAG 2.2 AA: text contrast of at least 4.5:1, graphics at least 3:1, never colour alone, and big tap targets.', ['Analysis Function: accessible charts checklist', 'https://analysisfunction.civilservice.gov.uk/policy-store/charts-a-checklist']],
+    ];
+    const colours = [['--brand', 'Brand, links'], ['--ink', 'Main text'], ['--ink-2', 'Second text'], ['--ink-3', 'Small print'], ['--surface-2', 'Quiet fill'], ['--line-2', 'Borders'],
+      ['--tone-good', 'Good: done'], ['--tone-progress', 'In progress'], ['--tone-bad', 'Problem'], ['--tone-unknown', 'No public record'],
+      ['--chart-1', 'Chart 1'], ['--chart-2', 'Chart 2'], ['--chart-3', 'Chart 3'], ['--chart-4', 'Chart 4']];
+    const sw = ([v, name]) => { const i = h('i'); i.style.background = `var(${v})`; return h('div', { class: 'swatch-card' }, i, h('span', null, h('b', null, name), h('br'), h('code', null, v))); };
+    const sample = [{ label: 'Projects', amount: 47, cls: 'c1', more: 'Roads, schools, hospitals.' }, { label: 'Paying debts', amount: 23, cls: 'c2', more: 'Interest and repayments.' },
+      { label: 'Running the government', amount: 23, cls: 'c3', more: 'Salaries and running costs.' }, { label: 'Fixed shares set by law', amount: 7, cls: 'c4', more: 'National Assembly, courts, UBEC.' }];
+
+    app().replaceChildren(h('div', { class: 'container narrow prose-page ds-page' },
+      h('h1', null, 'KudiTrail design system'),
+      h('p', { class: 'lead' }, 'Our promise: anyone with a phone can open any page and, within one minute, say where the money went, what state it is in, and how we know. These are the rules we use to keep that promise. The examples below come from the same code that runs the site.'),
+
+      h('section', null, h('h2', null, 'Principles'),
+        h('ol', { class: 'ds-principles' }, principles.map(([t, d, [st, su]]) => h('li', null, h('strong', null, t), h('p', null, d), h('p', { class: 'fine' }, 'Based on: ', src(st, su)))))),
+
+      h('section', null, h('h2', null, 'Writing'),
+        h('ul', null,
+          h('li', null, 'Write for someone who never reads business news. Aim for a reading age of about 9.'),
+          h('li', null, 'Put the most important words first in headings, list items and buttons.'),
+          h('li', null, 'Use "we" for KudiTrail and "you" for the reader. Use active verbs.'),
+          h('li', null, 'Use "reported", "alleged" or "under investigation" unless a court has decided. Describe projects, not people.'),
+          h('li', null, 'Dates look like 17 April 2026. Use digits for numbers, including at the start of a sentence.')),
+        dd('Paying debts (official term: debt service)', 'Debt service'),
+        dd('₦68.32 trillion', '₦68.32trn, N68,320,000,000,000'),
+        dd('₦5.08 trillion of the ₦9.22 trillion planned. That is about half.', '55.09% revenue performance against prorated projection'),
+        dd('We found no public record of where this money went.', 'The money was diverted. (Only a court can say that.)'),
+        h('h3', null, 'Words we use'),
+        h('div', { class: 'table-scroll' }, h('table', { class: 'data-table glossary' }, h('thead', null, h('tr', null, h('th', null, 'We say'), h('th', null, 'Official term'), h('th', null, 'What it means'))),
+          h('tbody', null, GLOSSARY.map(([a, b, c]) => h('tr', null, h('th', { scope: 'row' }, a), h('td', null, b), h('td', null, c))))))),
+
+      h('section', null, h('h2', null, 'Numbers'),
+        h('p', null, 'Show one big number, then say what it means for one person. Round to what people can hold in their head. Say how sure we are.'),
+        ex('Figure', figure({ label: 'The 2026 budget', value: naira(68.32e12), context: `About ${perPerson(68.32e12, 'NGN') || '₦287,600'} for every Nigerian`, note: 'Signed into law on 17 Apr 2026.' })),
+        h('p', null, 'For a share of a whole, use "out of every ₦100" with a 10 × 10 grid of squares. Research on icon arrays shows they help people who find numbers hard (',
+          src('Galesic, Garcia-Retamero & Gigerenzer, 2009', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC2775772'), '). The squares fill in the same order as the list, and the list gives the exact numbers in words.'),
+        ex('Out of every ₦100', per100(sample)),
+        h('p', null, 'Percentages also get everyday words: 55% is "', plainShare(55), '", 18% is "', plainShare(18), '", and 72% is "', plainShare(72), '".')),
+
+      h('section', null, h('h2', null, 'Charts'),
+        h('ul', null,
+          h('li', null, 'Pick the chart by the question it answers (', src('FT Visual Vocabulary', 'https://github.com/Financial-Times/chart-doctor/blob/main/visual-vocabulary/README.md'), '): part of a whole uses "out of every ₦100", plan against actual uses bars, and the money trail uses steps or a flow diagram.'),
+          h('li', null, 'The headline states the message. The line under it says what is shown, where and when.'),
+          h('li', null, 'Bars start at zero. Use 4 colours at most, from the accessible palette. Put labels on the chart, not in a separate key.'),
+          h('li', null, 'Every chart offers "See the numbers as a table". Don\'t use pie charts, 3D effects or dual axes.')),
+        ex('Chart block', chartBlock({ headline: 'The government collected about half of what it planned', sub: 'January to March 2026. From the Budget Office\'s first-quarter report.',
+          visual: pva([{ label: 'Money collected', pct: 55, text: `₦5.08 trillion of the ₦9.22 trillion planned. That is ${plainShare(55)}.`, color: 'var(--tone-progress)', chip: sourceChip(demoEv, 'Money collected') }]),
+          table: { head: ['', 'Collected', 'Planned'], num: [1, 2], rows: [['Money collected', '₦5.08 trillion', '₦9.22 trillion']] } }))),
+
+      h('section', null, h('h2', null, 'Answers, proof and certainty'),
+        ex('Answer list: the 3-second answer at the top of a page', verdictList([{ tone: 'good', text: 'Bridge: finished (2023)' }, { tone: 'progress', text: 'Road: part done, the rest due Nov 2026' }, { tone: 'bad', text: 'Part of the road is breaking up' }, { tone: 'unknown', text: 'We found no public record of where this money went' }], 'big')),
+        ex('Source button', h('p', null, 'No 2026 project money had been released by 30 June 2026. ', sourceChip(demoEv, 'Example statement'))),
+        ex('How sure are we?', h('p', null, Object.keys(CLARITY).map(c => [clarityTag(c), ' ']))),
+        ex('Where it stands', h('p', null, ['completed', 'operational', 'ongoing', 'stalled', 'defects', 'under_review', 'unclear'].map(s2 => [pill(s2), ' ']))),
+        ex('Gap', h('ul', { class: 'gaps' }, h('li', null, 'We could not find state-by-state payment figures that the public can check.'))),
+        ex('Stamps', stamp({ date: '2026-11-19' }), stamp({ auto: true, date: '2026-11-19' }))),
+
+      h('section', null, h('h2', null, 'Foundations'),
+        h('h3', null, 'Colour'),
+        h('p', null, 'The same meaning always gets the same colour and the same symbol, so colour is never the only signal. The chart colours are the UK Government Analysis Function\'s accessible palette (', src('colours guidance', 'https://analysisfunction.civilservice.gov.uk/policy-store/data-visualisation-colours-in-charts'), '). Every colour has a light and a dark version.'),
+        h('div', { class: 'swatches' }, colours.map(sw)),
+        h('h3', null, 'Type'),
+        h('p', null, 'We use the phone\'s own fonts, so nothing has to download. Body text is 16px with 1.55 line spacing, and lines are no wider than 68 characters.'),
+        [['--fs-figure', 'Big number'], ['--fs-2xl', 'Page title'], ['--fs-lg', 'Chart headline'], ['--fs-md', 'Lead text'], ['--fs-base', 'Body text'], ['--fs-sm', 'Supporting text'], ['--fs-xs', 'Small print']].map(([v, n]) => {
+          const t = h('span', null, n); t.style.fontSize = `var(${v})`; t.style.fontWeight = '700'; return h('div', { class: 'type-row' }, h('code', null, v), t);
+        }),
+        h('h3', null, 'Space and touch'),
+        h('p', null, 'Spacing uses a 4px grid (4, 8, 12, 16, 24, 32, 48). Main buttons are at least 44px tall. Small inline buttons, such as Source, are at least 28px, above the WCAG 2.2 minimum of 24px.')),
+
+      h('section', null, h('h2', null, 'Testing: the one-minute test'),
+        h('p', null, 'Before a page goes live, give it to five people on their own phones. Ask three questions:'),
+        h('ol', null, h('li', null, 'Where did the money go?'), h('li', null, 'What state is it in now?'), h('li', null, 'How do we know?')),
+        h('p', null, 'If any of them can\'t answer within one minute, change the page and test again. Also check every page on a slow 3G connection and in dark mode, and with the text made larger.')),
+
+      h('p', { class: 'fine' }, 'The full write-up, with the research and examples behind each rule, is in docs/DESIGN-SYSTEM.md in the code repository.')));
+  }
+
+  function pageAdmin() {
+    setTitle('Moderation');
+    let token = ''; try { token = sessionStorage.getItem('kt-admin') || ''; } catch (_) { }
+    const box = h('div');
+    const authed = (path, opts = {}) => api(path, { ...opts, headers: { 'x-admin-token': token } });
+    const login = () => {
+      const inp = h('input', { type: 'password', placeholder: 'Admin token (shown in the server console)', 'aria-label': 'Admin token' });
+      box.replaceChildren(h('form', { class: 'form card-form narrow', onsubmit: e => { e.preventDefault(); token = inp.value.trim(); try { sessionStorage.setItem('kt-admin', token); } catch (_) { } load(); } },
+        h('label', null, 'Admin token', inp), h('button', { class: 'btn primary' }, 'Sign in')));
+    };
+    const load = async () => {
+      let updates, contacts, live;
+      try { [updates, contacts, live] = await Promise.all([authed('admin/updates'), authed('admin/contacts'), authed('admin/live')]); }
+      catch (e) { box.replaceChildren(h('p', { class: 'form-msg err' }, e.message)); login(); box.prepend(h('p', { class: 'form-msg err' }, e.message)); return; }
+      const act = async (id, action) => { if (action === 'delete' && !window.confirm('Delete permanently?')) return; await authed('admin/updates/' + id, { method: 'POST', body: JSON.stringify({ action }) }); load(); };
+      const photoImg = async (u) => {
+        const img = h('img', { alt: 'Submitted photo' });
+        try { const r = await fetch(u.photo, { headers: { 'x-admin-token': token } }); img.src = URL.createObjectURL(await r.blob()); } catch (_) { }
+        return img;
+      };
+      const pending = updates.filter(u => u.moderation === 'pending');
+      const rows = await Promise.all(updates.map(async u => h('article', { class: `mod-item mod-${u.moderation}` },
+        h('div', { class: 'mod-head' }, h('span', { class: `mod-state ${u.moderation}` }, u.moderation), h('strong', null, u.fundTitle), ' → ', u.nodeLabel, h('span', { class: 'mod-date' }, new Date(u.createdAt).toLocaleString())),
+        h('p', null, h('span', { class: `pill obs obs-${u.status}` }, h('i'), OBSERVED[u.status]), ' ', u.message),
+        u.photo ? await photoImg(u) : null,
+        u.links?.length ? h('ul', null, u.links.map(l => h('li', null, h('a', { href: l, target: '_blank', rel: 'noopener noreferrer' }, l)))) : null,
+        h('p', { class: 'fine' }, `By: ${u.name}${u.contact ? ' · private contact: ' + u.contact : ''}${u.location ? ' · ' + u.location : ''}${u.observedOn ? ' · seen ' + u.observedOn : ''}`),
+        h('div', { class: 'actions' },
+          u.moderation !== 'approved' ? h('button', { class: 'btn primary small', onclick: () => act(u.id, 'approved') }, 'Approve & publish') : null,
+          u.moderation !== 'rejected' ? h('button', { class: 'btn small', onclick: () => act(u.id, 'rejected') }, u.moderation === 'approved' ? 'Unpublish' : 'Reject') : null,
+          h('button', { class: 'btn small danger', onclick: () => act(u.id, 'delete') }, 'Delete')))));
+      fill(box,
+        h('div', { class: 'mod-bar' }, h('span', null, `${pending.length} pending · ${updates.length} total updates · ${contacts.filter(c => c.state === 'open').length} open messages`),
+          h('button', { class: 'btn small', onclick: () => { try { sessionStorage.removeItem('kt-admin'); } catch (_) { } token = ''; login(); } }, 'Sign out')),
+        h('h2', null, 'Automatic data'),
+        h('article', { class: 'mod-item' },
+          h('p', null, `Last run: ${live.lastRun ? new Date(live.lastRun).toLocaleString() : 'never'}. `,
+            `Exchange rate: ${live.rate ? '₦' + live.rate.value + ' (' + live.rate.date + ')' : '—'}. `,
+            `Population: ${live.population ? live.population.value.toLocaleString() + ' (' + live.population.year + ')' : '—'}. `,
+            `World Bank loans: ${Object.values(live.worldbank || {}).map(w => `${w.projectId} ${w.asOf}`).join(', ') || '—'}.`),
+          Object.keys(live.errors || {}).length ? h('ul', { class: 'form-msg err' }, Object.entries(live.errors).map(([k, e]) => h('li', null, `${k}: ${e.message} (${new Date(e.at).toLocaleString()})`))) : h('p', { class: 'fine' }, 'No errors.'),
+          h('p', { class: 'fine' }, 'If an automatic figure differs from the checked text on a fund page, update the fund file. Automatic data never rewrites it.'),
+          h('div', { class: 'actions' }, h('button', { class: 'btn small', onclick: async e => { e.target.disabled = true; e.target.textContent = 'Refreshing…'; try { await authed('admin/live', { method: 'POST' }); } catch (_) { } load(); } }, 'Refresh now'))),
+        h('h2', null, 'Citizen updates'), rows.length ? rows : h('p', { class: 'empty' }, 'Nothing yet.'),
+        h('h2', null, 'Contact, corrections & takedown requests'),
+        contacts.length ? contacts.map(c => h('article', { class: `mod-item mod-${c.state}` },
+          h('div', { class: 'mod-head' }, h('span', { class: `mod-state ${c.state === 'open' ? 'pending' : 'approved'}` }, c.state), h('strong', null, CONTACT_TYPES[c.type]), h('span', { class: 'mod-date' }, new Date(c.createdAt).toLocaleString())),
+          h('p', null, c.message),
+          c.links?.length ? h('ul', null, c.links.map(l => h('li', null, h('a', { href: l, target: '_blank', rel: 'noopener noreferrer' }, l)))) : null,
+          h('p', { class: 'fine' }, `${c.name} <${c.email}>${c.organisation ? ' · ' + c.organisation : ''}${c.fundId ? ' · fund: ' + c.fundId : ''} · ref ${c.id.slice(0, 8).toUpperCase()}`),
+          h('div', { class: 'actions' },
+            h('a', { class: 'btn small', href: `mailto:${c.email}?subject=${encodeURIComponent('KudiTrail ref ' + c.id.slice(0, 8).toUpperCase())}` }, 'Reply by email'),
+            h('button', { class: 'btn small', onclick: async () => { await authed('admin/contacts/' + c.id, { method: 'POST', body: JSON.stringify({ state: c.state === 'open' ? 'resolved' : 'open' }) }); load(); } }, c.state === 'open' ? 'Mark resolved' : 'Reopen')))) : h('p', { class: 'empty' }, 'No messages.'));
+    };
+    app().replaceChildren(h('div', { class: 'container prose-page' }, h('h1', null, 'Moderation'), box));
+    token ? load() : login();
+  }
+
+  // Router
+  async function route() {
+    const raw = location.hash.replace(/^#\/?/, '');
+    const [pathPart, query] = raw.split('?');
+    const parts = pathPart.split('/').filter(Boolean);
+    const params = new URLSearchParams(query || '');
+    document.body.classList.remove('sheet-open', 'modal-open');
+    modalRoot().textContent = '';
+    if (currentGraph && parts[0] !== 'fund') { currentGraph.destroy(); currentGraph = null; }
+    document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#/' + (parts[0] || '')));
+    try {
+      if (!parts.length) await pageHome();
+      else if (parts[0] === 'fund' && parts[1]) {
+        // selecting a node only rewrites the hash with replaceState, so a real hashchange means a new page
+        await pageFund(parts[1], parts[2]);
+      }
+      else if (parts[0] === 'budget') await pageBudget(params);
+      else if (parts[0] === 'contact') pageContact(params);
+      else if (parts[0] === 'disclaimer') pageDisclaimer();
+      else if (parts[0] === 'about') pageAbout();
+      else if (parts[0] === 'design') pageDesign();
+      else if (parts[0] === 'admin') pageAdmin();
+      else app().replaceChildren(h('div', { class: 'container prose-page' }, h('h1', null, 'Page not found'), h('p', null, h('a', { href: '#/' }, '← Back to all funds'))));
+    } catch (e) {
+      app().replaceChildren(h('div', { class: 'container prose-page' }, h('h1', null, 'Something went wrong'), h('p', null, e.message), h('p', null, h('a', { href: '#/' }, '← Back to all funds'))));
+    }
+    window.scrollTo(0, 0);
+  }
+
+  window.addEventListener('hashchange', route);
+  document.addEventListener('DOMContentLoaded', async () => {
+    try { CONFIG = await api('config'); } catch (_) { }
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const toggle = document.getElementById('nav-toggle');
+    toggle.addEventListener('click', () => { const open = document.body.classList.toggle('nav-open'); toggle.setAttribute('aria-expanded', String(open)); });
+    document.querySelector('.nav').addEventListener('click', () => { document.body.classList.remove('nav-open'); toggle.setAttribute('aria-expanded', 'false'); });
+    route();
+  });
+})();

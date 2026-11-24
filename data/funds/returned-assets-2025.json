@@ -1,0 +1,198 @@
+{
+  "id": "returned-assets-2025",
+  "order": 6,
+  "title": "$52.88m returned by the US in 2025",
+  "category": "Recovered assets",
+  "source": "the United States",
+  "amount": 52880000,
+  "currency": "USD",
+  "date": "2025-01-10",
+  "asOf": "2026-11-19",
+  "status": "pending_data",
+  "simple": "In 2025 the US agreed to return $52.88 million in assets linked to a former petroleum minister. $50 million was set aside for electricity in rural areas, managed by the World Bank. The rest went to a rule-of-law institute. We have not yet found a public report of how the $50 million has been spent.",
+  "verdict": [
+    {
+      "tone": "neutral",
+      "text": "$50 million set aside for rural electricity, managed by the World Bank"
+    },
+    {
+      "tone": "unknown",
+      "text": "How the $50 million has been spent: no public report found yet"
+    },
+    {
+      "tone": "neutral",
+      "text": "$2.88 million set aside for a rule-of-law institute (IIJ)"
+    }
+  ],
+  "summary": "On 10 January 2025 Nigeria and the United States signed an agreement to return about $52.88 million from the forfeited \"Galactica\" assets, which are linked to former petroleum minister Diezani Alison-Madueke and her associates. She has denied wrongdoing. About $50 million was to fund rural electrification through the World Bank, and $2.88 million was given as a grant to the International Institute for Justice and the Rule of Law (IIJ). Officials said the World Bank and IIJ would send regular reports to Nigeria and the US.",
+  "gaps": [
+    "We have not yet found a public report from the World Bank or the government on how the $50 million has been spent, or which communities got electricity.",
+    "We have not yet found a public report on how IIJ used its $2.88 million."
+  ],
+  "timeline": [
+    {
+      "date": "2017",
+      "text": "The US Justice Department files a civil case to recover about $144 million in assets. It alleges they were bought with bribes paid to the former minister, who has denied wrongdoing.",
+      "evidence": [
+        3
+      ]
+    },
+    {
+      "date": "2025-01-10",
+      "text": "Nigeria and the US sign an agreement to return $52.88 million: $50 million for rural electricity through the World Bank, and $2.88 million for IIJ.",
+      "evidence": [
+        0,
+        2
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "title": "Nigeria, USA sign agreement to return USD 52.88 million",
+      "publisher": "Federal Ministry of Information",
+      "type": "official",
+      "date": "2025-01-10",
+      "url": "https://fmino.gov.ng/nigeria-usa-sign-agreement-to-return-usd-52-88-million-diezani-loot/"
+    },
+    {
+      "title": "US to return $52.88 mln in assets forfeited by ex-Nigerian oil minister (Reuters)",
+      "publisher": "CNBC Africa / Reuters",
+      "type": "news",
+      "date": "2025-01-10",
+      "url": "https://cnbcafrica.com/2025/us-to-return-52-88-mln-in-assets-forfeited-by-ex-nigerian-oil-minister"
+    },
+    {
+      "title": "FG to expend $50 million of loot allegedly recovered from Diezani on rural electrification",
+      "publisher": "ThisDay",
+      "type": "news",
+      "date": "2025-01-11",
+      "url": "https://www.thisdaylive.com/2025/01/11/fg-to-expend-50-million-of-loot-allegedly-recovered-from-diezani-on-rural-electrification/"
+    },
+    {
+      "title": "US to return $52.88 million in assets forfeited by ex-Nigerian oil minister (Reuters)",
+      "publisher": "Yahoo News / Reuters",
+      "type": "news",
+      "date": "2025-01-10",
+      "url": "https://www.yahoo.com/news/nigeria-us-sign-deal-return-114128935.html"
+    },
+    {
+      "title": "FG, U.S. sign asset return agreement for repatriation of $52.88m",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2025-01-10",
+      "url": "https://nairametrics.com/2025/01/10/fg-u-s-sign-asset-return-agreement-for-repatriation-of-52-88m-linked-to-diezani-alison-madueke/"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "us",
+      "type": "source",
+      "label": "United States (forfeited \"Galactica\" assets)",
+      "simple": "The US recovered these assets through a court case and agreed to give the money to Nigeria.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "The assets are linked to former petroleum minister Diezani Alison-Madueke and her associates. The US case began in 2017 as a civil forfeiture complaint. She has denied wrongdoing. The return agreement was signed in Abuja on 10 January 2025.",
+      "evidence": [
+        {
+          "title": "Nigeria, USA sign agreement to return USD 52.88 million",
+          "publisher": "Federal Ministry of Information",
+          "type": "official",
+          "date": "2025-01-10",
+          "url": "https://fmino.gov.ng/nigeria-usa-sign-agreement-to-return-usd-52-88-million-diezani-loot/"
+        },
+        {
+          "title": "US to return $52.88 mln in assets forfeited by ex-Nigerian oil minister (Reuters)",
+          "publisher": "CNBC Africa / Reuters",
+          "type": "news",
+          "date": "2025-01-10",
+          "url": "https://cnbcafrica.com/2025/us-to-return-52-88-mln-in-assets-forfeited-by-ex-nigerian-oil-minister"
+        },
+        {
+          "title": "US to return $52.88 million in assets forfeited by ex-Nigerian oil minister (Reuters)",
+          "publisher": "Yahoo News / Reuters",
+          "type": "news",
+          "date": "2025-01-10",
+          "url": "https://www.yahoo.com/news/nigeria-us-sign-deal-return-114128935.html"
+        }
+      ]
+    },
+    {
+      "id": "wbfund",
+      "type": "agency",
+      "label": "World Bank-managed fund",
+      "simple": "$50 million was to be handled by the World Bank, which must report regularly on how it is used.",
+      "status": "passed_on",
+      "clarity": "reported",
+      "description": "The Attorney-General said the World Bank would use the money to partly fund the Rural Electrification Project, with regular reports to Nigeria and the US.",
+      "evidence": [
+        {
+          "title": "FG to expend $50 million of loot allegedly recovered from Diezani on rural electrification",
+          "publisher": "ThisDay",
+          "type": "news",
+          "date": "2025-01-11",
+          "url": "https://www.thisdaylive.com/2025/01/11/fg-to-expend-50-million-of-loot-allegedly-recovered-from-diezani-on-rural-electrification/"
+        },
+        {
+          "title": "FG, U.S. sign asset return agreement for repatriation of $52.88m",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "date": "2025-01-10",
+          "url": "https://nairametrics.com/2025/01/10/fg-u-s-sign-asset-return-agreement-for-repatriation-of-52-88m-linked-to-diezani-alison-madueke/"
+        }
+      ]
+    },
+    {
+      "id": "rural",
+      "type": "project",
+      "label": "Rural electricity (Rural Electrification Project)",
+      "simple": "Meant to bring electricity to rural areas. We have not yet found a public report of what it has paid for.",
+      "status": "unclear",
+      "clarity": "unclear",
+      "description": "The $50 million was meant to partly fund rural electrification, including renewable energy. We have not yet found a public report from the World Bank or the government showing how much has been spent, or where. If you know of one, please send it.",
+      "evidence": [
+        {
+          "title": "FG to expend $50 million of loot allegedly recovered from Diezani on rural electrification",
+          "publisher": "ThisDay",
+          "type": "news",
+          "date": "2025-01-11",
+          "url": "https://www.thisdaylive.com/2025/01/11/fg-to-expend-50-million-of-loot-allegedly-recovered-from-diezani-on-rural-electrification/"
+        }
+      ]
+    },
+    {
+      "id": "iij",
+      "type": "outcome",
+      "label": "International Institute for Justice and the Rule of Law (IIJ)",
+      "simple": "$2.88 million was set aside as a grant for a rule-of-law and counter-terrorism project.",
+      "status": "pending_data",
+      "clarity": "reported",
+      "description": "The Attorney-General said $2.88 million would go as a grant from Nigeria to IIJ for its Rule of Law and Counter-Terrorism Project. Some reports round this figure to $2 million or $3 million.",
+      "evidence": [
+        {
+          "title": "FG to expend $50 million of loot allegedly recovered from Diezani on rural electrification",
+          "publisher": "ThisDay",
+          "type": "news",
+          "date": "2025-01-11",
+          "url": "https://www.thisdaylive.com/2025/01/11/fg-to-expend-50-million-of-loot-allegedly-recovered-from-diezani-on-rural-electrification/"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "us",
+      "to": "wbfund",
+      "amount": 50000000
+    },
+    {
+      "from": "wbfund",
+      "to": "rural",
+      "amount": 50000000
+    },
+    {
+      "from": "us",
+      "to": "iij",
+      "amount": 2880000
+    }
+  ]
+}

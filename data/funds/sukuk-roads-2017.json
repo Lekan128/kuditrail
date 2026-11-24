@@ -1,0 +1,335 @@
+{
+  "id": "sukuk-roads-2017",
+  "order": 4,
+  "title": "Sukuk bond for 25 roads",
+  "category": "Domestic borrowing",
+  "source": "investors, through the Debt Management Office",
+  "amount": 100000000000,
+  "currency": "NGN",
+  "date": "2017-09-26",
+  "asOf": "2026-11-19",
+  "status": "pending_data",
+  "summary": "Nigeria's first government Sukuk raised ₦100 billion from investors in 2017 to build or repair 25 roads. Each of the six zones received about ₦16.67 billion. We have found 15 of the 25 roads so far.",
+  "simple": "In 2017 the government borrowed ₦100 billion from investors through a Sukuk (an Islamic bond) to fix 25 roads, shared equally between the six zones. We have found 15 of the roads so far.",
+  "verdict": [
+    {
+      "tone": "neutral",
+      "text": "About ₦16.67 billion went to each of the 6 zones"
+    },
+    {
+      "tone": "neutral",
+      "text": "We have found 15 of the 25 roads so far. Help us find the rest."
+    }
+  ],
+  "gaps": [
+    "We have found 15 of the 25 roads, from one published list. The full official list, with an amount for each road, would fill this gap.",
+    "We have not yet checked the current state of each road. If you use one of these roads, send an update.",
+    "We have not yet found an official report on the state of each Sukuk road."
+  ],
+  "timeline": [
+    {
+      "date": "2017-09-26",
+      "text": "The DMO issues a ₦100 billion, 7-year Ijarah Sukuk at 16.47% a year.",
+      "evidence": [
+        2
+      ]
+    },
+    {
+      "date": "2017-10",
+      "text": "The proceeds are handed to the Ministry of Power, Works & Housing, about ₦16.67 billion per zone.",
+      "evidence": [
+        3
+      ]
+    },
+    {
+      "date": "2018-04",
+      "text": "The Sukuk is listed on the Nigerian Stock Exchange and FMDQ.",
+      "evidence": [
+        4
+      ]
+    },
+    {
+      "date": "2024",
+      "text": "The 7-year Sukuk reaches maturity.",
+      "evidence": [
+        2
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "title": "SUKUK roads everywhere",
+      "publisher": "Vanguard",
+      "type": "news",
+      "date": "2022-06",
+      "url": "https://www.vanguardngr.com/2022/06/sukuk-roads-everywhere/"
+    },
+    {
+      "title": "FULL LIST: 25 roads N100bn Sukuk proceeds will be spent on",
+      "publisher": "TheCable",
+      "type": "news",
+      "url": "https://www.thecable.ng/?p=207469"
+    },
+    {
+      "title": "Nigeria's debut N100bn sovereign sukuk",
+      "publisher": "African Business",
+      "type": "news",
+      "url": "https://african.business/2018/01/finance-services/nigerias-debut-n100bn-sovereign-sukuk"
+    },
+    {
+      "title": "FG shares N100bn Sukuk equally to six zones for 25 economic roads",
+      "publisher": "ThisDay (via PressReader)",
+      "type": "news",
+      "date": "2017-10-06",
+      "url": "https://www.pressreader.com/nigeria/thisday/20171006/282097751916234"
+    },
+    {
+      "title": "DMO lists N100bn sovereign sukuk on NSE, FMDQ",
+      "publisher": "MFW4A",
+      "type": "news",
+      "url": "https://www.mfw4a.org/news/nigeria-dmo-lists-n100bn-sovereign-sukuk-nse-fmdq"
+    },
+    {
+      "title": "The 25 projects Nigerian government would be funding with its N100bn Sukuk fund",
+      "publisher": "Olaniwun Ajayi LP",
+      "type": "reference",
+      "date": "2017-10-10",
+      "url": "https://www.olaniwunajayi.net/blog/the-25-projects-nigerian-government-would-be-funding-with-its-100bn-sukuk-fund/"
+    },
+    {
+      "title": "Nigerian govt releases N100 billion Sukuk Bond proceeds for 25 road projects",
+      "publisher": "Premium Times",
+      "type": "news",
+      "url": "https://www.premiumtimesng.com/news/top-news/245199-nigerian-govt-releases-n100-billion-sukuk-bond-proceeds-25-road-projects.html"
+    },
+    {
+      "title": "FG releases N100bn through sukuk bonds for 25 road projects",
+      "publisher": "Vanguard",
+      "type": "news",
+      "url": "https://www.vanguardngr.com/2017/10/fg-releases-n100bn-sukuk-bonds-25-road-projects/"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "investors",
+      "type": "source",
+      "label": "Investors who bought the Sukuk bond",
+      "simple": "Investors lent the government ₦100 billion through a Sukuk, a bond that follows Islamic finance rules.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "A 7-year Ijarah Sukuk issued on 26 September 2017 at a 16.47% annual rental rate. It was issued through a special purpose vehicle, FGN Roads Sukuk Company 1 Plc. It was the first of several road-financing Sukuk issues.",
+      "evidence": [
+        {
+          "title": "Nigeria's debut N100bn sovereign sukuk",
+          "publisher": "African Business",
+          "type": "news",
+          "url": "https://african.business/2018/01/finance-services/nigerias-debut-n100bn-sovereign-sukuk"
+        },
+        {
+          "title": "DMO lists N100bn sovereign sukuk on NSE, FMDQ",
+          "publisher": "MFW4A",
+          "type": "news",
+          "url": "https://www.mfw4a.org/news/nigeria-dmo-lists-n100bn-sovereign-sukuk-nse-fmdq"
+        }
+      ]
+    },
+    {
+      "id": "fmw",
+      "type": "government",
+      "label": "Federal Ministry of Works",
+      "simple": "The Works Ministry received the money to fix 25 roads.",
+      "status": "passed_on",
+      "clarity": "reported",
+      "description": "Received the proceeds to fund 25 road projects across the six zones. Reported projects include sections of the Enugu–Port Harcourt road.",
+      "evidence": [
+        {
+          "title": "Works ministry gets N100bn Sukuk proceeds",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/?p=207066"
+        },
+        {
+          "title": "FULL LIST: 25 roads N100bn Sukuk proceeds will be spent on",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/?p=207469"
+        }
+      ]
+    },
+    {
+      "id": "z-nc",
+      "type": "allocation",
+      "label": "North Central roads",
+      "simple": "About ₦16.67 billion. Roads named so far: Loko–Oweto Bridge; Abuja–Lokoja road (Sections 1 and 4); Suleja–Minna road (Phase 2); Lokoja–Benin road (Section 1).",
+      "status": "pending_data",
+      "clarity": "pending",
+      "description": "About ₦16.67 billion went to this zone. A list published in October 2017 names these projects: Loko–Oweto Bridge; Abuja–Lokoja road (Sections 1 and 4); Suleja–Minna road (Phase 2); Lokoja–Benin road (Section 1). That list gives only 15 of the 25 roads, and it does not give an amount for each road. We have not yet checked the current state of each road.",
+      "evidence": [
+        {
+          "title": "The 25 projects … N100bn Sukuk fund (lists 15)",
+          "publisher": "Olaniwun Ajayi LP",
+          "type": "reference",
+          "url": "https://www.olaniwunajayi.net/blog/the-25-projects-nigerian-government-would-be-funding-with-its-100bn-sukuk-fund/"
+        },
+        {
+          "title": "FULL LIST: 25 roads",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/?p=207469"
+        }
+      ]
+    },
+    {
+      "id": "z-ne",
+      "type": "allocation",
+      "label": "North East roads",
+      "simple": "About ₦16.67 billion. Roads named so far: Kano–Maiduguri road (Sections 2–5).",
+      "status": "pending_data",
+      "clarity": "pending",
+      "description": "About ₦16.67 billion went to this zone. A list published in October 2017 names these projects: Kano–Maiduguri road (Sections 2–5). That list gives only 15 of the 25 roads, and it does not give an amount for each road. We have not yet checked the current state of each road.",
+      "evidence": [
+        {
+          "title": "The 25 projects … N100bn Sukuk fund (lists 15)",
+          "publisher": "Olaniwun Ajayi LP",
+          "type": "reference",
+          "url": "https://www.olaniwunajayi.net/blog/the-25-projects-nigerian-government-would-be-funding-with-its-100bn-sukuk-fund/"
+        },
+        {
+          "title": "FULL LIST: 25 roads",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/?p=207469"
+        }
+      ]
+    },
+    {
+      "id": "z-nw",
+      "type": "allocation",
+      "label": "North West roads",
+      "simple": "About ₦16.67 billion. Roads named so far: Kano–Maiduguri road (Section 1); Kano–Katsina road (Phase 1); Kano Western Bypass and Kaduna Eastern Bypass.",
+      "status": "pending_data",
+      "clarity": "pending",
+      "description": "About ₦16.67 billion went to this zone. A list published in October 2017 names these projects: Kano–Maiduguri road (Section 1); Kano–Katsina road (Phase 1); Kano Western Bypass and Kaduna Eastern Bypass. That list gives only 15 of the 25 roads, and it does not give an amount for each road. We have not yet checked the current state of each road.",
+      "evidence": [
+        {
+          "title": "The 25 projects … N100bn Sukuk fund (lists 15)",
+          "publisher": "Olaniwun Ajayi LP",
+          "type": "reference",
+          "url": "https://www.olaniwunajayi.net/blog/the-25-projects-nigerian-government-would-be-funding-with-its-100bn-sukuk-fund/"
+        },
+        {
+          "title": "FULL LIST: 25 roads",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/?p=207469"
+        }
+      ]
+    },
+    {
+      "id": "z-se",
+      "type": "allocation",
+      "label": "South East roads",
+      "simple": "About ₦16.67 billion. Roads named so far: Onitsha–Enugu expressway; Enugu–Port Harcourt road (Sections 1–3).",
+      "status": "pending_data",
+      "clarity": "pending",
+      "description": "About ₦16.67 billion went to this zone. A list published in October 2017 names these projects: Onitsha–Enugu expressway; Enugu–Port Harcourt road (Sections 1–3). That list gives only 15 of the 25 roads, and it does not give an amount for each road. We have not yet checked the current state of each road.",
+      "evidence": [
+        {
+          "title": "The 25 projects … N100bn Sukuk fund (lists 15)",
+          "publisher": "Olaniwun Ajayi LP",
+          "type": "reference",
+          "url": "https://www.olaniwunajayi.net/blog/the-25-projects-nigerian-government-would-be-funding-with-its-100bn-sukuk-fund/"
+        },
+        {
+          "title": "FULL LIST: 25 roads",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/?p=207469"
+        }
+      ]
+    },
+    {
+      "id": "z-ss",
+      "type": "allocation",
+      "label": "South South roads",
+      "simple": "About ₦16.67 billion. Roads named so far: Enugu–Port Harcourt road (Section 4); Yenagoa road junction–Kolo–Otuoke–Bayelsa Palm road; Lokoja–Benin road (Sections 2–4).",
+      "status": "pending_data",
+      "clarity": "pending",
+      "description": "About ₦16.67 billion went to this zone. A list published in October 2017 names these projects: Enugu–Port Harcourt road (Section 4); Yenagoa road junction–Kolo–Otuoke–Bayelsa Palm road; Lokoja–Benin road (Sections 2–4). That list gives only 15 of the 25 roads, and it does not give an amount for each road. We have not yet checked the current state of each road.",
+      "evidence": [
+        {
+          "title": "The 25 projects … N100bn Sukuk fund (lists 15)",
+          "publisher": "Olaniwun Ajayi LP",
+          "type": "reference",
+          "url": "https://www.olaniwunajayi.net/blog/the-25-projects-nigerian-government-would-be-funding-with-its-100bn-sukuk-fund/"
+        },
+        {
+          "title": "FULL LIST: 25 roads",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/?p=207469"
+        }
+      ]
+    },
+    {
+      "id": "z-sw",
+      "type": "allocation",
+      "label": "South West roads",
+      "simple": "About ₦16.67 billion. Roads named so far: Benin–Ofosu–Ore–Ajebandele–Shagamu road (Phases 3 and 4); Ibadan–Ilorin road (Section 2).",
+      "status": "pending_data",
+      "clarity": "pending",
+      "description": "About ₦16.67 billion went to this zone. A list published in October 2017 names these projects: Benin–Ofosu–Ore–Ajebandele–Shagamu road (Phases 3 and 4); Ibadan–Ilorin road (Section 2). That list gives only 15 of the 25 roads, and it does not give an amount for each road. We have not yet checked the current state of each road.",
+      "evidence": [
+        {
+          "title": "The 25 projects … N100bn Sukuk fund (lists 15)",
+          "publisher": "Olaniwun Ajayi LP",
+          "type": "reference",
+          "url": "https://www.olaniwunajayi.net/blog/the-25-projects-nigerian-government-would-be-funding-with-its-100bn-sukuk-fund/"
+        },
+        {
+          "title": "FULL LIST: 25 roads",
+          "publisher": "TheCable",
+          "type": "news",
+          "url": "https://www.thecable.ng/?p=207469"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "investors",
+      "to": "fmw",
+      "amount": 100000000000
+    },
+    {
+      "from": "fmw",
+      "to": "z-nc",
+      "amount": 16666666667
+    },
+    {
+      "from": "fmw",
+      "to": "z-ne",
+      "amount": 16666666667
+    },
+    {
+      "from": "fmw",
+      "to": "z-nw",
+      "amount": 16666666667
+    },
+    {
+      "from": "fmw",
+      "to": "z-se",
+      "amount": 16666666667
+    },
+    {
+      "from": "fmw",
+      "to": "z-ss",
+      "amount": 16666666666
+    },
+    {
+      "from": "fmw",
+      "to": "z-sw",
+      "amount": 16666666666
+    }
+  ]
+}

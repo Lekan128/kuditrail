@@ -1,0 +1,414 @@
+{
+  "id": "abacha-loot-2020",
+  "order": 1,
+  "title": "Abacha loot returned in 2020",
+  "category": "Recovered assets",
+  "source": "the United States and Jersey",
+  "amount": 311797866.11,
+  "currency": "USD",
+  "date": "2020-05-04",
+  "asOf": "2026-11-19",
+  "status": "ongoing",
+  "summary": "Money taken during the Abacha military government was forfeited abroad and returned to Nigeria in 2020 under an agreement between the US, Jersey and Nigeria. The government said it would go in equal shares to the Second Niger Bridge, the Lagos–Ibadan Expressway and the Abuja–Kano road. The bridge opened in 2023. The Abuja–Kaduna part of the Abuja–Kano road was reported finished in 2026, and the rest is due by November 2026. The Lagos–Ibadan Expressway is open, but in 2026 the government said a finished section was failing.",
+  "simple": "Money stolen by a former military ruler was recovered from abroad and sent back in 2020. The government shared it equally between two big roads and one bridge. The bridge is finished. One road is still being built. Part of the other road is already breaking up.",
+  "verdict": [
+    {
+      "tone": "good",
+      "text": "Second Niger Bridge: finished (2023)"
+    },
+    {
+      "tone": "progress",
+      "text": "Abuja–Kano road: Abuja–Kaduna part done in 2026, the rest due Nov 2026"
+    },
+    {
+      "tone": "bad",
+      "text": "Lagos–Ibadan road: open, but part is breaking up"
+    }
+  ],
+  "gaps": [
+    "We could not find a published, itemised audit of how the $311.8 million was spent on each project, although the agreement provided for independent financial review.",
+    "How each project's share (about $103.9 million) was split between road sections has not been published.",
+    "We have not yet seen confirmation that the Kaduna–Kano part of the Abuja–Kano road was finished in November 2026."
+  ],
+  "timeline": [
+    {
+      "date": "2020-02-03",
+      "text": "The US, Jersey and Nigeria sign an agreement to return the money. It includes a rule that Nigeria must replace any money spent on things not allowed.",
+      "evidence": [
+        0
+      ]
+    },
+    {
+      "date": "2020-05-04",
+      "text": "Nigeria confirms it has received $311,797,866.11.",
+      "evidence": [
+        1
+      ]
+    },
+    {
+      "date": "2020-05",
+      "text": "The Presidency says the money will go to the Second Niger Bridge, the Lagos–Ibadan Expressway and the Abuja–Kano road.",
+      "evidence": [
+        2
+      ]
+    },
+    {
+      "date": "2023-05-23",
+      "text": "The Second Niger Bridge is opened.",
+      "evidence": [
+        4
+      ]
+    },
+    {
+      "date": "2024-10",
+      "text": "The government cancels the first Abuja–Kaduna contract.",
+      "evidence": [
+        5
+      ]
+    },
+    {
+      "date": "2026-06",
+      "text": "The government says the Abuja–Kaduna part is finished. It also says a finished part of the Lagos–Ibadan Expressway (Ibadan-bound) is failing and must be rebuilt.",
+      "evidence": [
+        6,
+        7
+      ]
+    },
+    {
+      "date": "2026-08",
+      "text": "The Works Minister says the rest of the Abuja–Kano road will be finished by November 2026.",
+      "evidence": [
+        8
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "title": "U.S. Repatriates Over $311.7 Million in Assets to the Nigerian People",
+      "publisher": "U.S. Department of Justice",
+      "type": "official",
+      "url": "https://www.justice.gov/opa/pr/us-repatriates-over-3117-million-assets-nigerian-people-were-stolen-former-nigerian-dictator"
+    },
+    {
+      "title": "Nigeria Receives $311m Abacha Loot Repatriated from US, Jersey",
+      "publisher": "ThisDay",
+      "type": "news",
+      "date": "2020-05-04",
+      "url": "https://thisdaylive.com/index.php/2020/05/04/nigeria-receives-311m-abacha-loot-repatriated-from-us-jersey"
+    },
+    {
+      "title": "Presidency says $311m returned Abacha loot will fund 2nd Niger Bridge, other projects",
+      "publisher": "The Guardian Nigeria",
+      "type": "news",
+      "url": "https://guardian.ng/news/presidency-says-311m-returned-abacha-loot-will-fund-2nd-niger-bridge-other-projects/"
+    },
+    {
+      "title": "FG receives over $311m Abacha recovered assets from US",
+      "publisher": "BusinessDay",
+      "type": "news",
+      "url": "https://businessday.ng/lead-story/article/fg-receives-over-311m-abacha-recovered-assets-from-us/"
+    },
+    {
+      "title": "FACT CHECK: Completion of Second Niger Bridge",
+      "publisher": "CDD Fact Check",
+      "type": "news",
+      "url": "https://cddfactcheck.org/fact-check-completion-of-second-niger-bridge-other-legacy-infrastructure-projects/"
+    },
+    {
+      "title": "FG revokes Abuja-Kaduna road contract over delays",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2024-10-18",
+      "url": "https://nairametrics.com/2024/10/18/fg-revokes-julius-bergers-abuja-kaduna-road-contract-over-delays-cost-irregularities/"
+    },
+    {
+      "title": "FG completes first section of N257bn Abuja-Kaduna-Kano highway",
+      "publisher": "Channels TV",
+      "type": "news",
+      "date": "2026-06-30",
+      "url": "https://www.channelstv.com/2026/06/30/fg-completes-first-section-of-n257bn-abuja-kaduna-kano-highway/"
+    },
+    {
+      "title": "Lagos-Ibadan Expressway: FG confirms failed Ibadan section, orders rebuild",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2026-06-30",
+      "url": "https://nairametrics.com/2026/06/30/lagos-ibadan-expressway-fg-confirms-failed-ibadan-section-orders-rebuild/"
+    },
+    {
+      "title": "FG targets November for completion of remaining 164km Abuja-Kaduna-Kano highway",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2026-08-11",
+      "url": "https://nairametrics.com/2026/08/11/fg-targets-november-for-completion-of-remaining-164km-abuja-kaduna-kano-highway/"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "src",
+      "type": "source",
+      "label": "US & Jersey (returned stolen money)",
+      "simple": "The stolen money had been kept abroad. The US and Jersey gave it back to Nigeria.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "These assets were taken during the 1993–98 military government of Sani Abacha. They were forfeited through US courts while held in Jersey. A 2020 agreement between the US, Jersey and Nigeria returned them to Nigeria.",
+      "evidence": [
+        {
+          "title": "U.S. Repatriates Over $311.7 Million in Assets to the Nigerian People",
+          "publisher": "U.S. Department of Justice",
+          "type": "official",
+          "url": "https://www.justice.gov/opa/pr/us-repatriates-over-3117-million-assets-nigerian-people-were-stolen-former-nigerian-dictator"
+        }
+      ]
+    },
+    {
+      "id": "fgn",
+      "type": "government",
+      "label": "Federal Government of Nigeria",
+      "simple": "Nigeria received $311.8 million in May 2020.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "Nigeria received $311,797,866.11 in May 2020, including interest earned since February. The money first went into a Central Bank asset-recovery account and was then to be paid to NSIA. Under the agreement, Nigeria must replace any money found to have been spent on things that were not allowed (a \"claw-back\" rule).",
+      "evidence": [
+        {
+          "title": "Nigeria Receives $311m Abacha Loot Repatriated from US, Jersey",
+          "publisher": "ThisDay",
+          "type": "news",
+          "url": "https://thisdaylive.com/index.php/2020/05/04/nigeria-receives-311m-abacha-loot-repatriated-from-us-jersey"
+        },
+        {
+          "title": "FG receives over $311m Abacha recovered assets from US",
+          "publisher": "BusinessDay",
+          "type": "news",
+          "url": "https://businessday.ng/lead-story/article/fg-receives-over-311m-abacha-recovered-assets-from-us/"
+        },
+        {
+          "title": "Nigeria receives $311m Abacha assets from US, Jersey",
+          "publisher": "The Guardian Nigeria",
+          "type": "news",
+          "url": "https://guardian.ng/news/nigeria-receives-311m-abacha-assets-from-us-jersey/"
+        }
+      ]
+    },
+    {
+      "id": "nsia",
+      "type": "agency",
+      "label": "Nigeria Sovereign Investment Authority (NSIA)",
+      "simple": "NSIA, the government's investment agency, was put in charge of spending it on three projects.",
+      "status": "passed_on",
+      "clarity": "reported",
+      "description": "Under the return agreement, NSIA was to manage the money and carry out the projects, with independent financial review. The Presidency later said the money had been paid directly to the projects' contractors, about one third (≈$103.9 million) per project.",
+      "evidence": [
+        {
+          "title": "Nigeria paid $311m Abacha loot directly to contractors",
+          "publisher": "Arise News",
+          "type": "news",
+          "url": "https://www.arise.tv/nigeria-paid-311m-abacha-loot-directly-to-contractors"
+        }
+      ]
+    },
+    {
+      "id": "p-2nb",
+      "type": "project",
+      "label": "Second Niger Bridge",
+      "simple": "The new bridge between Asaba and Onitsha was opened in May 2023.",
+      "location": "Asaba (Delta) – Onitsha (Anambra)",
+      "status": "completed",
+      "clarity": "reported",
+      "description": "A bridge of about 1.6 km over the River Niger. It was formally opened on 23 May 2023 and later renamed the Muhammadu Buhari Bridge. Most of its money came from the Presidential Infrastructure Development Fund (PIDF), which NSIA manages. The Abacha money paid for only part of it. Total cost figures differ between reports.",
+      "evidence": [
+        {
+          "title": "FACT CHECK: Completion of Second Niger Bridge, other legacy infrastructure projects",
+          "publisher": "CDD Fact Check",
+          "type": "news",
+          "url": "https://cddfactcheck.org/fact-check-completion-of-second-niger-bridge-other-legacy-infrastructure-projects/"
+        },
+        {
+          "title": "President Buhari inaugurates 2nd Niger Bridge, other projects",
+          "publisher": "Voice of Nigeria (government radio)",
+          "type": "official",
+          "url": "https://von.gov.ng/president-buhari-inaugurates-2nd-niger-bridge-other-projects/"
+        },
+        {
+          "title": "President Buhari commissions Second Niger Bridge and Abuja–Kano road projects",
+          "publisher": "NSIA",
+          "type": "official",
+          "url": "https://nsia.com.ng/president-muhammadu-buhari-commissions-second-niger-bridge-and-abuja-kano-road-projects-salutes-nsia-for-pivotal-role-in-project-actualization"
+        },
+        {
+          "title": "Second Niger Bridge (2NB) — project page",
+          "publisher": "NSIA",
+          "type": "official",
+          "url": "https://nsia.com.ng/portfolio/second-niger-bridge-2nb/"
+        },
+        {
+          "title": "Second Niger Bridge gulps N157bn",
+          "publisher": "BusinessDay",
+          "type": "news",
+          "url": "https://businessday.ng/news/article/second-niger-bridge-gulps-n157bn/"
+        }
+      ]
+    },
+    {
+      "id": "p-lie",
+      "type": "project",
+      "label": "Lagos–Ibadan Expressway",
+      "simple": "The road is open. But in 2026 the government said part of the Ibadan-bound side was breaking up and must be rebuilt.",
+      "location": "Lagos – Ogun – Oyo",
+      "status": "defects",
+      "clarity": "reported",
+      "description": "A dual carriageway rebuilt in two sections: Lagos–Sagamu (about 43.6 km) and Sagamu–Ibadan (about 84 km). The road was opened to traffic. In June 2026 the Federal Government said a completed Ibadan-bound stretch was failing and ordered it rebuilt. Reported contract figures range from ₦167 billion (2014) to more than ₦230 billion.",
+      "evidence": [
+        {
+          "title": "Lagos – Ibadan Expressway (LIE)",
+          "publisher": "NSIA",
+          "type": "official",
+          "url": "https://nsia.com.ng/?p=2780"
+        },
+        {
+          "title": "Ministry of Works opens Lagos-Ibadan expressway to commuters",
+          "publisher": "The Guardian Nigeria",
+          "type": "news",
+          "url": "https://guardian.ng/news/ministry-of-works-opens-lagos-ibadan-expressway-to-commuters/"
+        },
+        {
+          "title": "Lagos-Ibadan Expressway: FG confirms failed Ibadan section, orders rebuild",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "date": "2026-06-30",
+          "url": "https://nairametrics.com/2026/06/30/lagos-ibadan-expressway-fg-confirms-failed-ibadan-section-orders-rebuild/"
+        }
+      ]
+    },
+    {
+      "id": "p-akk",
+      "type": "project",
+      "label": "Abuja–Kaduna–Kano Road",
+      "simple": "The Abuja–Kaduna part was finished in 2026. The government says the rest (164 km) will be finished by November 2026.",
+      "location": "FCT – Kaduna – Kano",
+      "status": "ongoing",
+      "clarity": "reported",
+      "description": "A dual carriageway from Abuja through Kaduna and Zaria to Kano. In October 2024 the government took the Abuja–Kaduna contract away from the first contractor, citing slow work and a dispute over a higher price. The work was given to a new contractor in 2025. In June 2026 the government said the 118 km Abuja–Kaduna part was finished. In August 2026 the Works Minister said the remaining 164 km would be finished by November 2026. We have not yet seen confirmation that this happened.",
+      "evidence": [
+        {
+          "title": "FG completes first section of N257bn Abuja-Kaduna-Kano highway",
+          "publisher": "Channels TV",
+          "type": "news",
+          "date": "2026-06-30",
+          "url": "https://www.channelstv.com/2026/06/30/fg-completes-first-section-of-n257bn-abuja-kaduna-kano-highway/"
+        },
+        {
+          "title": "FG targets November for completion of remaining 164km Abuja-Kaduna-Kano highway",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "date": "2026-08-11",
+          "url": "https://nairametrics.com/2026/08/11/fg-targets-november-for-completion-of-remaining-164km-abuja-kaduna-kano-highway/"
+        },
+        {
+          "title": "FG revokes section of Abuja-Kaduna road contract",
+          "publisher": "The Guardian Nigeria",
+          "type": "news",
+          "url": "https://guardian.ng/news/fg-revokes-section-of-abuja-kaduna-road-contract/"
+        },
+        {
+          "title": "FG to spend N777bn to complete Abuja-Kaduna-Kano highway",
+          "publisher": "AllAfrica / ThisDay",
+          "type": "news",
+          "date": "2025-04-15",
+          "url": "https://allafrica.com/stories/202504150608.html"
+        }
+      ]
+    },
+    {
+      "id": "s-ak",
+      "type": "section",
+      "label": "Abuja–Kaduna (118 km)",
+      "simple": "The government said this part was finished in June 2026.",
+      "status": "completed",
+      "clarity": "reported",
+      "amountDisclosed": false,
+      "description": "About 27% was done when the first contract was cancelled in October 2024. A new contractor took over in 2025. In June 2026 the government said this 118 km section was complete, at a reported cost of ₦257 billion.",
+      "evidence": [
+        {
+          "title": "FG completes first section of N257bn Abuja-Kaduna-Kano highway",
+          "publisher": "Channels TV",
+          "type": "news",
+          "date": "2026-06-30",
+          "url": "https://www.channelstv.com/2026/06/30/fg-completes-first-section-of-n257bn-abuja-kaduna-kano-highway/"
+        },
+        {
+          "title": "FG revokes Abuja-Kaduna road contract over delays",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "date": "2024-10-18",
+          "url": "https://nairametrics.com/2024/10/18/fg-revokes-julius-bergers-abuja-kaduna-road-contract-over-delays-cost-irregularities/"
+        }
+      ]
+    },
+    {
+      "id": "s-kzk",
+      "type": "section",
+      "label": "Kaduna–Zaria–Kano (164 km)",
+      "simple": "The government says this part will be finished by November 2026.",
+      "status": "ongoing",
+      "clarity": "reported",
+      "amountDisclosed": false,
+      "description": "In August 2026 the Works Minister said the remaining 164 km would be completed by November 2026, and that more than ₦200 billion had been spent on the whole project. We have not yet seen confirmation that it is finished.",
+      "evidence": [
+        {
+          "title": "Abuja-Kano road to be completed in November — Umahi",
+          "publisher": "Vanguard",
+          "type": "news",
+          "date": "2026-08",
+          "url": "https://www.vanguardngr.com/2026/08/abuja-kano-road-to-be-completed-in-november-umahi/"
+        },
+        {
+          "title": "FG targets November for completion of remaining 164km",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "date": "2026-08-11",
+          "url": "https://nairametrics.com/2026/08/11/fg-targets-november-for-completion-of-remaining-164km-abuja-kaduna-kano-highway/"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "src",
+      "to": "fgn",
+      "amount": 311797866.11
+    },
+    {
+      "from": "fgn",
+      "to": "nsia",
+      "amount": 311797866.11
+    },
+    {
+      "from": "nsia",
+      "to": "p-2nb",
+      "amount": 103932622.04
+    },
+    {
+      "from": "nsia",
+      "to": "p-lie",
+      "amount": 103932622.04
+    },
+    {
+      "from": "nsia",
+      "to": "p-akk",
+      "amount": 103932622.03
+    },
+    {
+      "from": "p-akk",
+      "to": "s-ak",
+      "amount": 51966311.02,
+      "estimated": true
+    },
+    {
+      "from": "p-akk",
+      "to": "s-kzk",
+      "amount": 51966311.01,
+      "estimated": true
+    }
+  ]
+}

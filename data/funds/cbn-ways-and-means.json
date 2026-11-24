@@ -1,0 +1,203 @@
+{
+  "id": "cbn-ways-and-means",
+  "order": 8,
+  "title": "Money the government borrowed from the Central Bank",
+  "category": "Domestic borrowing",
+  "source": "the Central Bank of Nigeria",
+  "amount": 22700000000000,
+  "currency": "NGN",
+  "date": "2022-12-19",
+  "asOf": "2026-11-19",
+  "status": "under_review",
+  "summary": "'Ways & Means' is an overdraft the Central Bank can give the Federal Government to cover short-term cash gaps. By December 2022 the balance had reached ₦22.7 trillion, far above the legal limit. In 2023 it was converted into long-term bonds, so it is now public debt. What the money paid for has not been itemised publicly, and the advances have been investigated.",
+  "simple": "The government borrowed ₦22.7 trillion from the Central Bank as an overdraft, far above the legal limit. In 2023 it was turned into long-term debt that Nigerians will be paying for decades. No public breakdown shows what the money paid for.",
+  "verdict": [
+    {
+      "tone": "unknown",
+      "text": "What it paid for: no public record found"
+    },
+    {
+      "tone": "bad",
+      "text": "Investigated by a presidential investigator and the Senate"
+    },
+    {
+      "tone": "neutral",
+      "text": "Now a 40-year debt at 9% interest. Repayment began in 2026"
+    }
+  ],
+  "gaps": [
+    "We could not find a public, itemised account of what the ₦22.7 trillion paid for.",
+    "The findings of the Senate's 2024 ad hoc committee are not yet reflected here."
+  ],
+  "timeline": [
+    {
+      "date": "2022-12-19",
+      "text": "Ways & Means advances to the Federal Government reach ₦22.7 trillion.",
+      "evidence": [
+        0
+      ]
+    },
+    {
+      "date": "2023-05",
+      "text": "The Senate approves turning the ₦22.7 trillion into a 40-year loan at 9% interest, with no repayment of the principal for 3 years.",
+      "evidence": [
+        0,
+        5
+      ]
+    },
+    {
+      "date": "2023-12",
+      "text": "A presidential special investigator's report alleges that the advances breached Section 38 of the CBN Act. These are allegations, not court findings.",
+      "evidence": [
+        2
+      ]
+    },
+    {
+      "date": "2023-12-30",
+      "text": "The Senate approves converting a further ₦7.3 trillion outstanding balance.",
+      "evidence": [
+        2
+      ]
+    },
+    {
+      "date": "2024-03-11",
+      "text": "The Senate sets up a 17-member ad hoc committee to probe a reported ₦30 trillion in Ways & Means advances. That figure is disputed.",
+      "evidence": [
+        3,
+        4
+      ]
+    },
+    {
+      "date": "2026-06",
+      "text": "The 3-year pause ends and repayment of the principal begins. The balance falls to about ₦22.1 trillion.",
+      "evidence": [
+        6
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "title": "Securitisation of the N22.7trn Ways and Means",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2023-05-09",
+      "url": "https://nairametrics.com/2023/05/09/securitisation-of-the-22-7trn-naira-ways-and-means/"
+    },
+    {
+      "title": "Senate approves restructuring of FG's N22.7trn unbudgeted loans from CBN",
+      "publisher": "Economic Confidential",
+      "type": "news",
+      "url": "https://economicconfidential.com/senate-restructuring-unbudgeted-loans/"
+    },
+    {
+      "title": "Tinubu ignores special investigator, asks Senate to approve conversion of N7.3 trillion ways and means",
+      "publisher": "Peoples Gazette",
+      "type": "news",
+      "url": "https://gazettengr.com/tinubu-ignores-special-investigator-asks-senate-to-approve-conversion-of-n7-3-trillion-ways-and-means-revenue/"
+    },
+    {
+      "title": "Senate panel begins investigation into CBN's Anchor Borrower, N30trn Ways and Means",
+      "publisher": "BusinessDay",
+      "type": "news",
+      "url": "https://businessday.ng/news/article/senate-panel-begins-investigation-into-cbns-anchor-borrower-n30trn-ways-and-means/"
+    },
+    {
+      "title": "Buhari's N22trillion Ways and Means: Senate inaugurates investigation committee",
+      "publisher": "The Frontier",
+      "type": "news",
+      "url": "https://thefrontierng.com/buharis-n22trillion-ways-and-means-senate-inaugurates-investigation-committee/"
+    },
+    {
+      "title": "Ways and Means: National Assembly securitizes N22.7 trillion CBN loan",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2023-05-05",
+      "url": "https://nairametrics.com/2023/05/05/ways-and-means-national-assembly-securitizes-n22-7-trillion-cbn-loan-public-debt-now-n69-trillion/"
+    },
+    {
+      "title": "FG's securitised Ways and Means debt drops N613 billion as moratorium ends",
+      "publisher": "Nairametrics",
+      "type": "news",
+      "date": "2026-09-28",
+      "url": "https://nairametrics.com/2026/09/28/fgs-securitised-ways-and-means-debt-drops-n613-billion-as-moratorium-ends/"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "cbn",
+      "type": "source",
+      "label": "Central Bank of Nigeria (overdraft)",
+      "simple": "The Central Bank lent the government money like a bank overdraft, far above the legal limit of 5% of revenue.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "Section 38 of the CBN Act 2007 limits Ways & Means advances to 5% of the previous year's federal revenue and requires repayment by the end of the year. By 19 December 2022 the balance stood at ₦22.7 trillion.",
+      "evidence": [
+        {
+          "title": "Securitisation of the N22.7trn Ways and Means",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "url": "https://nairametrics.com/2023/05/09/securitisation-of-the-22-7trn-naira-ways-and-means/"
+        }
+      ]
+    },
+    {
+      "id": "fgn",
+      "type": "government",
+      "label": "Federal Government of Nigeria",
+      "simple": "The government spent it outside the approved budget. In 2023 it became long-term debt.",
+      "status": "passed_on",
+      "clarity": "documented",
+      "description": "The money was spent outside the approved budget. In May 2023 the National Assembly approved turning it into a 40-year loan at 9% interest, with a 3-year pause on repaying the principal. The previous rate had been about 21%. Repayment began in 2026.",
+      "evidence": [
+        {
+          "title": "Senate approves restructuring of FG's N22.7trn unbudgeted loans from CBN",
+          "publisher": "Economic Confidential",
+          "type": "news",
+          "url": "https://economicconfidential.com/senate-restructuring-unbudgeted-loans/"
+        },
+        {
+          "title": "Ways and Means: National Assembly securitizes N22.7 trillion CBN loan",
+          "publisher": "Nairametrics",
+          "type": "news",
+          "date": "2023-05-05",
+          "url": "https://nairametrics.com/2023/05/05/ways-and-means-national-assembly-securitizes-n22-7-trillion-cbn-loan-public-debt-now-n69-trillion/"
+        }
+      ]
+    },
+    {
+      "id": "unknown",
+      "type": "outcome",
+      "label": "What it paid for: no public record found",
+      "simple": "No public breakdown shows what the ₦22.7 trillion paid for.",
+      "status": "unclear",
+      "clarity": "unclear",
+      "description": "We could not find a public breakdown of what these advances financed. A presidential special investigator and a Senate committee have looked into the advances. Allegations in those processes are not court findings. If you have an official breakdown, please send it.",
+      "evidence": [
+        {
+          "title": "Senate panel begins investigation into N30trn Ways and Means",
+          "publisher": "BusinessDay",
+          "type": "news",
+          "url": "https://businessday.ng/news/article/senate-panel-begins-investigation-into-cbns-anchor-borrower-n30trn-ways-and-means/"
+        },
+        {
+          "title": "Buhari's N22trillion Ways and Means: Senate inaugurates investigation committee",
+          "publisher": "The Frontier",
+          "type": "news",
+          "url": "https://thefrontierng.com/buharis-n22trillion-ways-and-means-senate-inaugurates-investigation-committee/"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "cbn",
+      "to": "fgn",
+      "amount": 22700000000000
+    },
+    {
+      "from": "fgn",
+      "to": "unknown",
+      "amount": 22700000000000
+    }
+  ]
+}
