@@ -9,7 +9,8 @@
     "db:local": "wrangler d1 migrations apply kuditrail --local",
     "db:remote": "wrangler d1 migrations apply kuditrail --remote",
     "dev": "npm run build && npm run db:local && wrangler pages dev --port 3000",
-    "update-live": "node scripts/update-live.js"
+    "update-live": "node scripts/update-live.js",
+    "backup": "bash scripts/backup-db.sh"
   },
   "engines": {
     "node": ">=22.12"

@@ -91,6 +91,7 @@ Put the local moderator token in `.dev.vars` (git-ignored) as `ADMIN_TOKEN=…`,
 | `npm run build` | Validate the data, bundle it for the Function, run the evidence audit |
 | `npm run update-live` | Fetch the official figures into `data/live.json` |
 | `npm run db:local` / `npm run db:remote` | Apply database migrations locally / on Cloudflare |
+| `npm run backup` | Download the live database to `backups/` (git-ignored: it holds private data) |
 
 ## Add or edit a fund
 
@@ -160,7 +161,7 @@ API: `GET /api/budget`, `GET /api/funds`, `GET /api/funds/:id`, `GET /api/update
 1. **Have a Nigerian lawyer review** the disclaimer, the terms and the wording on the Ways & Means and Abacha pages.
 2. Set the `ADMIN_TOKEN` secret on the Pages project and a real `CONTACT_EMAIL` in `wrangler.toml`.
 3. Re-verify each fund's figures and links, and update `asOf`.
-4. Back up the database now and then: `npx wrangler d1 export kuditrail --remote --output backup.sql`. (D1 also keeps 30 days of Time Travel restore points.)
+4. Back up the database now and then with `npm run backup`. (D1 also keeps 30 days of Time Travel restore points.)
 
 ## Roadmap ideas
 

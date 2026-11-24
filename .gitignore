@@ -6,3 +6,5 @@ functions/_lib/data.js
 # Wrangler local state and local secrets
 .wrangler/
 .dev.vars
+# Database backups contain private data
+backups/
