@@ -3,6 +3,7 @@
 name = "kuditrail"
 main = "src/worker.js"
 compatibility_date = "2026-11-01"
+workers_dev = true   # serve at kuditrail.<subdomain>.workers.dev
 
 [assets]
 directory = "public"
