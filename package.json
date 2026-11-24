@@ -1,16 +1,21 @@
 {
   "name": "kuditrail",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "KudiTrail: follow Nigeria's public money from lender to project, with evidence and citizen updates.",
   "private": true,
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "check": "node -e \"require('./server.js').loadFunds(); console.log('fund data OK')\" && node scripts/audit.js"
+    "build": "node scripts/build.js && node scripts/audit.js",
+    "check": "npm run build",
+    "db:local": "wrangler d1 migrations apply kuditrail --local",
+    "db:remote": "wrangler d1 migrations apply kuditrail --remote",
+    "dev": "npm run build && npm run db:local && wrangler pages dev --port 3000",
+    "update-live": "node scripts/update-live.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.12"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "4.167.0"
+  }
 }

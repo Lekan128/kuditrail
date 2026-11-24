@@ -1,0 +1,40 @@
+# Fetches the official figures (CBN exchange rate, World Bank population and
+# loan data) twice a day and commits data/live.json. Every automatic change is
+# therefore recorded in git, and each commit redeploys the site on Cloudflare.
+name: Update automatic data
+
+on:
+  schedule:
+    - cron: '15 5,17 * * *'   # 06:15 and 18:15 Lagos time
+  workflow_dispatch: {}        # "Run workflow" button on GitHub
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-live
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/update-live.js
+      - name: Check the data still builds
+        run: node scripts/build.js
+      - name: Commit if the figures changed
+        run: |
+          # Ignore changes that are only timestamps (fetchedAt / lastRun / at).
+          if git diff --quiet -- data/live.json; then echo "No change"; exit 0; fi
+          if [ -z "$(git diff -U0 -- data/live.json | grep '^[-+] ' | grep -vE '"(fetchedAt|lastRun|at)":')" ]; then
+            echo "Only timestamps changed; not committing"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/live.json
+          git commit -m "Update automatic data ($(date -u +%Y-%m-%d))"
+          git push

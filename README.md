@@ -18,12 +18,12 @@
   | Money borrowed from the Central Bank (₦22.7trn) | No public record of what it paid for; now a 40-year debt |
 
 - **National budget page** (`#/budget`, button on the home page). It shows the 2026 and 2025 federal budgets: the total, the amount for every Nigerian, the split (projects, debts, running the government, fixed shares set by law), and "Was it spent?" figures from the Budget Office reports. Every figure has a numbered source. The data is in `data/budget.json`.
-- **Automatic updates from official data** (`live.js`). Twice a day the server fetches:
+- **Automatic updates from official data** (`scripts/update-live.js`). Twice a day a GitHub Actions job fetches:
   - the US dollar rate from the Central Bank of Nigeria API;
   - Nigeria's population from the World Bank API;
   - for any fund with `"live": { "worldbankProject": "P…" }`, the loan's latest monthly figures from the World Bank's Finances One API (paid out, left to pay, paid back, repayment dates).
 
-  Automatic figures are labelled "Updates automatically" and show their date. A failed fetch keeps the last good value, and automatic data never rewrites the checked text in the fund files. Moderators can see the status and press "Refresh now" at `#/admin`.
+  Automatic figures are labelled "Updates automatically" and show their date. A failed fetch keeps the last good value, and automatic data never rewrites the checked text in the fund files. When figures change, the job commits `data/live.json` (so every change is in git) and the site redeploys. Moderators can see the status at `#/admin`, and run the job early from GitHub.
 - **Plain language first.** Every fund and every step has an "In simple words" line. Dollar amounts also show a naira equivalent and "≈ ₦X for every Nigerian", using the rate and population in `data/settings.json`. Update those values now and then.
 - **Two ways to follow the money:** a **step-by-step list** (the default on phones) and an **interactive flow diagram** (the default on laptops). Each visitor's choice is remembered.
 - **Interactive flow diagram.** Drag to pan, scroll or pinch to zoom, drag boxes to rearrange, tap a box for details. Ribbon thickness is proportional to the money. Pages deep-link to a box, e.g. `#/fund/abacha-loot-2020/p-lie`.
@@ -47,44 +47,53 @@ KudiTrail's promise is that anyone with a phone can open any page and, within on
 
 The full rules, with the research behind them and examples of where others use them, are in [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md). The live reference, built from the real components, is at `/#/design` (linked in the footer).
 
-## Hosting plan (free)
+## Hosting (Cloudflare, free plan)
 
-Only what people send in (citizen updates, contact messages and photos) needs a database. Everything else can be static files.
+Only what people send in (citizen updates, contact messages and photos) needs a database. Everything else is static files.
 
-- **Cloudflare Pages:** the site and the fund and budget data, on a global CDN.
-- **Pages Functions:** the API for the forms.
-- **D1:** a free SQLite database for updates and messages.
-- **R2:** photo storage.
-- **GitHub Actions:** a job twice a day that fetches the official figures (CBN, World Bank) and commits them, so every automatic change is recorded in git.
+- **Cloudflare Pages:** serves `public/` on a global CDN, and redeploys on every push to `main`.
+- **Pages Functions** (`functions/api/[[path]].js`): the whole `/api/*` backend.
+- **D1** (binding `DB`): a SQLite database for updates and messages. Schema in `migrations/`.
+- **R2** (binding `PHOTOS`): photo storage.
+- **GitHub Actions** (`.github/workflows/update-live.yml`): fetches the official figures twice a day and commits them.
+
+Fund, budget and automatic data are bundled into the Function at build time by `scripts/build.js`, so editing a fund file and pushing is all it takes to publish.
 
 Free-plan limits (Cloudflare docs, Nov 2026):
 - Workers: 100,000 requests a day.
 - D1: 5 million rows read and 100,000 written a day, with 5 GB of storage.
 - R2: 10 GB of storage.
 
-## Run it
+Cloudflare settings:
 
-You need Node 18 or newer. There are no dependencies, so no `npm install` is needed.
+| Setting | Value |
+|---|---|
+| Build command | `npm run build` |
+| Build output directory | `public` |
+| Secret `ADMIN_TOKEN` | Moderator token (set in the dashboard or with `wrangler pages secret put ADMIN_TOKEN`) |
+| `CONTACT_EMAIL` | Email shown for legal notices (in `wrangler.toml`) |
+| `GITHUB_REPO` | `owner/repo`, for the admin page's "run the update" link (in `wrangler.toml`) |
+
+## Run it locally
+
+You need Node 22.12 or newer.
 
 ```bash
-npm start                 # http://localhost:3000
-PORT=8080 npm start       # another port
+npm install
+npm run dev               # http://localhost:3000, with a local D1 database and R2 bucket
 ```
 
-The admin token prints in the console and is saved to `data/store/.admin-token`. Use it at `/#/admin`.
+Put the local moderator token in `.dev.vars` (git-ignored) as `ADMIN_TOKEN=…`, and use it at `/#/admin`. Local data lives in `.wrangler/` (git-ignored).
 
-| Env var | Purpose |
+| Command | What it does |
 |---|---|
-| `PORT` | Port to listen on (default 3000) |
-| `ADMIN_TOKEN` | Set your own moderator token (recommended in production) |
-| `CONTACT_EMAIL` | Email shown for legal notices (default is a placeholder) |
-| `STORE_DIR` | Where submissions are stored (default `data/store`) |
-| `TRUST_PROXY` | Set to `1` behind a reverse proxy, so rate limiting uses `X-Forwarded-For` |
-| `LIVE_UPDATES` | Set to `0` to turn off automatic fetching (then `data/settings.json` values are used) |
+| `npm run build` | Validate the data, bundle it for the Function, run the evidence audit |
+| `npm run update-live` | Fetch the official figures into `data/live.json` |
+| `npm run db:local` / `npm run db:remote` | Apply database migrations locally / on Cloudflare |
 
 ## Add or edit a fund
 
-Each fund is one JSON file in `data/funds/`. Run `npm run check` to validate the files and run the evidence audit, then restart the server (or `POST /api/admin/reload` with the admin token).
+Each fund is one JSON file in `data/funds/`. Run `npm run check` to validate the files and run the evidence audit, then push. Cloudflare rebuilds and publishes it.
 
 ```jsonc
 {
@@ -127,15 +136,20 @@ To update the budget page, edit `data/budget.json`. Add a new year at the top of
 ## Structure
 
 ```
-server.js            Node http server: static files, JSON API, moderation, photo handling
-live.js              Automatic updates from official APIs (CBN, World Bank)
-data/budget.json     National budget page data
-data/funds/*.json    Fund data (the editorial content)
-data/store/          Runtime data: submissions, contacts, uploads (git-ignored)
-public/index.html    App shell
-public/app.js        Pages, routing, modals, forms (vanilla JS)
-public/flow.js       Custom pan/zoom/drag Sankey flow graph (no libraries)
-public/styles.css    Styles, light and dark mode, mobile bottom-sheet panel
+functions/api/[[path]].js  The API (Cloudflare Pages Function): forms, moderation, photos
+functions/_lib/data.js     Generated by scripts/build.js (git-ignored)
+migrations/*.sql           D1 database schema
+scripts/build.js           Validates data/ and bundles it for the Function
+scripts/update-live.js     Automatic updates from official APIs (CBN, World Bank)
+scripts/audit.js           Evidence audit
+data/budget.json           National budget page data
+data/funds/*.json          Fund data (the editorial content)
+data/live.json             Automatic figures (written by the GitHub job)
+public/_headers            Security headers for the static site
+public/index.html          App shell
+public/app.js              Pages, routing, modals, forms (vanilla JS)
+public/flow.js             Custom pan/zoom/drag Sankey flow graph (no libraries)
+public/styles.css          Styles, light and dark mode, mobile bottom-sheet panel
 ```
 
 API: `GET /api/budget`, `GET /api/funds`, `GET /api/funds/:id`, `GET /api/updates?fund=`, `POST /api/updates`, `POST /api/contact`, `GET /api/photo/:id`, plus `/api/admin/*` (requires the `x-admin-token` header).
@@ -143,9 +157,9 @@ API: `GET /api/budget`, `GET /api/funds`, `GET /api/funds/:id`, `GET /api/update
 ## Before a public launch
 
 1. **Have a Nigerian lawyer review** the disclaimer, the terms and the wording on the Ways & Means and Abacha pages.
-2. Set `ADMIN_TOKEN` and a real `CONTACT_EMAIL`, and serve over HTTPS behind a proxy (`TRUST_PROXY=1`).
+2. Set the `ADMIN_TOKEN` secret on Cloudflare and a real `CONTACT_EMAIL` in `wrangler.toml`.
 3. Re-verify each fund's figures and links, and update `asOf`.
-4. Back up `data/store/`. For larger scale, move it to a database such as SQLite or Postgres and move uploads to object storage.
+4. Back up the database now and then: `npx wrangler d1 export kuditrail --remote --output backup.sql`. (D1 also keeps 30 days of Time Travel restore points.)
 
 ## Roadmap ideas
 

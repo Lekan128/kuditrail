@@ -932,7 +932,7 @@
     const box = h('div');
     const authed = (path, opts = {}) => api(path, { ...opts, headers: { 'x-admin-token': token } });
     const login = () => {
-      const inp = h('input', { type: 'password', placeholder: 'Admin token (shown in the server console)', 'aria-label': 'Admin token' });
+      const inp = h('input', { type: 'password', placeholder: 'Admin token', 'aria-label': 'Admin token' });
       box.replaceChildren(h('form', { class: 'form card-form narrow', onsubmit: e => { e.preventDefault(); token = inp.value.trim(); try { sessionStorage.setItem('kt-admin', token); } catch (_) { } load(); } },
         h('label', null, 'Admin token', inp), h('button', { class: 'btn primary' }, 'Sign in')));
     };
@@ -962,13 +962,14 @@
           h('button', { class: 'btn small', onclick: () => { try { sessionStorage.removeItem('kt-admin'); } catch (_) { } token = ''; login(); } }, 'Sign out')),
         h('h2', null, 'Automatic data'),
         h('article', { class: 'mod-item' },
-          h('p', null, `Last run: ${live.lastRun ? new Date(live.lastRun).toLocaleString() : 'never'}. `,
+          h('p', null, `Figures last changed: ${live.lastRun ? new Date(live.lastRun).toLocaleString() : 'never'}. `,
             `Exchange rate: ${live.rate ? '₦' + live.rate.value + ' (' + live.rate.date + ')' : '—'}. `,
             `Population: ${live.population ? live.population.value.toLocaleString() + ' (' + live.population.year + ')' : '—'}. `,
             `World Bank loans: ${Object.values(live.worldbank || {}).map(w => `${w.projectId} ${w.asOf}`).join(', ') || '—'}.`),
           Object.keys(live.errors || {}).length ? h('ul', { class: 'form-msg err' }, Object.entries(live.errors).map(([k, e]) => h('li', null, `${k}: ${e.message} (${new Date(e.at).toLocaleString()})`))) : h('p', { class: 'fine' }, 'No errors.'),
           h('p', { class: 'fine' }, 'If an automatic figure differs from the checked text on a fund page, update the fund file. Automatic data never rewrites it.'),
-          h('div', { class: 'actions' }, h('button', { class: 'btn small', onclick: async e => { e.target.disabled = true; e.target.textContent = 'Refreshing…'; try { await authed('admin/live', { method: 'POST' }); } catch (_) { } load(); } }, 'Refresh now'))),
+          h('p', { class: 'fine' }, 'The figures are fetched twice a day by a GitHub job. When they change, the job saves them and the site redeploys within a few minutes.'),
+          live.runUrl ? h('div', { class: 'actions' }, h('a', { class: 'btn small', href: live.runUrl, target: '_blank', rel: 'noopener noreferrer' }, 'Run the update now (on GitHub)')) : null),
         h('h2', null, 'Citizen updates'), rows.length ? rows : h('p', { class: 'empty' }, 'Nothing yet.'),
         h('h2', null, 'Contact, corrections & takedown requests'),
         contacts.length ? contacts.map(c => h('article', { class: `mod-item mod-${c.state}` },

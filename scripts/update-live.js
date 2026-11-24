@@ -1,4 +1,6 @@
 // Automatic updates from official public data (no API keys needed).
+// Run by GitHub Actions twice a day (.github/workflows/update-live.yml):
+//   node scripts/update-live.js   -> writes data/live.json, which is committed.
 //
 // Rules, because correctness matters more than freshness:
 //  - We only use official sources that publish machine-readable data.
@@ -11,7 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const REFRESH_MS = 12 * 60 * 60 * 1000; // twice a day
+
 const TIMEOUT_MS = 30000;
 
 const SOURCES = {
@@ -94,72 +96,38 @@ async function fetchWorldBankLoan(projectId) {
   return out;
 }
 
-function createLive({ storeDir, getFunds, log = console }) {
-  const file = path.join(storeDir, 'live.json');
+// Run all fetches and write data/live.json. A failed fetch keeps the last
+// good value and records the error, so the site never goes blank.
+async function run({ file = path.join(__dirname, '..', 'data', 'live.json'), log = console } = {}) {
   let state = { rate: null, population: null, worldbank: {}, errors: {}, lastRun: null };
   try { state = { ...state, ...JSON.parse(fs.readFileSync(file, 'utf8')) }; } catch (_) { /* first run */ }
-  let running = null;
-
-  const save = () => {
-    const tmp = file + '.' + process.pid + '.tmp';
-    fs.mkdirSync(storeDir, { recursive: true });
-    fs.writeFileSync(tmp, JSON.stringify(state, null, 2));
-    fs.renameSync(tmp, file);
-  };
 
   async function step(key, fn, assign) {
     try {
       const v = await fn();
       assign({ ...v, fetchedAt: new Date().toISOString() });
       delete state.errors[key];
+      log.log(`  [live] ${key}: ok`);
     } catch (e) {
       state.errors[key] = { message: String(e.message || e), at: new Date().toISOString() };
       log.warn(`  [live] ${key}: ${state.errors[key].message} (keeping last good value)`);
     }
   }
 
-  async function refresh() {
-    if (running) return running;
-    running = (async () => {
-      await step('rate', fetchRate, v => state.rate = v);
-      await step('population', fetchPopulation, v => state.population = v);
-      const projects = new Set();
-      for (const f of getFunds()) if (f.live && f.live.worldbankProject) projects.add(f.live.worldbankProject);
-      for (const p of projects) await step('worldbank:' + p, () => fetchWorldBankLoan(p), v => state.worldbank[p] = v);
-      state.lastRun = new Date().toISOString();
-      save();
-    })().finally(() => { running = null; });
-    return running;
+  await step('rate', fetchRate, v => state.rate = v);
+  await step('population', fetchPopulation, v => state.population = v);
+  const projects = new Set();
+  const fundsDir = path.join(__dirname, '..', 'data', 'funds');
+  for (const f of fs.readdirSync(fundsDir).filter(f => f.endsWith('.json'))) {
+    const fund = JSON.parse(fs.readFileSync(path.join(fundsDir, f), 'utf8'));
+    if (fund.live && fund.live.worldbankProject) projects.add(fund.live.worldbankProject);
   }
-
-  // Values for /api/config (falls back to data/settings.json)
-  function settings(base) {
-    const s = { ...base };
-    if (state.rate) Object.assign(s, {
-      usdToNgn: state.rate.value, rateDate: state.rate.date, rateAuto: true,
-      rateSource: { title: SOURCES.rate.title, url: SOURCES.rate.page },
-    });
-    if (state.population) Object.assign(s, {
-      population: state.population.value, populationAuto: true,
-      populationNote: `World Bank estimate for ${state.population.year}`,
-      populationSource: { title: SOURCES.population.title, url: SOURCES.population.page },
-    });
-    return s;
-  }
-
-  function forFund(f) {
-    if (!f.live) return null;
-    const out = {};
-    if (f.live.worldbankProject && state.worldbank[f.live.worldbankProject]) out.worldbank = state.worldbank[f.live.worldbankProject];
-    return Object.keys(out).length ? out : null;
-  }
-
-  function start() {
-    refresh().catch(() => {});
-    setInterval(() => refresh().catch(() => {}), REFRESH_MS).unref();
-  }
-
-  return { refresh, settings, forFund, start, status: () => state };
+  for (const p of projects) await step('worldbank:' + p, () => fetchWorldBankLoan(p), v => state.worldbank[p] = v);
+  state.lastRun = new Date().toISOString();
+  fs.writeFileSync(file, JSON.stringify(state, null, 2) + '\n');
+  return state;
 }
 
-module.exports = { createLive, fetchRate, fetchPopulation, fetchWorldBankLoan, wbDate };
+if (require.main === module) run().catch(e => { console.error(e); process.exit(1); });
+
+module.exports = { run, SOURCES, fetchRate, fetchPopulation, fetchWorldBankLoan, wbDate };

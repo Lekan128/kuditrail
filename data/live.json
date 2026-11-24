@@ -1,0 +1,37 @@
+{
+  "rate": {
+    "value": 1393.51,
+    "date": "2026-11-23",
+    "fetchedAt": "2026-11-24T05:34:18.870Z"
+  },
+  "population": {
+    "value": 237527782,
+    "year": "2025",
+    "fetchedAt": "2026-11-24T05:34:20.786Z"
+  },
+  "worldbank": {
+    "P176935": {
+      "projectId": "P176935",
+      "asOf": "2026-10-31",
+      "credits": [
+        "IDA70190"
+      ],
+      "status": "Disbursing",
+      "original": 800000000,
+      "disbursed": 744610903.69,
+      "undisbursed": 13819598.1,
+      "cancelled": 0,
+      "repaid": 0,
+      "owed": 752806343.9,
+      "closingDate": "2027-06-30",
+      "lastDisbursement": "2026-09-21",
+      "firstRepayment": "2027-01-15",
+      "lastRepayment": "2051-07-15",
+      "sourcePage": "https://financesone.worldbank.org/ida-statement-of-credits-grants-and-guarantees-historical-data/DS00976",
+      "projectPage": "https://projects.worldbank.org/en/projects-operations/project-detail/P176935",
+      "fetchedAt": "2026-11-24T05:34:21.700Z"
+    }
+  },
+  "errors": {},
+  "lastRun": "2026-11-24T05:34:21.701Z"
+}
