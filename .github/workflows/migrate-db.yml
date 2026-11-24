@@ -7,7 +7,7 @@ name: Migrate database
 on:
   push:
     branches: [main]
-    paths: ['migrations/**', 'wrangler.toml']
+    paths: ['migrations/**']
   workflow_dispatch: {}
 
 concurrency:
