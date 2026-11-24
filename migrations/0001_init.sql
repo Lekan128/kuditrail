@@ -1,7 +1,7 @@
 -- KudiTrail D1 database: what people send in.
 -- Apply: npx wrangler d1 migrations apply kuditrail --remote   (or --local)
 
-CREATE TABLE updates (
+CREATE TABLE IF NOT EXISTS updates (
   id           TEXT PRIMARY KEY,
   fund_id      TEXT NOT NULL,
   node_id      TEXT NOT NULL,
@@ -18,10 +18,10 @@ CREATE TABLE updates (
   moderated_at TEXT,
   ip           TEXT NOT NULL               -- salted hash, for rate limiting only
 );
-CREATE INDEX updates_public ON updates (moderation, fund_id, created_at);
-CREATE INDEX updates_ip ON updates (ip, created_at);
+CREATE INDEX IF NOT EXISTS updates_public ON updates (moderation, fund_id, created_at);
+CREATE INDEX IF NOT EXISTS updates_ip ON updates (ip, created_at);
 
-CREATE TABLE contacts (
+CREATE TABLE IF NOT EXISTS contacts (
   id           TEXT PRIMARY KEY,
   type         TEXT NOT NULL,
   name         TEXT NOT NULL,
@@ -35,5 +35,5 @@ CREATE TABLE contacts (
   updated_at   TEXT,
   ip           TEXT NOT NULL
 );
-CREATE INDEX contacts_created ON contacts (created_at);
-CREATE INDEX contacts_ip ON contacts (ip, created_at);
+CREATE INDEX IF NOT EXISTS contacts_created ON contacts (created_at);
+CREATE INDEX IF NOT EXISTS contacts_ip ON contacts (ip, created_at);
