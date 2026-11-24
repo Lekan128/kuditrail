@@ -1,6 +1,6 @@
 // Build step: validates the fund files and bundles all editorial data
 // (funds, budget, settings, automatic figures) into one module that the
-// Cloudflare Worker imports (src/data.js). Run: node scripts/build.js
+// Cloudflare Pages Function imports (functions/_lib/data.js). Run: node scripts/build.js
 // Cloudflare runs it on every deploy (build command: npm run build).
 'use strict';
 
@@ -9,7 +9,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const DATA = path.join(ROOT, 'data');
-const OUT = path.join(ROOT, 'src', 'data.js');
+const OUT = path.join(ROOT, 'functions', '_lib', 'data.js');
 
 const STATUSES = ['passed_on', 'completed', 'operational', 'ongoing', 'stalled', 'defects',
   'under_review', 'disbursed', 'not_disbursed', 'repaid', 'unclear', 'pending_data'];

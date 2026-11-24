@@ -8,7 +8,7 @@
     "check": "npm run build",
     "db:local": "wrangler d1 migrations apply kuditrail --local",
     "db:remote": "wrangler d1 migrations apply kuditrail --remote",
-    "dev": "npm run build && npm run db:local && wrangler dev --port 3000",
+    "dev": "npm run build && npm run db:local && wrangler pages dev --port 3000",
     "update-live": "node scripts/update-live.js"
   },
   "engines": {

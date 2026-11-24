@@ -1,17 +1,8 @@
-# Cloudflare Worker configuration for KudiTrail.
-# Cloudflare builds with `npm run build` and deploys with `npx wrangler deploy`.
+# Cloudflare Pages configuration for KudiTrail.
+# Build command: npm run build. Build output directory: public.
 name = "kuditrail"
-main = "src/worker.js"
+pages_build_output_dir = "public"
 compatibility_date = "2026-11-01"
-workers_dev = true   # serve at kuditrail.<subdomain>.workers.dev
-
-[assets]
-directory = "public"
-binding = "ASSETS"
-run_worker_first = ["/api/*"]
-
-[observability]
-enabled = true
 
 [vars]
 CONTACT_EMAIL = "corrections@kuditrail.example"
