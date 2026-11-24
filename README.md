@@ -56,6 +56,7 @@ Only what people send in (citizen updates, contact messages and photos) needs a 
 - **D1** (binding `DB`): a SQLite database for updates and messages. Schema in `migrations/`.
 - **R2** (binding `PHOTOS`): photo storage. New photos are refused once they total 9 GB (text updates still go through), so the free 10 GB is never exceeded.
 - **GitHub Actions** (`.github/workflows/update-live.yml`): fetches the official figures once a day and commits them when they change.
+- **GitHub Actions** (`.github/workflows/moderation-reminder.yml`): every morning, keeps a GitHub issue open while updates or messages are waiting on the moderation page, so the owner gets an email. The issue shows counts only.
 - **GitHub Actions** (`.github/workflows/migrate-db.yml`): applies new files in `migrations/` to the D1 database when they reach `main`. Needs the repository secrets `CLOUDFLARE_API_TOKEN` (D1 Edit permission) and `CLOUDFLARE_ACCOUNT_ID`.
 
 Fund, budget and automatic data are bundled into the Function at build time by `scripts/build.js`, so editing a fund file and pushing is all it takes to publish.

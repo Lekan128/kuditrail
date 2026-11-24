@@ -1,0 +1,45 @@
+# Once a day, checks the database for citizen updates and messages waiting on
+# the moderation page, and keeps a GitHub issue open while anything is waiting
+# (GitHub emails the repo owner). The issue shows counts only.
+# Uses the same secrets as the migration job: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID.
+name: Moderation reminder
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # 07:00 Lagos time
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: moderation-reminder
+  cancel-in-progress: false
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Count items waiting
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: >
+          npx wrangler d1 execute kuditrail --remote --json --command
+          "SELECT (SELECT COUNT(*) FROM updates WHERE moderation = 'pending') AS updates,
+          (SELECT COUNT(*) FROM contacts WHERE state = 'open') AS messages,
+          (SELECT MIN(created_at) FROM (SELECT created_at FROM updates WHERE moderation = 'pending'
+          UNION ALL SELECT created_at FROM contacts WHERE state = 'open')) AS oldest"
+          > counts.json
+      - name: Open, update or close the reminder issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SITE_URL: https://kuditrail.pages.dev
+        run: node scripts/moderation-reminder.js counts.json
