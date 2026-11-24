@@ -56,6 +56,7 @@ Only what people send in (citizen updates, contact messages and photos) needs a 
 - **D1** (binding `DB`): a SQLite database for updates and messages. Schema in `migrations/`.
 - **R2** (binding `PHOTOS`): photo storage.
 - **GitHub Actions** (`.github/workflows/update-live.yml`): fetches the official figures twice a day and commits them.
+- **GitHub Actions** (`.github/workflows/migrate-db.yml`): applies new files in `migrations/` to the D1 database when they reach `main`. Needs the repository secrets `CLOUDFLARE_API_TOKEN` (D1 Edit permission) and `CLOUDFLARE_ACCOUNT_ID`.
 
 Fund, budget and automatic data are bundled into the Function at build time by `scripts/build.js`, so editing a fund file and pushing is all it takes to publish.
 

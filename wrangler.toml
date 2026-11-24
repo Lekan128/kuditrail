@@ -11,7 +11,7 @@ GITHUB_REPO = "Lekan128/kuditrail"
 [[d1_databases]]
 binding = "DB"
 database_name = "kuditrail"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "1ca3bfdd-cc00-4b1b-9255-17c3dea23002"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
