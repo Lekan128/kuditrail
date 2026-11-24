@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS updates (
   message      TEXT NOT NULL,
   links        TEXT NOT NULL DEFAULT '[]', -- JSON array of URLs
   photo        TEXT,                       -- R2 key, or NULL
+  photo_size   INTEGER,                    -- bytes, so uploads stop before R2's free 10 GB
   moderation   TEXT NOT NULL DEFAULT 'pending', -- pending | approved | rejected
   created_at   TEXT NOT NULL,
   moderated_at TEXT,

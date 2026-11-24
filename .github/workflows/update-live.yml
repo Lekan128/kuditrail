@@ -1,11 +1,11 @@
 # Fetches the official figures (CBN exchange rate, World Bank population and
-# loan data) twice a day and commits data/live.json. Every automatic change is
+# loan data) once a day and commits data/live.json. Every automatic change is
 # therefore recorded in git, and each commit redeploys the site on Cloudflare.
 name: Update automatic data
 
 on:
   schedule:
-    - cron: '15 5,17 * * *'   # 06:15 and 18:15 Lagos time
+    - cron: '15 17 * * *'     # 18:15 Lagos time, after the CBN publishes the day's rate
   workflow_dispatch: {}        # "Run workflow" button on GitHub
 
 permissions:

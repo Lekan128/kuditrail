@@ -13,6 +13,7 @@ import { DATA } from '../_lib/data.js';
 
 const MAX_BODY = 6 * 1024 * 1024; // 6 MB (photo is base64, max ~3 MB binary)
 const MAX_PHOTO = 3 * 1024 * 1024;
+const PHOTO_STORAGE_CAP = 9 * 1024 ** 3; // stop taking photos before R2's 10 GB free limit
 const RATE_LIMIT = 8;             // submissions per network per hour (updates + messages)
 const { statuses: STATUSES, observedStatuses: OBSERVED_STATUS, contactTypes: CONTACT_TYPES } = DATA;
 
@@ -156,14 +157,16 @@ async function handle(request, env, url) {
       if (bin.length > MAX_PHOTO) return fail(413, 'Photo is too large (max 3 MB)');
       const buf = Uint8Array.from(bin, c => c.charCodeAt(0));
       if (!(buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff)) return fail(400, 'Photo must be a JPEG image');
-      u.photo = `${u.id}.jpg`;
+      const used = await env.DB.prepare('SELECT COALESCE(SUM(photo_size), 0) AS n FROM updates').first();
+      if (used.n + buf.length > PHOTO_STORAGE_CAP) return fail(507, "We can't accept photos at the moment. Please send your update without the photo, or add a link to it instead.");
+      u.photo = `${u.id}.jpg`; u.photoSize = buf.length;
       await env.PHOTOS.put(u.photo, buf, { httpMetadata: { contentType: 'image/jpeg' } });
     }
     await env.DB.prepare(
-      `INSERT INTO updates (id, fund_id, node_id, name, contact, location, observed_on, status, message, links, photo, moderation, created_at, ip)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
+      `INSERT INTO updates (id, fund_id, node_id, name, contact, location, observed_on, status, message, links, photo, photo_size, moderation, created_at, ip)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
     ).bind(u.id, u.fundId, u.nodeId, u.name, u.contact, u.location, u.observedOn, u.status, u.message,
-      JSON.stringify(u.links), u.photo, u.createdAt, ip).run();
+      JSON.stringify(u.links), u.photo, u.photoSize || null, u.createdAt, ip).run();
     return json(201, { ok: true, id: u.id });
   }
 

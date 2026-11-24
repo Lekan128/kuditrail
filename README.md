@@ -18,7 +18,7 @@
   | Money borrowed from the Central Bank (₦22.7trn) | No public record of what it paid for; now a 40-year debt |
 
 - **National budget page** (`#/budget`, button on the home page). It shows the 2026 and 2025 federal budgets: the total, the amount for every Nigerian, the split (projects, debts, running the government, fixed shares set by law), and "Was it spent?" figures from the Budget Office reports. Every figure has a numbered source. The data is in `data/budget.json`.
-- **Automatic updates from official data** (`scripts/update-live.js`). Twice a day a GitHub Actions job fetches:
+- **Automatic updates from official data** (`scripts/update-live.js`). Once a day a GitHub Actions job fetches:
   - the US dollar rate from the Central Bank of Nigeria API;
   - Nigeria's population from the World Bank API;
   - for any fund with `"live": { "worldbankProject": "P…" }`, the loan's latest monthly figures from the World Bank's Finances One API (paid out, left to pay, paid back, repayment dates).
@@ -54,8 +54,8 @@ Only what people send in (citizen updates, contact messages and photos) needs a 
 - **Cloudflare Pages:** serves `public/` on a global CDN, and redeploys on every push to `main`.
 - **Pages Functions** (`functions/api/[[path]].js`): the whole `/api/*` backend.
 - **D1** (binding `DB`): a SQLite database for updates and messages. Schema in `migrations/`.
-- **R2** (binding `PHOTOS`): photo storage.
-- **GitHub Actions** (`.github/workflows/update-live.yml`): fetches the official figures twice a day and commits them.
+- **R2** (binding `PHOTOS`): photo storage. New photos are refused once they total 9 GB (text updates still go through), so the free 10 GB is never exceeded.
+- **GitHub Actions** (`.github/workflows/update-live.yml`): fetches the official figures once a day and commits them when they change.
 - **GitHub Actions** (`.github/workflows/migrate-db.yml`): applies new files in `migrations/` to the D1 database when they reach `main`. Needs the repository secrets `CLOUDFLARE_API_TOKEN` (D1 Edit permission) and `CLOUDFLARE_ACCOUNT_ID`.
 
 Fund, budget and automatic data are bundled into the Function at build time by `scripts/build.js`, so editing a fund file and pushing is all it takes to publish.

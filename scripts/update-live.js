@@ -1,5 +1,5 @@
 // Automatic updates from official public data (no API keys needed).
-// Run by GitHub Actions twice a day (.github/workflows/update-live.yml):
+// Run by GitHub Actions once a day (.github/workflows/update-live.yml):
 //   node scripts/update-live.js   -> writes data/live.json, which is committed.
 //
 // Rules, because correctness matters more than freshness:
