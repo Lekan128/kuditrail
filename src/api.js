@@ -1,4 +1,4 @@
-// KudiTrail API, as a Cloudflare Pages Function (handles every /api/* request).
+// KudiTrail API: handles every /api/* request (called from src/worker.js).
 //
 // Bindings (see wrangler.toml):
 //   DB      D1 database: citizen updates and contact messages
@@ -9,7 +9,7 @@
 //
 // Fund, budget and automatic data are bundled at build time (scripts/build.js).
 
-import { DATA } from '../_lib/data.js';
+import { DATA } from './data.js';
 
 const MAX_BODY = 6 * 1024 * 1024; // 6 MB (photo is base64, max ~3 MB binary)
 const MAX_PHOTO = 3 * 1024 * 1024;
@@ -244,7 +244,7 @@ async function handle(request, env, url) {
   return fail(404, 'Not found');
 }
 
-export async function onRequest({ request, env }) {
+export async function handleApi(request, env) {
   try {
     return await handle(request, env, new URL(request.url));
   } catch (e) {
