@@ -115,14 +115,27 @@ All components are plain functions in `public/app.js`. They return DOM nodes and
 | `verdictList(items, 'big')` | The 3-second answer at the top of a page | 1–4 lines. Tone sets the symbol and colour: good ✅, progress ⏳, bad ⚠️, unknown ❓, neutral ℹ️. |
 | `figure({label, value, context, note})` | One big number | The value is written in words. `context` says what it means for one person. |
 | `per100(parts)` | Part of a whole ("out of every ₦100") | 4 parts at most. The 10 × 10 grid fills in list order. Shares always add up to exactly 100 (largest-remainder rounding). |
-| `branchBars({root, spent})` | The budget at a glance, broken down | A tree with connecting lines. Each part has a bar sized to its money, and every bar, at every level, uses the same scale as the total, so the biggest parts look biggest anywhere in the tree. Phones open on the total and its main branches (one screen), with "See the parts" and "Open every part". Laptops open two levels. A switch shows "What was spent" (the default) or "What was planned". In spent mode each part also says what share of its plan was used. Main branches give their shares in words too ("38% · about 4 in 10") and their official term. Every part can reach its sources: a part's Source button covers the parts inside it, and a part with its own sources shows its own button. Use it inside `chartBlock` with a headline that states the message and `branchTable()` as the table. On the budget page it comes after the answer list. Parts must add up to their parent, which `npm run check` enforces. |
+| `budgetTree(root, {onOpen, wide, open})` | Money split into parts | A real tree: the total on top, its parts below, joined by lines. Every box shows **Planned** and **Spent** (or **Came in**) as two labelled bars with amounts, plus its share of the box above. Only boxes that got less than half of their plan turn orange and get ⚠️. On phones it is one box per line, with the trunk down the left. The budget page shows only the main parts, and tapping one opens the explorer (`#/budget/tree`). There the whole tree sits on a canvas you drag and zoom, rows hold at most 4 boxes, tapping a box opens its parts underneath in a panel with a green line from the box, and the opened path is kept in the address. |
+| `planBars(root, {chipFor, infoOf})` | The second version of the budget chart ("Bars" switch) | One bar row per part: grey is planned and dark is spent, on one scale. Kept so the two versions can be compared. Remove whichever loses. |
 | `pva(rows)` | Plan against actual, or a ranking | Bars start at zero, and the text under each bar says it in words. |
 | `chartBlock({headline, sub, visual, table})` | Any chart | The headline states the message, and "See the numbers as a table" is always there. |
 | `sourceChip(evidence[], about)` | Proof for one statement | Labelled "Source" or "2 sources", at least 28px tall, and opens only those sources. |
 | `stamp({auto, date})` | Freshness | "Checked by a person · last checked …" or "Updates automatically · last updated …". |
 | `clarityTag`, `pill` | How sure we are; where it stands | Colour always comes with a text label. |
 | Gap card (`.gaps li`) | Something we could not find | Says plainly what is missing, never what it implies. |
-| Steps list and flow diagram | The money trail | Steps are the default on phones; the diagram is an option. |
+| Steps list and flow diagram | The money trail | Steps are the default on phones; the diagram is an option. When a step splits more than 2 ways, its cards drop the description (it is in the details panel) so the list stays short. |
+
+### Page shape: short answer, one chart, Go further
+
+Every data page has the same three layers, so people always know where to look:
+
+1. **The short answer.** The big number and up to 4 answer lines (`verdictList`).
+2. **One main chart**, with a headline that states the message. On the budget page this is `planBars`. On a fund page it is the money trail.
+3. **Go further.** Everything else sits in closed sections that open on a tap: the whole-year plan, every number as a table, what we could not find, words used, sources and how to check it yourself.
+
+Don't add switches that change what a chart shows (such as spent or planned). If two things need comparing, put them in the same chart. For now the budget page also has a Tree/Bars switch while we choose between the two versions.
+
+Read-only data (budget, funds, settings) is kept in memory once loaded, and the API lets phones cache it for 5 minutes, so changing the year or going back doesn't need the network.
 
 ---
 

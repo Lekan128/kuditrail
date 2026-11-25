@@ -640,14 +640,27 @@
                 ],
                 "children": [
                   {
-                    "label": "Projects paid for by project loans",
-                    "amount": 1024460000000,
-                    "plan": 1024460000000
-                  },
-                  {
-                    "label": "Projects paid for by the development levy",
-                    "amount": 949250000000,
-                    "plan": 902270000000
+                    "label": "Projects paid for by loans, a levy and aid",
+                    "amount": 2428150000000,
+                    "note": "The reports do not list which projects this money paid for.",
+                    "children": [
+                      {
+                        "label": "Project loans",
+                        "amount": 1024460000000,
+                        "plan": 1024460000000
+                      },
+                      {
+                        "label": "The development levy",
+                        "amount": 949250000000,
+                        "plan": 902270000000
+                      },
+                      {
+                        "label": "Grants and aid",
+                        "amount": 454440000000,
+                        "plan": 683580000000
+                      }
+                    ],
+                    "plan": 2610310000000
                   },
                   {
                     "label": "2025 projects still being paid for",
@@ -662,11 +675,6 @@
                     "label": "Projects of government-owned companies",
                     "amount": 494380000000,
                     "plan": 1480630000000
-                  },
-                  {
-                    "label": "Projects paid for by grants and aid",
-                    "amount": 454440000000,
-                    "plan": 683580000000
                   },
                   {
                     "label": "Project funds held centrally",
@@ -1298,14 +1306,22 @@
                 ],
                 "children": [
                   {
-                    "label": "Projects paid for by project loans",
-                    "amount": 4786460000000,
-                    "plan": 2523210000000
-                  },
-                  {
-                    "label": "Projects paid for by grants and aid",
-                    "amount": 1080060000000,
-                    "plan": 541430000000
+                    "label": "Projects paid for by loans and aid",
+                    "amount": 5866520000000,
+                    "note": "The reports do not list which projects this money paid for.",
+                    "children": [
+                      {
+                        "label": "Project loans",
+                        "amount": 4786460000000,
+                        "plan": 2523210000000
+                      },
+                      {
+                        "label": "Grants and aid",
+                        "amount": 1080060000000,
+                        "plan": 541430000000
+                      }
+                    ],
+                    "plan": 3064640000000
                   },
                   {
                     "label": "Projects of government-owned companies",

@@ -33,6 +33,8 @@ function json(status, body, headers = {}) {
   });
 }
 const fail = (status, error) => json(status, { error });
+// Fund, budget and settings data only change when the site is deployed, so phones may keep a copy for a few minutes.
+const SHORT_CACHE = { 'Cache-Control': 'public, max-age=300' };
 
 async function readBody(request) {
   const len = Number(request.headers.get('content-length') || 0);
@@ -108,7 +110,7 @@ async function handle(request, env, url) {
 
   if (m === 'GET' && parts[0] === 'config') {
     return json(200, { ...DATA.settings, contactEmail: env.CONTACT_EMAIL || 'kuditrail@gmail.com',
-      statuses: STATUSES, observedStatuses: OBSERVED_STATUS, contactTypes: CONTACT_TYPES });
+      statuses: STATUSES, observedStatuses: OBSERVED_STATUS, contactTypes: CONTACT_TYPES }, SHORT_CACHE);
   }
 
   if (m === 'GET' && parts[0] === 'funds' && parts.length === 1) {
@@ -118,9 +120,9 @@ async function handle(request, env, url) {
   }
   if (m === 'GET' && parts[0] === 'funds' && parts.length === 2) {
     const f = FUNDS[parts[1]];
-    return f ? json(200, f) : fail(404, 'Fund not found');
+    return f ? json(200, f, SHORT_CACHE) : fail(404, 'Fund not found');
   }
-  if (m === 'GET' && parts[0] === 'budget' && parts.length === 1) return json(200, DATA.budget);
+  if (m === 'GET' && parts[0] === 'budget' && parts.length === 1) return json(200, DATA.budget, SHORT_CACHE);
 
   if (m === 'GET' && parts[0] === 'updates') {
     const fundId = url.searchParams.get('fund');

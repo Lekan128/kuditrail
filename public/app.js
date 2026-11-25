@@ -155,63 +155,139 @@
         bar, h('p', null, r.text, ' ', r.chip || ''));
     }));
   }
-  // Branch bars: a tree with connecting lines, every level open. Each part has a bar sized to its money,
-  // all on the same scale as the total, so the biggest parts look biggest at any level.
-  const dollars = n => { for (const [v, u] of [[1e9, 'billion'], [1e6, 'million']]) if (Math.abs(n) >= v) return `$${(n / v).toFixed(2)} ${u}`; return '$' + Math.round(n).toLocaleString('en-NG'); };
   const pctTxt = f => f > 0 && f < 0.005 ? 'under 1' : String(Math.round(f * 100));
-  // A part's Source covers the parts inside it, unless a part has its own sources.
-  function branchBars({ root, colourOf, chipFor, techOf, spent, openDepth = window.matchMedia('(min-width: 760px)').matches ? 2 : 1 }) {
-    const total = root.amount || 1;
-    const bar = (n, cls, meta, depth) => {
-      const f = n.amount / total;
-      const b = h('span', { class: `bb-bar ${cls}`, 'aria-hidden': 'true' }, h('i')); b.firstChild.style.width = `max(${n.amount > 0 ? 3 : 0}px, calc(var(--bbw) * ${f.toFixed(5)}))`;
-      // main branches also say the share in everyday words ("about 4 in 10")
-      return h('span', { class: 'bb-barline' }, b, h('span', { class: 'bb-pct' }, `${pctTxt(f)}%`, depth === 1 ? h('span', { class: 'bb-words' }, ` · ${plainShare(f * 100)}`) : null), meta);
-    };
-    const amountEl = n => h('span', { class: 'bb-amt' }, n.usd != null ? dollars(n.usd) : naira(n.amount), n.usd != null ? h('small', null, ` (about ${naira(n.amount)})`) : null);
-    const metaEl = (n, parent, depth, ev, parentEv) => {
-      const bits = [];
-      if (parent && parent !== root) bits.push(`${pctTxt(n.amount / parent.amount)}% of ${parent.label.toLowerCase()}`);
-      if (spent && n.plan) {
-        const p = n.amount / n.plan;
-        bits.push(!parent ? `${pctTxt(p)}% of the ${naira(n.plan)} planned for this time. That is ${plainShare(p * 100)}`
-          : depth === 1 ? `${p < 0.5 ? 'only ' : ''}${pctTxt(p)}% of what was planned (${plainShare(p * 100)})`
-          : p < 0.5 ? `only ${pctTxt(p)}% of plan` : `${pctTxt(p)}% of plan`);
-      }
-      if (spent && !n.plan && n.amount > 0 && parent && parent.plan) bits.push('not in the plan');
-      const chip = ev && (depth <= 1 || ev !== parentEv) && chipFor(ev, n.label);
-      return bits.length || chip ? h('span', { class: 'bb-meta' }, bits.join(' · '), chip ? [' ', chip] : null) : null;
-    };
-    const node = (n, depth, cls, parent, parentEv) => {
-      const kids = n.children || [];
-      const ev = n.ev && n.ev.length ? n.ev : parentEv;
-      const tech = depth === 1 && techOf && techOf(n);
-      const li = h('li', { class: `bb-li ${cls}` });
-      li.append(h('div', { class: 'bb-row' },
-        h('span', { class: 'bb-top' }, h('span', { class: 'bb-name' }, n.label), amountEl(n)),
-        bar(n, cls, metaEl(n, parent, depth, ev, parentEv), depth),
-        n.note || tech ? h('span', { class: 'bb-note' }, n.note || '', n.note && tech ? ' ' : '', tech ? h('span', { class: 'tech' }, `Official term: ${tech}.`) : null) : null));
-      if (kids.length) {
-        const ul = h('ul', { class: 'bb-list' }, kids.map((k, i) => node(k, depth + 1, depth === 0 ? colourOf(k, i) : cls, n, ev)));
-        if (depth >= openDepth) {
-          ul.hidden = true;
-          const t = h('button', { type: 'button', class: 'bb-toggle', 'aria-expanded': 'false' }, h('span', { 'aria-hidden': 'true', class: 'bb-caret' }, '▸'), ` See the ${kids.length} parts`);
-          t.addEventListener('click', () => { const open = ul.hidden; ul.hidden = !open; t.setAttribute('aria-expanded', String(open)); t.lastChild.textContent = open ? ' Hide the parts' : ` See the ${kids.length} parts`; });
-          li.firstChild.append(t);
-        }
-        li.append(ul);
-      }
-      return li;
-    };
-    const rootLi = node(root, 0, 'root', null, null);
-    const tree = h('div', { class: 'bbtree' }, h('ul', { class: 'bb-rootlist' }, rootLi));
-    const all = h('button', { type: 'button', class: 'bb-all', onclick: () => {
-      const toggles = [...tree.querySelectorAll('.bb-toggle')]; const open = toggles.some(t => t.getAttribute('aria-expanded') === 'false');
-      toggles.forEach(t => { if ((t.getAttribute('aria-expanded') === 'false') === open) t.click(); });
-      all.textContent = open ? 'Close the parts' : 'Open every part';
-    } }, 'Open every part');
-    return h('div', { class: 'bbwrap' }, tree.querySelector('.bb-toggle') ? all : null, tree);
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  // Planned and Spent, as two labelled bars with their amounts, so nobody has to work anything out.
+  // max sets the scale: one box on its own (the tree), or all the rows in a list (the bars).
+  function planSpentBars(n, { actual = 'Spent', planOf = x => x.plan || 0, parentHasPlan = false, max } = {}) {
+    const p = planOf(n), m = max || Math.max(p, n.amount) || 1, low = p && n.amount / p < 0.5;
+    const bar = (cls, label, v) => { const i = h('i'); i.style.width = `max(${v > 0 ? 3 : 0}px, ${(v / m * 100).toFixed(1)}%)`;
+      return h('span', { class: `tb ${cls}` }, h('span', { class: 'tb-l' }, h('span', null, label), h('b', null, naira(v))), h('span', { class: 'tb-t' }, i)); };
+    return [p ? bar('tb-plan', 'Planned', p) : null,
+      bar(`tb-spent${low ? ' low' : ''}`, p ? `${actual} ${low ? '⚠️ ' : '· '}${pctTxt(n.amount / p)}% of plan` : actual, n.amount),
+      !p && parentHasPlan && n.amount > 0 ? h('span', { class: 'tb-none' }, 'Not in the plan') : null];
   }
+  // Version 1 (bars): one bar row per part, plan and spent in the same bar
+  function gotWords(n, parent) {
+    if (!n.plan) return n.amount > 0 && parent && parent.plan ? 'Not in the plan' : '';
+    const p = n.amount / n.plan * 100;
+    if (p >= 100.5) return `More than the ${naira(n.plan)} planned`;
+    if (p >= 99.5) return `All of the ${naira(n.plan)} planned`;
+    const w = plainShare(p);
+    return `${p < 50 && w.startsWith('about') ? 'Only ' + w : cap(w)} of the ${naira(n.plan)} planned`;
+  }
+  const planTone = n => !n.plan ? '' : n.amount / n.plan < 0.5 ? 'low' : n.amount / n.plan > 1.05 ? 'over' : '';
+  function planBars(root, { chipFor, infoOf, parentEv, depth = 1, actual = 'Spent', shareWord = 'spending' } = {}) {
+    const kids = [...(root.children || [])].sort((a, b) => (b.plan || b.amount) - (a.plan || a.amount));
+    const max = Math.max(...kids.map(k => Math.max(k.amount, k.plan || 0)), 1);
+    return h('ul', { class: `pb-list pb-d${depth}` }, kids.map(n => {
+      const ev = n.ev && n.ev.length ? n.ev : parentEv;
+      const info = infoOf ? infoOf(n) : null;
+      const chip = chipFor && ev ? chipFor(ev, n.label) : null;
+      const more = [n.note ? h('p', null, n.note) : null, info ? h('p', null, info) : null,
+        n.children && n.children.length ? planBars(n, { chipFor, parentEv: ev, depth: depth + 1, actual, shareWord: n.label.toLowerCase() }) : null].filter(Boolean);
+      const row = h(more.length ? 'summary' : 'div', { class: 'pb-row' },
+        h('span', { class: 'pb-top' }, h('span', { class: 'pb-name' }, n.label), h('span', { class: 'pb-share' }, `${pctTxt(n.amount / (root.amount || 1))}% of ${shareWord}`)),
+        planSpentBars(n, { actual, max, parentHasPlan: !!root.plan }),
+        more.length ? h('span', { class: 'pb-open', 'aria-hidden': 'true' }) : null);
+      return h('li', { class: 'pb-item' }, more.length ? h('details', null, row, h('div', { class: 'pb-more' }, more)) : row, chip ? h('p', { class: 'pb-src' }, chip) : null);
+    }));
+  }
+  // Budget tree: the total at the top, its parts branching below it, joined by lines.
+  // Every box shows Planned and Spent as two labelled bars, so the comparison is inside the box.
+  // Tapping a box grows its own branch underneath; the path you took is drawn in green.
+  // Options: onOpen(n) replaces opening in place (the budget page sends people to the explorer instead);
+  // wide lays every row out side by side, for the explorer's draggable canvas; open is a list of labels to start opened.
+  function budgetTree(root, { shareWord = 'spending', actual = 'Spent', rootTitle, onPick, onOpen, wide, open: startOpen = [], onRender, chipFor } = {}) {
+    const plan = n => n.plan || ((n.children || []).length && n.children.every(c => c.plan) ? n.children.reduce((a, c) => a + c.plan, 0) : 0);
+    const kidsOf = n => [...(n.children || [])].sort((a, b) => (plan(b) || b.amount) - (plan(a) || a.amount));
+    const wrap = h('div', { class: `tree${wide ? ' wide' : ''}` });
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'tree-lines'); svg.setAttribute('aria-hidden', 'true');
+    const path = [root];
+    for (const label of startOpen) { const k = (path[path.length - 1].children || []).find(c => c.label === label); if (!k || !(k.children || []).length) break; path.push(k); }
+    const bars = (n, parent) => planSpentBars(n, { actual, planOf: plan, parentHasPlan: !!(parent && plan(parent)) });
+    // A box's sources are its own, or those of the nearest box above it
+    const evMap = new Map(); (function walk(n, acc) { const e = n.ev && n.ev.length ? n.ev : acc; evMap.set(n, e); (n.children || []).forEach(c => walk(c, e)); })(root, null);
+    const srcOf = n => chipFor && evMap.get(n) ? h('span', { class: 'tn-src' }, chipFor(evMap.get(n), n.label)) : null;
+    const box = (n, parent, level) => {
+      const kids = n.children || [];
+      const body = [h('span', { class: 'tn-name' }, n.label),
+        parent ? h('span', { class: 'tn-share' }, `${pctTxt(n.amount / (parent.amount || 1))}% of ${parent === root ? shareWord : parent.label.length <= 24 ? parent.label.toLowerCase() : 'the box above'}`) : null,
+        bars(n, parent),
+        kids.length ? h('span', { class: 'tn-more', 'aria-hidden': 'true' }, `${kids.length} parts`) : null];
+      const el = h('div', { class: `tnode${kids.length ? ' has-kids' : ''}` });
+      if (!kids.length) { el.append(h('div', { class: 'tn-hit' }, body)); el.append(...[srcOf(n)].filter(Boolean)); return el; }
+      el.append(h('button', { type: 'button', class: 'tn-hit', 'aria-expanded': 'false', onclick: () => {
+        if (onOpen) return onOpen(n);
+        const open = path[level + 1] === n;
+        path.length = level + 1; if (!open) path.push(n);
+        render(); onPick && onPick(path.length > 1 ? path[path.length - 1] : null, path.slice(1).map(x => x.label)); if (!open && !wide) { requestAnimationFrame(() => wrap.querySelector(`.tgrid[data-level="${level + 1}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })); }
+      } }, body));
+      el.append(...[srcOf(n)].filter(Boolean));
+      return el;
+    };
+    // Each opened box's parts sit in a panel placed straight after the row that holds the box
+    let grids = [], panels = [];
+    const tnodes = g => [...g.children].filter(e => e.classList.contains('tnode'));
+    const render = () => {
+      const rootBox = h('div', { class: 'tnode troot' }, h('div', { class: 'tn-hit' }, h('span', { class: 'tn-name' }, rootTitle || root.label), bars(root, null)), srcOf(root));
+      grids = path.map((n, lv) => h('div', { class: `tgrid${n.children.length > 2 ? ' many' : ''}`, dataset: { level: String(lv) } },
+        kidsOf(n).map(k => { const e = box(k, n, lv); e._node = k; if (path[lv + 1] === k) { e.classList.add('on'); e.querySelector('.tn-hit').setAttribute('aria-expanded', 'true'); } return e; })));
+      panels = grids.map((g, lv) => lv === 0 ? g : h('div', { class: 'tpanel' }, g));
+      wrap.replaceChildren(svg, rootBox, panels[0]);
+      place();
+      onRender && onRender([...wrap.querySelectorAll('.tnode.on')].pop() || null);
+    };
+    const place = () => {
+      for (let lv = 1; lv < panels.length; lv++) {
+        panels[lv].remove();
+        const els = tnodes(grids[lv - 1]); const sel = els.find(e => e.classList.contains('on'));
+        const row = els.filter(e => e.offsetTop === sel.offsetTop);
+        row[row.length - 1].after(panels[lv]);
+      }
+      draw();
+    };
+    const draw = () => {
+      const W = wrap.getBoundingClientRect(); if (!W.width) return;
+      const k = W.width / (wrap.offsetWidth || W.width); // the explorer may be zoomed: work in unzoomed pixels
+      const r = el => { const b = el.getBoundingClientRect(); return { l: (b.left - W.left) / k, r: (b.right - W.left) / k, t: (b.top - W.top) / k, b: (b.bottom - W.top) / k, cx: ((b.left + b.right) / 2 - W.left) / k }; };
+      const WW = wrap.offsetWidth, WH = wrap.offsetHeight;
+      svg.setAttribute('width', WW); svg.setAttribute('height', WH); svg.setAttribute('viewBox', `0 0 ${WW} ${WH}`);
+      const out = [];
+      const line = (d, cls) => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); if (cls) p.setAttribute('class', cls); out.push(p); };
+      grids.forEach((g, lv) => {
+        const P = r(lv === 0 ? wrap.querySelector('.troot') : tnodes(grids[lv - 1]).find(e => e.classList.contains('on')));
+        const els = tnodes(g); if (!els.length) return;
+        const G = r(g), cls = lv === 0 ? null : 'branch';
+        // Phones: one box per line, the trunk runs down the left and a branch goes into the side of each box
+        if (!wide && new Set(els.map(e => Math.round(r(e).l))).size === 1) {
+          const tx = G.l + 14, y = E => E.t + 22;
+          const ends = els.map(e => r(e));
+          line(`M${tx},${P.b} V${y(ends[ends.length - 1])}`, cls);
+          els.forEach((e, k) => {
+            line(`M${tx},${y(ends[k])} H${ends[k].l}`, cls);
+            if (e.classList.contains('on')) line(`M${tx},${P.b} V${y(ends[k])} H${ends[k].l}`, 'hot');
+          });
+          return;
+        }
+        const trunk = (G.l + G.r) / 2, bus = t => t - 12;
+        const tops = els.map(e => r(e).t), lastBus = bus(Math.max(...tops)), firstBus = bus(Math.min(...tops));
+        // the trunk goes behind an opened panel, not across it
+        const Q = panels[lv + 1] ? r(panels[lv + 1]) : null;
+        line(Q && Q.t > firstBus && Q.b < lastBus ? `M${P.cx},${P.b} V${firstBus} H${trunk} V${Q.t} M${trunk},${Q.b} V${lastBus}` : `M${P.cx},${P.b} V${firstBus} H${trunk} V${lastBus}`, cls);
+        els.forEach(e => {
+          const E = r(e); line(`M${trunk},${bus(E.t)} H${E.cx} V${E.t}`, cls);
+          if (e.classList.contains('on')) line(`M${P.cx},${P.b} V${firstBus} H${trunk} V${bus(E.t)} H${E.cx} V${E.t}`, 'hot');
+        });
+      });
+      out.sort((x, y) => (x.getAttribute('class') === 'hot') - (y.getAttribute('class') === 'hot'));
+      svg.replaceChildren(...out);
+    };
+    if (window.ResizeObserver) new ResizeObserver(() => place()).observe(wrap);
+    render();
+    return wrap;
+  }
+
   // The same tree as table rows for chartBlock: every part, indented by level
   function branchTable(root, spent) {
     const rows = [];
@@ -250,8 +326,15 @@
     return data;
   }
   let CONFIG = { contactEmail: '' };
-  const fundCache = new Map();
-  async function getFund(id) { if (!fundCache.has(id)) fundCache.set(id, await api('funds/' + encodeURIComponent(id))); return fundCache.get(id); }
+  let configReady = Promise.resolve();
+  // Keep read-only data in memory, so switching years or going back is instant and needs no network.
+  // A request that fails is forgotten, so the next visit tries again.
+  const apiCache = new Map();
+  function cached(path) {
+    if (!apiCache.has(path)) apiCache.set(path, api(path).catch(e => { apiCache.delete(path); throw e; }));
+    return apiCache.get(path);
+  }
+  const getFund = id => cached('funds/' + encodeURIComponent(id));
 
   // Modal
   const modalRoot = () => document.getElementById('modal-root');
@@ -389,21 +472,27 @@
 
   async function pageHome() {
     setTitle('');
-    const funds = await api('funds');
+    const [funds, B] = await Promise.all([cached('funds'), cached('budget').catch(() => null)]);
+    // The budget card leads with this year's main finding, so people know what they will find before they tap
+    const Y = B && B.years[0];
+    const top = Y && Y.verdict[0];
     app().replaceChildren(h('div', { class: 'home container narrow' },
       h('h1', null, 'Where did the money go?'),
-      h('p', { class: 'lead' }, 'Nigeria borrows and spends a lot of money. We follow some of it to see what it paid for. Every step links to its source.'),
+      h('p', { class: 'lead' }, 'We follow Nigeria\'s public money to see what it paid for. Every step links to its source.'),
       h('a', { class: 'budget-entry', href: '#/budget' },
-        h('span', { class: 'be-main' }, h('strong', null, 'Check the national budget'), h('span', null, 'How the government planned to spend its money this year, and what really happened.')),
-        h('span', { class: 'chev', 'aria-hidden': 'true' }, '›')),
-      h('h2', { class: 'list-h' }, 'Loans and funds we follow'),
+        h('span', { class: 'be-main' },
+          h('span', { class: 'be-kicker' }, Y ? `The ${Y.year} national budget: ${naira(Y.total)}` : 'The national budget'),
+          h('strong', null, top ? top.text : 'How the government planned to spend its money, and what really happened.'),
+          h('span', { class: 'be-go' }, 'See where the budget went →'))),
+      h('h2', { class: 'list-h' }, `Loans and funds we follow (${funds.length})`),
       h('ol', { class: 'fund-list' }, funds.map(f => {
         const ngn = nairaHint(f.amount, f.currency).replace('≈ ', '');
+        const v = f.verdict || []; const extra = v.length - 2;
         return h('li', null,
           h('h2', null, h('a', { href: `#/fund/${f.id}` }, f.title)),
           h('p', { class: 'fl-amount' }, h('strong', null, money(f.amount, f.currency)), ngn ? ` (about ${ngn})` : '', ' · ', fmtDate(f.date)),
-          verdictList(f.verdict),
-          h('a', { class: 'fl-go', href: `#/fund/${f.id}`, 'aria-label': `See how the money moved: ${f.title}` }, 'See how the money moved →'));
+          verdictList(v.slice(0, 2)),
+          h('a', { class: 'fl-go', href: `#/fund/${f.id}`, 'aria-label': `See how the money moved: ${f.title}` }, extra > 0 ? `See ${extra} more and how the money moved →` : 'See how the money moved →'));
       })),
       symbolKey(),
       h('section', { class: 'home-foot' },
@@ -420,13 +509,12 @@
       CONFIG.rateAuto ? 'These update automatically. ' : '', 'They are rough guides only.');
   }
 
-  // National budget
+  // National budget: answer first, then one chart that puts the plan beside what was spent, then "Go further"
   let budgetYear = null;
-  function budgetView() { try { const v = localStorage.getItem('kt-budget-view'); if (v === 'tree' || v === 'details') return v; } catch (_) { } return 'tree'; }
 
   async function pageBudget(params) {
     setTitle('The national budget');
-    const B = await api('budget');
+    const B = await cached('budget');
     const years = B.years.map(y => y.year);
     let yr = Number(params.get('year')) || budgetYear || years[0];
     if (!years.includes(yr)) yr = years[0];
@@ -435,98 +523,201 @@
     const ev = idxs => (idxs || []).map(i => Y.evidence[i]).filter(Boolean);
     const chip = (idxs, about) => sourceChip(ev(idxs), about);
     const pp = perPerson(Y.total, 'NGN');
-    const toggle = years.length > 1 ? h('nav', { class: 'view-toggle year-toggle', 'aria-label': 'Choose a year' },
+    const yearNav = years.length > 1 ? h('nav', { class: 'view-toggle year-toggle', 'aria-label': 'Choose a year' },
       years.map(y => h('a', { href: `#/budget?year=${y}`, class: y === yr ? 'on' : null, 'aria-current': y === yr ? 'page' : null }, String(y)))) : null;
-    const splitTotal = Y.split.reduce((a, x) => a + x.amount, 0);
+
+    // The balance, like a bank statement: the budget, then what came in, what was spent and what is left
+    const balance = () => {
+      const TR = Y.trees; if (!TR) return figure({ label: Y.title, value: naira(Y.total), context: pp ? `About ${pp} for every Nigerian` : '', note: Y.totalNote || `Signed into law on ${fmtDate(Y.signed)}.` });
+      const inn = TR.spent.in.amount, out = TR.spent.out.amount, left = inn - out;
+      const per = TR.period.replace(/ \d{4}$/, '').replace(/([A-Z][a-z]{2})[a-z]*/g, '$1').replace(' to ', '–'); // "Jan–Jun"
+      const row = (label, value, cls, chipEl) => h('div', { class: `bal-row ${cls || ''}` }, h('dt', null, label, chipEl ? [' ', chipEl] : null), h('dd', null, value));
+      return h('section', { class: 'balance', 'aria-label': 'The budget balance' },
+        h('dl', null,
+          row(`Budget for ${Y.year}`, naira(Y.total), 'bal-total'),
+          row(`Came in, ${per}`, naira(inn), 'bal-in', chip(TR.spent.in.ev, `Money that came in, ${TR.period}`)),
+          row(`Spent, ${per}`, `− ${naira(out)}`, 'bal-out', chip(TR.spent.out.ev, `Money spent, ${TR.period}`)),
+          row(left >= 0 ? 'Left over' : 'Short by', naira(Math.abs(left)), 'bal-left')),
+        null);
+    };
+    const head = [
+      h('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' }, h('a', { href: '#/' }, '← All funds')),
+      h('div', { class: 'budget-title' }, h('h1', null, 'The national budget'), yearNav),
+      balance(),
+      h('h2', { class: 'small-h' }, 'The short answer'),
+      // The most important line shows; the rest are one tap away, so the tree comes sooner
+      (() => { const li = x => h('li', { class: `tone-${x.tone}` },
+        h('span', { class: 'v-icon', 'aria-hidden': 'true' }, (SYMBOLS[x.tone] || SYMBOLS.neutral)[0]), h('span', null, x.text, ' ', chip(x.evidence, x.text)));
+        const rest = Y.verdict.slice(1);
+        return [h('ul', { class: 'verdict big' }, li(Y.verdict[0])),
+          rest.length ? h('details', { class: 'verdict-more' }, h('summary', null, `${rest.length} more`), h('ul', { class: 'verdict big' }, rest.map(li))) : null]; })()];
+
+    // Main chart: spent against planned, for the money going out and the money coming in
+    const charts = [];
+    const tables = [];
+    if (Y.trees) {
+      const TR = Y.trees, S = TR.spent;
+      const chipFor = (idxs, about) => sourceChip((idxs || []).map(i => Y.evidence[i]), about);
+      const explore = (side, n) => { location.hash = `#/budget/tree?year=${yr}&side=${side}${n ? '&open=' + encodeURIComponent(n.label) : ''}`; };
+      const exploreBtn = (side, text) => h('p', { class: 'tree-go' }, h('a', { class: 'btn', href: `#/budget/tree?year=${yr}&side=${side}` }, text));
+      const borrowed = S.in.children.find(c => c.part === 'r2');
+      // Two versions to compare: the tree (default) and the bars. The switch needs no network.
+      let version = 'tree'; try { if (localStorage.getItem('kt-budget-version') === 'bars') version = 'bars'; } catch (_) { }
+      const setVersion = v => { try { localStorage.setItem('kt-budget-version', v); } catch (_) { } pageBudget(params); };
+      charts.push(h('div', { class: 'view-toggle version-toggle', role: 'group', 'aria-label': 'How to show the budget' },
+        [['tree', 'Tree'], ['bars', 'Bars']].map(([v, t]) => h('button', { type: 'button', class: v === version ? 'on' : null, 'aria-pressed': String(v === version), onclick: () => v !== version && setVersion(v) }, t))));
+      if (version === 'bars') {
+        const infoOf = n => { const P = B.parts[n.part]; return P && P.simple ? [P.simple, ' ', h('span', { class: 'tech' }, `Official term: ${P.tech}.`)] : null; };
+        charts.push(chartBlock({
+          headline: S.out.plan ? `${naira(S.out.amount)} of the ${naira(S.out.plan)} planned was spent` : `${naira(S.out.amount)} was spent`,
+          sub: `${TR.period}. Tap a part to see inside it.`,
+          visual: planBars(S.out, { chipFor, infoOf, parentEv: S.out.ev }) }));
+        charts.push(chartBlock({
+          headline: borrowed ? `₦${Math.round(borrowed.amount / (S.in.amount || 1) * 100)} of every ₦100 that came in was borrowed or raised` : 'Where the money came from',
+          sub: `${naira(S.in.amount)} came in from ${TR.period}. ${S.in.note || ''}`,
+          visual: planBars(S.in, { chipFor, parentEv: S.in.ev, actual: 'Came in', shareWord: 'money in' }) }));
+      } else {
+      charts.push(chartBlock({
+        headline: S.out.plan ? `${naira(S.out.amount)} of the ${naira(S.out.plan)} planned was spent` : `${naira(S.out.amount)} was spent`,
+        sub: `${TR.period}. Tap a part to explore it.`,
+        visual: [budgetTree(S.out, { rootTitle: `The ${Y.year} budget, ${TR.period.replace(/ \d{4}$/, '')}`, onOpen: n => explore('out', n), chipFor }), exploreBtn('out', 'Explore the whole spending tree →')] }));
+      charts.push(chartBlock({
+        headline: borrowed ? `₦${Math.round(borrowed.amount / (S.in.amount || 1) * 100)} of every ₦100 that came in was borrowed or raised` : 'Where the money came from',
+        sub: `${TR.period}. Tap a part to explore it.`,
+        visual: [budgetTree(S.in, { shareWord: 'money in', actual: 'Came in', rootTitle: `Money that came in, ${TR.period.replace(/ \d{4}$/, '')}`, onOpen: n => explore('in', n), chipFor }), exploreBtn('in', 'Explore where the money came from →')] }));
+      }
+      tables.push(['Where the money went', branchTable(S.out, true)], ['Where the money came from', branchTable(S.in, true)]);
+    } else if (Y.progress) {
+      const prog = Y.progress;
+      charts.push(chartBlock({ headline: prog.headline, sub: prog.title + '. ' + prog.note,
+        visual: pva(prog.rows.map(r => { const pct = r.pct != null ? r.pct : r.planned ? r.actual / r.planned * 100 : 0;
+          return { label: r.label, pct, text: r.planned ? `${naira(r.actual)} of the ${naira(r.planned)} planned. That is ${plainShare(pct)}.` : naira(r.actual), chip: chip(r.evidence, r.label) }; })) }));
+    }
+
+    // Go further: everything else, one tap away
     const parts = Y.split.map((x, i) => {
       const P = B.parts[x.part];
       return { label: P.label, amount: x.amount, cls: 'c' + (i + 1), more: [P.simple, ' ', h('span', { class: 'tech' }, `Official term: ${P.tech}.`)], chip: chip(x.evidence, `${Y.title}: ${P.label}`) };
     });
-    const prog = Y.progress;
-    const progRows = prog ? prog.rows.map(r => {
-      const pct = r.pct != null ? r.pct : r.planned ? r.actual / r.planned * 100 : 0;
-      const text = (r.planned ? `${naira(r.actual)} of the ${naira(r.planned)} planned. That is ${plainShare(pct)}.`
-        : `${naira(r.actual)}. That is ${plainShare(pct)} of what was planned.`) + (r.more ? ' ' + r.more : '');
-      return { label: r.label, pct, text, chip: chip(r.evidence, `${prog.title}: ${r.label}`) };
-    }) : [];
+    const tableEl = t => h('div', { class: 'table-scroll' }, h('table', { class: 'data-table' },
+      h('thead', null, h('tr', null, t.head.map((c, i) => h('th', { class: (t.num || []).includes(i) ? 'num' : null, scope: 'col' }, c)))),
+      h('tbody', null, t.rows.map(r => h('tr', null, r.map((c, i) => h(i === 0 ? 'th' : 'td', { class: (t.num || []).includes(i) ? 'num' : null, scope: i === 0 ? 'row' : null }, c)))))));
+    const more = (title, ...body) => h('details', null, h('summary', null, title), ...body);
     const maxArea = Y.areas ? Math.max(...Y.areas.rows.map(r => r.amount)) : 1;
-    const view = Y.trees ? budgetView() : 'details';
-    const setView = v => { try { localStorage.setItem('kt-budget-view', v); } catch (_) { } pageBudget(params); };
-    const viewToggle = Y.trees ? h('div', { class: 'view-toggle', role: 'group', 'aria-label': 'How to show the budget' },
-      [['tree', 'Tree'], ['details', 'Details']].map(([v, t]) => h('button', { type: 'button', class: v === view ? 'on' : null, 'aria-pressed': String(v === view), onclick: () => v !== view && setView(v) }, t))) : null;
-    const verdictEl = [h('h2', { class: 'small-h' }, 'Was it spent?'),
-      h('ul', { class: 'verdict big' }, Y.verdict.map(x => h('li', { class: `tone-${x.tone}` },
-        h('span', { class: 'v-icon', 'aria-hidden': 'true' }, (SYMBOLS[x.tone] || SYMBOLS.neutral)[0]), h('span', null, x.text, ' ', chip(x.evidence, x.text)))))];
-    const head = [
-      h('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' }, h('a', { href: '#/' }, '← All funds')),
-      h('h1', null, 'The national budget'),
-      h('div', { class: 'budget-toggles' }, toggle, viewToggle),
-      figure({ label: Y.title, value: naira(Y.total), context: pp ? `About ${pp} for every Nigerian` : '', note: Y.totalNote || `Signed into law on ${fmtDate(Y.signed)}.` })];
-    const moreAbout = h('section', { class: 'more-about' },
-      h('details', { open: true }, h('summary', null, 'What we could not find'),
+    const further = h('section', { class: 'more-about further' },
+      h('h2', { class: 'section-h' }, 'Go further'),
+      more(`How the whole ${Y.year} budget was planned`,
+        h('p', { class: 'more-lead' }, pp ? `The budget is about ${pp} for every Nigerian. ` : '', Y.totalNote || `Signed into law on ${fmtDate(Y.signed)}.`),
+        h('p', { class: 'more-lead' }, Y.splitHeadline, '. ', `Out of every ₦100 in the ${Y.year} budget. ${Y.splitSub || ''}`),
+        per100(parts), Y.splitNote ? h('p', { class: 'fine' }, Y.splitNote) : null),
+      Y.areas ? more(Y.areas.headline || Y.areas.title,
+        h('p', { class: 'more-lead' }, Y.areas.note),
+        pva(Y.areas.rows.map(r => ({ label: r.label, pct: r.amount / maxArea * 100, right: naira(r.amount), text: '' }))),
+        h('p', { class: 'fine' }, chip(Y.areas.evidence, Y.areas.title))) : null,
+      tables.length ? more('Every number, as a table', tables.map(([t, tb]) => [h('h3', null, t), tableEl(tb)])) : null,
+      more(`What we could not find (${Y.gaps.length})`,
         h('ul', { class: 'gaps' }, Y.gaps.map(g => h('li', null, g))),
         h('p', null, h('a', { href: '#/contact?type=new_evidence' }, 'Have a document that fills a gap? Tell us.'))),
-      h('details', null, h('summary', null, 'Words used on this page'),
+      more('Words used on this page',
         h('dl', { class: 'gloss-list' }, GLOSSARY.slice(0, 7).flatMap(([plain, official, means]) => [h('dt', null, plain, h('span', { class: 'tech' }, ` (${official})`)), h('dd', null, means)]))),
-      h('details', null, h('summary', null, 'Check it yourself'),
+      more('Check it yourself',
         h('ul', { class: 'check-list' }, B.checkYourself.map(c => h('li', null,
-          h('a', { href: c.url, target: '_blank', rel: 'noopener noreferrer' }, c.title, ' ↗'), h('span', null, c.text))))));
+          h('a', { href: c.url, target: '_blank', rel: 'noopener noreferrer' }, c.title, ' ↗'), h('span', null, c.text)))),
+        h('p', null, h('button', { class: 'btn', onclick: () => showEvidence(Y.title, Y.evidence) }, `📎 All sources for this year (${Y.evidence.length})`))));
 
-    if (view === 'tree') {
-      const TR = Y.trees;
-      let mode = 'spent'; try { const m = localStorage.getItem('kt-tree-mode'); if (m === 'planned' || m === 'spent') mode = m; } catch (_) { }
-      const spent = mode === 'spent';
-      const setMode = m => { try { localStorage.setItem('kt-tree-mode', m); } catch (_) { } pageBudget(params); };
-      const colourOf = (n, i) => n.part ? ({ capital: 'c1', debt: 'c2', recurrent: 'c3', statutory: 'c4', r1: 'r1', r2: 'r2' })[n.part] : 'c' + (i + 1);
-      const chipFor = (ev, about) => sourceChip((ev || []).map(i => Y.evidence[i]), about);
-      const techOf = n => (B.parts[n.part] || {}).tech;
-      const modeToggle = h('div', { class: 'view-toggle mode-toggle', role: 'group', 'aria-label': 'Show what was spent or what was planned' },
-        [['spent', 'What was spent'], ['planned', 'What was planned']].map(([m, t]) => h('button', { type: 'button', class: m === mode ? 'on' : null, 'aria-pressed': String(m === mode), onclick: () => m !== mode && setMode(m) }, t)));
-      const T = TR[mode];
-      // Headlines state the message (Analysis Function rule), worked out from the data
-      const per = (n, of) => Math.round(n.amount / (of.amount || 1) * 100);
-      const top = [...T.out.children].sort((a, b) => b.amount - a.amount)[0];
-      const borrowed = T.in.children.find(c => c.part === 'r2');
-      const outHead = spent ? `${top.label} took the most: ₦${per(top, T.out)} of every ₦100 spent` : `The plan gave the most to ${top.label.toLowerCase()}: ₦${per(top, T.out)} of every ₦100`;
-      const inHead = !borrowed ? (spent ? 'Where the money came from' : 'Where the money was planned to come from')
-        : spent ? `₦${per(borrowed, T.in)} of every ₦100 the government had was borrowed or raised` : `The plan was to borrow or raise ₦${per(borrowed, T.in)} of every ₦100`;
-      const src = spent ? `${TR.period}, from the Budget Office and Debt Management Office reports. Later months are not published yet.` : `The ${Y.year} budget law.`;
-      app().replaceChildren(h('div', { class: 'budget-page container narrow' }, head,
-        verdictEl,
-        chartBlock({ headline: outHead, sub: `Where the money ${spent ? 'went' : 'was planned to go'}. ${src} A longer bar means more money.`,
-          visual: [modeToggle, branchBars({ root: T.out, colourOf, chipFor, techOf, spent })], table: branchTable(T.out, spent) }),
-        chartBlock({ headline: inHead, sub: `Where the money ${spent ? 'came' : 'was planned to come'} from. ${src}`,
-          visual: branchBars({ root: T.in, colourOf, chipFor, techOf, spent }), table: branchTable(T.in, spent) }),
-        moreAbout,
-        h('p', null, h('button', { class: 'btn', onclick: () => setView('details') }, 'See the details and charts →')),
-        stamp({ date: B.asOf, extra: ['Figures from the Budget Office and Debt Management Office reports. ', h('a', { href: '#/disclaimer' }, 'Read the disclaimer'), '.'] })));
-      return;
-    }
-
-    app().replaceChildren(h('div', { class: 'budget-page container narrow' },
-      head,
-      h('p', { class: 'fh-simple' }, Y.simple),
-
-      verdictEl,
-
-      chartBlock({
-        headline: Y.splitHeadline, sub: `Out of every ₦100 in the ${Y.year} budget. ${Y.splitSub || ''}`, visual: per100(parts),
-        table: { head: ['Part', 'Amount', 'Share'], num: [1, 2], rows: Y.split.map(x => [B.parts[x.part].label, naira(x.amount), `${(x.amount / splitTotal * 100).toFixed(1)}%`]) },
-        after: Y.splitNote ? h('p', { class: 'fine' }, Y.splitNote) : null }),
-
-      prog ? chartBlock({
-        headline: prog.headline, sub: prog.title + '. ' + prog.note, visual: pva(progRows),
-        table: { head: ['', 'What happened', 'Planned', 'Share'], num: [1, 2, 3], rows: prog.rows.map((r, i) => [r.label, naira(r.actual), r.planned ? naira(r.planned) : '—', `${Math.round(progRows[i].pct)}%`]) } }) : null,
-
-      Y.areas ? chartBlock({
-        headline: Y.areas.headline || Y.areas.title, sub: Y.areas.note, visual: pva(Y.areas.rows.map(r => ({ label: r.label, pct: r.amount / maxArea * 100, right: naira(r.amount), text: '' }))),
-        table: { head: ['Area', 'Amount'], num: [1], rows: Y.areas.rows.map(r => [r.label, naira(r.amount)]) },
-        after: h('p', { class: 'fine' }, chip(Y.areas.evidence, Y.areas.title)) }) : null,
-
-      h('p', null, h('button', { class: 'btn', onclick: () => showEvidence(Y.title, Y.evidence) }, `📎 All sources for this page (${Y.evidence.length})`)),
-
-      moreAbout,
+    app().replaceChildren(h('div', { class: 'budget-page container narrow' }, head, charts, further,
       stamp({ date: B.asOf, extra: ['Government reports come out months late, so the latest months are not shown yet. ', h('a', { href: '#/disclaimer' }, 'Read the disclaimer'), '.'] })));
+  }
+
+  // Budget explorer: the whole tree on a canvas you can drag around and zoom. Tap a box to open its branches.
+  async function pageBudgetTree(params) {
+    const B = await cached('budget');
+    const years = B.years.filter(y => y.trees).map(y => y.year);
+    let yr = Number(params.get('year')) || budgetYear || years[0];
+    if (!years.includes(yr)) yr = years[0];
+    budgetYear = yr;
+    const Y = B.years.find(y => y.year === yr), TR = Y.trees;
+    const side = params.get('side') === 'in' ? 'in' : 'out';
+    const open = (params.get('open') || '').split('>').filter(Boolean);
+    const T = TR.spent[side];
+    const period = TR.period.replace(/ \d{4}$/, '');
+    setTitle(`Explore the ${yr} budget`);
+    const q = (o) => { const p = new URLSearchParams({ year: yr, side, ...o }); return `#/budget/tree?${p}`; };
+
+    // What the opened box is, with its sources, under the canvas
+    const evOf = n => { const walk = (x, acc) => { const e = x.ev && x.ev.length ? x.ev : acc; if (x === n) return e;
+      for (const c of x.children || []) { const r = walk(c, e); if (r !== undefined) return r; } }; return walk(T, null); };
+    const info = h('p', { class: 'tree-info' });
+    const showInfo = n => {
+      if (!n) { info.hidden = true; return; }
+      const P = B.parts[n.part]; info.hidden = false;
+      fill(info, h('b', null, n.label, ': '), [P ? P.simple : null, n.note].filter(Boolean).join(' '),
+        P ? [' ', h('span', { class: 'tech' }, `Official term: ${P.tech}.`)] : null, ' ', sourceChip((evOf(n) || []).map(i => Y.evidence[i]), n.label));
+    };
+
+    // Pan and zoom
+    const view = h('div', { class: 'tx-view' }), canvas = h('div', { class: 'tx-canvas' });
+    let x = 0, y = 0, k = 1;
+    const apply = () => { canvas.style.transform = `translate(${x}px, ${y}px) scale(${k})`; };
+    const clampK = v => Math.max(0.25, Math.min(1.5, v));
+    const zoomAt = (f, cx, cy) => { const nk = clampK(k * f); x = cx - (cx - x) * nk / k; y = cy - (cy - y) * nk / k; k = nk; apply(); };
+    const focusOn = el => {
+      const V = view.getBoundingClientRect(), C = canvas.getBoundingClientRect(), E = el.getBoundingClientRect();
+      // centre on the branch that just opened (the row of parts under the box), keeping the box itself in view
+      const kids = el.classList.contains('on') ? el.parentElement.querySelector(':scope > .tpanel > .tgrid') : null;
+      const K = kids ? kids.getBoundingClientRect() : E;
+      const ex = (K.left - C.left) / k + K.width / k / 2, ey = (E.top - C.top) / k;
+      x = V.width / 2 - ex * k; x = Math.max(x, 10 - (E.left - C.left)); y = 20 - ey * k; apply(); // never hide the opened box itself
+    };
+    const fit = () => { const V = view.getBoundingClientRect(); k = clampK(Math.min(1, V.width / canvas.offsetWidth, V.height / canvas.offsetHeight)); x = (V.width - canvas.offsetWidth * k) / 2; y = 12; apply(); };
+    let kidsMax = 1; (function walk(n) { kidsMax = Math.max(kidsMax, (n.children || []).length); (n.children || []).forEach(walk); })(T);
+    canvas.style.width = Math.max(520, Math.min(kidsMax, 4) * 216 + 60) + 'px'; // at most 4 boxes a row
+    let ready = false;
+    const tree = budgetTree(T, { wide: true, open, chipFor: (idxs, about) => sourceChip((idxs || []).map(i => Y.evidence[i]), about), shareWord: side === 'in' ? 'money in' : 'spending', actual: side === 'in' ? 'Came in' : 'Spent',
+      rootTitle: side === 'in' ? `Money that came in, ${period}` : `The ${yr} budget, ${period}`,
+      onPick: (n, labels) => { showInfo(n); history.replaceState(null, '', q(labels.length ? { open: labels.join('>') } : {})); },
+      onRender: el => { if (ready) requestAnimationFrame(() => focusOn(el || canvas.querySelector('.troot'))); } });
+    canvas.append(tree); view.append(canvas);
+
+    // Drag with a finger or mouse, pinch or scroll to zoom. A drag never counts as a tap.
+    const pts = new Map(); let moved = 0, pinch = null;
+    view.addEventListener('pointerdown', e => { pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); moved = 0; if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); } });
+    view.addEventListener('pointermove', e => {
+      const p = pts.get(e.pointerId); if (!p) return;
+      const dx = e.clientX - p.x, dy = e.clientY - p.y; pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 1) { moved += Math.abs(dx) + Math.abs(dy); if (moved > 6) { view.setPointerCapture(e.pointerId); view.classList.add('dragging'); } x += dx; y += dy; apply(); }
+      else if (pts.size === 2 && pinch) { const [a, b] = [...pts.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); const V = view.getBoundingClientRect();
+        zoomAt(d / pinch, (a.x + b.x) / 2 - V.left, (a.y + b.y) / 2 - V.top); pinch = d; moved = 99; }
+    });
+    const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; view.classList.remove('dragging'); };
+    view.addEventListener('pointerup', up); view.addEventListener('pointercancel', up);
+    view.addEventListener('click', e => { if (moved > 6) { e.stopPropagation(); e.preventDefault(); } }, true);
+    view.addEventListener('wheel', e => { e.preventDefault(); const V = view.getBoundingClientRect();
+      if (e.ctrlKey) zoomAt(Math.exp(-e.deltaY / 200), e.clientX - V.left, e.clientY - V.top); else { x -= e.deltaX; y -= e.deltaY; apply(); } }, { passive: false });
+    const centre = () => { const V = view.getBoundingClientRect(); return [V.width / 2, V.height / 2]; };
+    const tools = h('div', { class: 'tx-tools' },
+      h('button', { class: 'icon-btn', 'aria-label': 'Zoom out', onclick: () => zoomAt(1 / 1.25, ...centre()) }, '−'),
+      h('button', { class: 'icon-btn', 'aria-label': 'Zoom in', onclick: () => zoomAt(1.25, ...centre()) }, '+'),
+      h('button', { class: 'icon-btn wide', onclick: fit }, 'See all'));
+    view.append(tools);
+
+    const yearNav = years.length > 1 ? h('nav', { class: 'view-toggle year-toggle', 'aria-label': 'Choose a year' },
+      years.map(v => h('a', { href: `#/budget/tree?year=${v}&side=${side}`, class: v === yr ? 'on' : null, 'aria-current': v === yr ? 'page' : null }, String(v)))) : null;
+    const sideNav = h('nav', { class: 'view-toggle', 'aria-label': 'Spending or money in' },
+      [['out', 'Spent'], ['in', 'Came in']].map(([v, t]) => h('a', { href: `#/budget/tree?year=${yr}&side=${v}`, class: v === side ? 'on' : null, 'aria-current': v === side ? 'page' : null }, t)));
+    app().replaceChildren(h('div', { class: 'budget-page container tx-page' },
+      h('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' }, h('a', { href: `#/budget?year=${yr}` }, '← The national budget')),
+      h('div', { class: 'budget-title' }, h('h1', null, `Explore the ${yr} budget`), yearNav),
+      h('div', { class: 'tx-bar' }, sideNav, h('span', { class: 'tx-hint' }, 'Drag to move. Tap a box to open it.')),
+      view, info,
+      stamp({ date: B.asOf, extra: [`${TR.period}. From the Budget Office and Debt Management Office reports. `, h('a', { href: '#/disclaimer' }, 'Read the disclaimer'), '.'] })));
+    showInfo(null);
+    // Start readable: full size on a laptop, a little smaller on a phone, centred on what was opened
+    const V = view.getBoundingClientRect(); k = clampK(Math.min(1, V.width / 480)); apply();
+    const last = [...canvas.querySelectorAll('.tnode.on')].pop();
+    if (last) { const labels = []; let n = T; for (const l of open) { n = (n.children || []).find(c => c.label === l); if (!n) break; labels.push(n); } showInfo(labels.pop() || null); }
+    focusOn(last || canvas.querySelector('.troot'));
+    ready = true;
   }
 
   function preferredView() {
@@ -596,7 +787,7 @@
         stepsBox.append(h('div', { class: 'step-arrow', 'aria-hidden': 'true' }, h('span', null, '↓'), h('em', null, money(moving, fund.currency, true))));
       }
       stepsBox.append(h('section', { class: 'step' },
-        h('h3', { class: 'step-h' }, h('span', { class: 'step-n' }, `Step ${i + 1}`), stepTitle(i)),
+        h('h3', { class: 'step-h' }, h('span', { class: 'step-n' }, `Step ${i + 1}`), stepTitle(i), i === maxD ? ' 🏁' : null),
         col.length > 1 ? h('p', { class: 'step-split' }, `The money was split ${col.length} ways:`) : null,
         h('div', { class: 'step-cards' }, col.map(n => {
           const isEnd = !outflow(n.id).length; const ev = (n.evidence || []).length; const up = counts[n.id] || 0;
@@ -608,9 +799,9 @@
             h('div', { class: 'sc-top' }, h('span', { class: 'n-type-tag' }, typeLabel(n.type)), pill(n.status)),
             h('strong', { class: 'sc-label' }, n.clarity === 'unclear' ? '❓ ' : '', n.label),
             h('div', { class: 'sc-amount' }, amountText(n), n.amountDisclosed === false ? null : nairaHint(nodeValue(n.id), fund.currency) ? h('small', null, ' ' + nairaHint(nodeValue(n.id), fund.currency)) : null),
-            n.simple ? h('p', { class: 'sc-simple' }, n.simple) : null,
+            n.simple && col.length <= 2 ? h('p', { class: 'sc-simple' }, n.simple) : null,
             parentSets.size > 1 && parents.length ? h('p', { class: 'sc-from' }, 'From: ', parents.join(' + ')) : null,
-            isEnd ? h('p', { class: 'sc-end' }, '🏁 The trail ends here') : null,
+            isEnd && i !== maxD ? h('p', { class: 'sc-end' }, '🏁 The trail ends here') : null,
             h('div', { class: 'sc-foot' }, h('span', null, `📎 ${ev} source${ev === 1 ? '' : 's'}`), up ? h('span', null, `💬 ${up}`) : null, h('span', { class: 'go' }, 'Details →')));
         }))));
     }
@@ -698,32 +889,34 @@
     };
     toggle.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); });
 
-    const ngn = nairaHint(fund.amount, fund.currency); const pp = perPerson(fund.amount, fund.currency);
+    const ngn = nairaHint(fund.amount, fund.currency); const pp = perPerson(fund.amount, fund.currency); const live = liveBox(fund);
     const main = h('div', { class: 'fund-page' },
       h('nav', { class: 'crumbs container', 'aria-label': 'Breadcrumb' }, h('a', { href: '#/' }, '← All funds')),
       h('header', { class: 'fund-head container narrow-left' },
         h('h1', null, fund.title),
         figure({ value: money(fund.amount, fund.currency), context: [ngn ? `About ${ngn.replace('≈ ', '')}` : '', pp ? `${ngn ? ', or a' : 'A'}bout ${pp} for every Nigerian` : ''].join('') || null,
           note: `From ${fund.source}, ${fmtDate(fund.date)}.` }),
-        h('h2', { class: 'small-h' }, 'Where did the money go?'),
+        h('h2', { class: 'small-h' }, 'The short answer'),
         verdictList(fund.verdict, 'big'),
-        fund.simple ? h('p', { class: 'fh-simple' }, fund.simple) : null,
-        stamp({ date: fund.asOf, extra: ['Built from public reports. ', h('a', { href: '#/disclaimer' }, 'Read the disclaimer'), '.'] }),
-        liveBox(fund),
-        h('button', { class: 'btn', onclick: () => showEvidence(fund.title, fund.evidence, fund) }, `📎 See the sources (${fund.evidence.length})`)),
+        stamp({ date: fund.asOf, extra: ['Built from public reports. ', h('a', { href: '#/disclaimer' }, 'Read the disclaimer'), '.'] })),
       h('h2', { class: 'container section-h' }, 'How the money moved'),
       h('section', { class: 'explorer container' }, wrap, panel, backdrop),
-      h('section', { class: 'container narrow-left more-about' },
-        h('h2', { class: 'section-h' }, 'More about this money'),
-        h('details', { open: true }, h('summary', null, 'What we could not find'),
+      live ? h('div', { class: 'container narrow-left' }, live) : null,
+      h('section', { class: 'container narrow-left more-about further' },
+        h('h2', { class: 'section-h' }, 'Go further'),
+        h('details', null, h('summary', null, 'The story in short'),
+          fund.simple ? h('p', null, fund.simple) : null,
+          h('p', null, fund.summary),
+          h('p', { class: 'fine' }, 'How much of the money can be traced:'), clarityBar(fund.clarityBreakdown)),
+        h('details', null, h('summary', null, `What we could not find (${fund.gaps.length})`),
           h('ul', { class: 'gaps' }, fund.gaps.map(g => h('li', null, g))),
           h('p', null, h('a', { href: `#/contact?type=new_evidence&fund=${fund.id}` }, 'Can you help fill a gap? Tell us.'))),
         h('details', null, h('summary', null, 'Timeline'),
           h('ol', { class: 'timeline' }, fund.timeline.map(t => h('li', null, h('time', null, fmtDate(t.date)), h('p', null, t.text, ' ',
             sourceChip((t.evidence || []).map(i => fund.evidence[i]), `${fmtDate(t.date)}: ${t.text}`)))))),
-        h('details', null, h('summary', null, 'The full story'),
-          h('p', null, fund.summary),
-          h('p', { class: 'fine' }, 'How much of the money can be traced:'), clarityBar(fund.clarityBreakdown))),
+        h('details', null, h('summary', null, `All sources (${fund.evidence.length})`),
+          h('p', null, 'The documents and reports behind this page. Each step in the trail also has its own sources.'),
+          h('button', { class: 'btn', onclick: () => showEvidence(fund.title, fund.evidence, fund) }, `📎 See the sources (${fund.evidence.length})`))),
       h('section', { class: 'container' }, updatesBox));
     app().replaceChildren(main);
     renderUpdates();
@@ -738,7 +931,7 @@
     setTitle('Contact & corrections');
     const msg = h('div', { class: 'form-msg', role: 'status', 'aria-live': 'polite' });
     const fundSel = h('select', { name: 'fundId' }, h('option', { value: '' }, '(None / not about a specific fund)'));
-    api('funds').then(fs => fs.forEach(f => fundSel.append(h('option', { value: f.id, selected: params.get('fund') === f.id }, f.title)))).catch(() => {});
+    cached('funds').then(fs => fs.forEach(f => fundSel.append(h('option', { value: f.id, selected: params.get('fund') === f.id }, f.title)))).catch(() => {});
     const form = h('form', { class: 'form card-form', novalidate: true },
       h('label', null, 'What is this about? *', h('select', { name: 'type' }, Object.entries(CONTACT_TYPES).map(([k, v]) => h('option', { value: k, selected: params.get('type') === k }, v)))),
       h('label', null, 'Which fund?', fundSel),
@@ -894,6 +1087,8 @@
           h('li', null, 'The headline states the message. The line under it says what is shown, where and when.'),
           h('li', null, 'Bars start at zero. Use 4 colours at most, from the accessible palette. Put labels on the chart, not in a separate key.'),
           h('li', null, 'Every chart offers "See the numbers as a table". Don\'t use pie charts, 3D effects or dual axes.')),
+        h('p', null, 'For money split into parts, use a tree: the total at the top and its parts below, joined by lines. Each box shows Planned and Spent as two labelled bars. Only boxes that got less than half of their plan turn orange.'),
+        ex('Budget tree', budgetTree({ label: 'Spent so far', amount: 18.78e12, plan: 31.75e12, children: [{ label: 'Paying debts', amount: 7.9e12, plan: 7.9e12 }, { label: 'Running the government', amount: 6.7e12, plan: 7.71e12 }, { label: 'Projects', amount: 4.18e12, plan: 16.14e12 }] }, { rootTitle: 'Example budget' })),
         ex('Chart block', chartBlock({ headline: 'The government collected about half of what it planned', sub: 'January to March 2026. From the Budget Office\'s first-quarter report.',
           visual: pva([{ label: 'Money collected', pct: 55, text: `₦5.08 trillion of the ₦9.22 trillion planned. That is ${plainShare(55)}.`, color: 'var(--tone-progress)', chip: sourceChip(demoEv, 'Money collected') }]),
           table: { head: ['', 'Collected', 'Planned'], num: [1, 2], rows: [['Money collected', '₦5.08 trillion', '₦9.22 trillion']] } }))),
@@ -986,11 +1181,19 @@
   }
 
   // Router
+  let lastPath = null;
   async function route() {
     const raw = location.hash.replace(/^#\/?/, '');
     const [pathPart, query] = raw.split('?');
     const parts = pathPart.split('/').filter(Boolean);
     const params = new URLSearchParams(query || '');
+    // Start downloading this page's data now, alongside the settings, instead of one after the other
+    if (!parts.length) { cached('funds').catch(() => {}); cached('budget').catch(() => {}); }
+    else if (parts[0] === 'budget') cached('budget').catch(() => {});
+    else if (parts[0] === 'fund' && parts[1]) getFund(parts[1]).catch(() => {});
+    await configReady;
+    // Switching the year on the same page keeps your place; a new page starts at the top
+    const samePage = pathPart === lastPath; lastPath = pathPart;
     document.body.classList.remove('sheet-open', 'modal-open');
     modalRoot().textContent = '';
     if (currentGraph && parts[0] !== 'fund') { currentGraph.destroy(); currentGraph = null; }
@@ -1001,6 +1204,7 @@
         // selecting a node only rewrites the hash with replaceState, so a real hashchange means a new page
         await pageFund(parts[1], parts[2]);
       }
+      else if (parts[0] === 'budget' && parts[1] === 'tree') await pageBudgetTree(params);
       else if (parts[0] === 'budget') await pageBudget(params);
       else if (parts[0] === 'contact') pageContact(params);
       else if (parts[0] === 'disclaimer') pageDisclaimer();
@@ -1011,12 +1215,12 @@
     } catch (e) {
       app().replaceChildren(h('div', { class: 'container prose-page' }, h('h1', null, 'Something went wrong'), h('p', null, e.message), h('p', null, h('a', { href: '#/' }, '← Back to all funds'))));
     }
-    window.scrollTo(0, 0);
+    if (!samePage) window.scrollTo(0, 0);
   }
 
   window.addEventListener('hashchange', route);
   document.addEventListener('DOMContentLoaded', async () => {
-    try { CONFIG = await api('config'); } catch (_) { }
+    configReady = cached('config').then(c => { CONFIG = c; }, () => { });
     document.getElementById('year').textContent = new Date().getFullYear();
     const toggle = document.getElementById('nav-toggle');
     toggle.addEventListener('click', () => { const open = document.body.classList.toggle('nav-open'); toggle.setAttribute('aria-expanded', String(open)); });
