@@ -123,13 +123,17 @@ All components are plain functions in `public/app.js`. They return DOM nodes and
 | `stamp({auto, date})` | Freshness | "Checked by a person · last checked …" or "Updates automatically · last updated …". |
 | `clarityTag`, `pill` | How sure we are; where it stands | Colour always comes with a text label. |
 | Gap card (`.gaps li`) | Something we could not find | Says plainly what is missing, never what it implies. |
-| Steps list and flow diagram | The money trail | Steps are the default on phones; the diagram is an option. When a step splits more than 2 ways, its cards drop the description (it is in the details panel) so the list stays short. |
+| Fund tree, steps list and flow diagram | The money trail | The Tree is the default: the money on top, each step below it, a Source button on every box, and a tap on an end box opens its details. A run of single steps goes straight down. The tree only branches, inside a panel, where the money splits. A step that got money from two places shows under each of them. |
+| Steps list and flow diagram | The money trail, other views | Steps are a simple list; the diagram can be dragged and zoomed. When a step splits more than 2 ways, its cards drop the description (it is in the details panel). |
+
+| `balance(rows)` | The "so what" at the top of a page | Reads like a bank statement: label on the left, amount on the right. The budget shows Budget, Came in, Spent and Left over. A fund shows The money, then (for World Bank loans) Paid out, Still to be paid out and Paid back, then "Where it ended up" by how sure we are. The home page shows all the money we follow, the same way. Rows can carry a Source button and a coloured dot that matches a bar elsewhere. Keep it to one screen on a phone. |
+| `answerList(items)` | The short answer | Shows the most important line. The rest sit under "N more", one tap away. |
 
 ### Page shape: short answer, one chart, Go further
 
 Every data page has the same three layers, so people always know where to look:
 
-1. **The short answer.** The big number and up to 4 answer lines (`verdictList`).
+1. **The balance and the short answer.** `balance()` first, then one answer line, with the rest under "N more" (`answerList`). On a phone, the main picture must start on the first screen.
 2. **One main chart**, with a headline that states the message. On the budget page this is `planBars`. On a fund page it is the money trail.
 3. **Go further.** Everything else sits in closed sections that open on a tap: the whole-year plan, every number as a table, what we could not find, words used, sources and how to check it yourself.
 

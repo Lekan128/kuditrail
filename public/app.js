@@ -198,7 +198,8 @@
   // Tapping a box grows its own branch underneath; the path you took is drawn in green.
   // Options: onOpen(n) replaces opening in place (the budget page sends people to the explorer instead);
   // wide lays every row out side by side, for the explorer's draggable canvas; open is a list of labels to start opened.
-  function budgetTree(root, { shareWord = 'spending', actual = 'Spent', rootTitle, onPick, onOpen, wide, open: startOpen = [], onRender, chipFor } = {}) {
+  // content(n, parent) replaces what a box shows; onLeaf(n) makes end boxes tappable (fund pages open the details panel).
+  function budgetTree(root, { shareWord = 'spending', actual = 'Spent', rootTitle, onPick, onOpen, wide, open: startOpen = [], onRender, chipFor, content, onLeaf } = {}) {
     const plan = n => n.plan || ((n.children || []).length && n.children.every(c => c.plan) ? n.children.reduce((a, c) => a + c.plan, 0) : 0);
     const kidsOf = n => [...(n.children || [])].sort((a, b) => (plan(b) || b.amount) - (plan(a) || a.amount));
     const wrap = h('div', { class: `tree${wide ? ' wide' : ''}` });
@@ -211,12 +212,12 @@
     const srcOf = n => chipFor && evMap.get(n) ? h('span', { class: 'tn-src' }, chipFor(evMap.get(n), n.label)) : null;
     const box = (n, parent, level) => {
       const kids = n.children || [];
-      const body = [h('span', { class: 'tn-name' }, n.label),
+      const body = content ? [content(n, parent), kids.length ? h('span', { class: 'tn-more', 'aria-hidden': 'true' }, `${kids.length} part${kids.length === 1 ? '' : 's'}`) : null] : [h('span', { class: 'tn-name' }, n.label),
         parent ? h('span', { class: 'tn-share' }, `${pctTxt(n.amount / (parent.amount || 1))}% of ${parent === root ? shareWord : parent.label.length <= 24 ? parent.label.toLowerCase() : 'the box above'}`) : null,
         bars(n, parent),
-        kids.length ? h('span', { class: 'tn-more', 'aria-hidden': 'true' }, `${kids.length} parts`) : null];
-      const el = h('div', { class: `tnode${kids.length ? ' has-kids' : ''}` });
-      if (!kids.length) { el.append(h('div', { class: 'tn-hit' }, body)); el.append(...[srcOf(n)].filter(Boolean)); return el; }
+        kids.length ? h('span', { class: 'tn-more', 'aria-hidden': 'true' }, `${kids.length} part${kids.length === 1 ? '' : 's'}`) : null];
+      const el = h('div', { class: `tnode${kids.length ? ' has-kids kids' : ''}` });
+      if (!kids.length) { el.append(onLeaf ? h('button', { type: 'button', class: 'tn-hit', onclick: () => onLeaf(n) }, body) : h('div', { class: 'tn-hit' }, body)); el.append(...[srcOf(n)].filter(Boolean)); if (onLeaf) el.classList.add('has-kids'); return el; }
       el.append(h('button', { type: 'button', class: 'tn-hit', 'aria-expanded': 'false', onclick: () => {
         if (onOpen) return onOpen(n);
         const open = path[level + 1] === n;
@@ -230,10 +231,11 @@
     let grids = [], panels = [];
     const tnodes = g => [...g.children].filter(e => e.classList.contains('tnode'));
     const render = () => {
-      const rootBox = h('div', { class: 'tnode troot' }, h('div', { class: 'tn-hit' }, h('span', { class: 'tn-name' }, rootTitle || root.label), bars(root, null)), srcOf(root));
+      const rootBox = h('div', { class: 'tnode troot' }, h('div', { class: 'tn-hit' }, content ? content(root, null) : [h('span', { class: 'tn-name' }, rootTitle || root.label), bars(root, null)]), srcOf(root));
       grids = path.map((n, lv) => h('div', { class: `tgrid${n.children.length > 2 ? ' many' : ''}`, dataset: { level: String(lv) } },
         kidsOf(n).map(k => { const e = box(k, n, lv); e._node = k; if (path[lv + 1] === k) { e.classList.add('on'); e.querySelector('.tn-hit').setAttribute('aria-expanded', 'true'); } return e; })));
-      panels = grids.map((g, lv) => lv === 0 ? g : h('div', { class: 'tpanel' }, g));
+      grids.forEach((g, lv) => { if ((path[lv].children || []).length === 1) g.classList.add('solo'); });
+      panels = grids.map((g, lv) => lv === 0 ? g : h('div', { class: `tpanel${g.classList.contains('solo') ? ' solo' : ''}` }, g));
       wrap.replaceChildren(svg, rootBox, panels[0]);
       place();
       onRender && onRender([...wrap.querySelectorAll('.tnode.on')].pop() || null);
@@ -260,6 +262,8 @@
         const els = tnodes(g); if (!els.length) return;
         const G = r(g), cls = lv === 0 ? null : 'branch';
         // Phones: one box per line, the trunk runs down the left and a branch goes into the side of each box
+        if (g.classList.contains('solo')) { const E = r(els[0]); const tx = Math.min(P.l, E.l) + 24;
+          line(`M${tx},${P.b} V${E.t}`, cls); if (els[0].classList.contains('on')) line(`M${tx},${P.b} V${E.t}`, 'hot'); return; }
         if (!wide && new Set(els.map(e => Math.round(r(e).l))).size === 1) {
           const tx = G.l + 14, y = E => E.t + 22;
           const ends = els.map(e => r(e));
@@ -476,6 +480,18 @@
     // The budget card leads with this year's main finding, so people know what they will find before they tap
     const Y = B && B.years[0];
     const top = Y && Y.verdict[0];
+    // At a glance: all the money we follow, in naira, and where it ended up. The dots match the bar on each fund.
+    const KEYS = ['documented', 'reported', 'pending', 'unclear'];
+    const tot = { all: 0 }; KEYS.forEach(k => tot[k] = 0);
+    funds.forEach(f => { const n = toNgn(f.amount, f.currency); if (n == null) return; tot.all += n; KEYS.forEach(k => tot[k] += n * ((f.clarity || {})[k] || 0)); });
+    const glance = tot.all ? balance([
+      { label: 'Money we follow', value: `about ${naira(tot.all)}`, cls: 'bal-total' },
+      { heading: 'Where it ended up' },
+      ...KEYS.filter(k => tot[k] > 0).map(k => ({ label: CLARITY[k].label, dot: `clarity-${k}`, value: `about ${naira(tot[k])}`, small: `${pctTxt(tot[k] / tot.all)}%` }))], 'All the money we follow') : null;
+    const traceBar = c => { const segs = KEYS.filter(k => c[k] > 0.001);
+      const bar = h('div', { class: 'clarity-bar trace-mini', role: 'img', 'aria-label': 'Where it ended up: ' + segs.map(k => `${Math.round(c[k] * 100)}% ${CLARITY_SHORT[k]}`).join(', ') },
+        segs.map(k => { const d = h('span', { class: `seg clarity-${k}` }); d.style.width = (c[k] * 100) + '%'; return d; }));
+      return bar; };
     app().replaceChildren(h('div', { class: 'home container narrow' },
       h('h1', null, 'Where did the money go?'),
       h('p', { class: 'lead' }, 'We follow Nigeria\'s public money to see what it paid for. Every step links to its source.'),
@@ -485,14 +501,16 @@
           h('strong', null, top ? top.text : 'How the government planned to spend its money, and what really happened.'),
           h('span', { class: 'be-go' }, 'See where the budget went →'))),
       h('h2', { class: 'list-h' }, `Loans and funds we follow (${funds.length})`),
+      glance,
       h('ol', { class: 'fund-list' }, funds.map(f => {
         const ngn = nairaHint(f.amount, f.currency).replace('≈ ', '');
-        const v = f.verdict || []; const extra = v.length - 2;
+        const v = f.verdict || [];
         return h('li', null,
           h('h2', null, h('a', { href: `#/fund/${f.id}` }, f.title)),
           h('p', { class: 'fl-amount' }, h('strong', null, money(f.amount, f.currency)), ngn ? ` (about ${ngn})` : '', ' · ', fmtDate(f.date)),
-          verdictList(v.slice(0, 2)),
-          h('a', { class: 'fl-go', href: `#/fund/${f.id}`, 'aria-label': `See how the money moved: ${f.title}` }, extra > 0 ? `See ${extra} more and how the money moved →` : 'See how the money moved →'));
+          f.clarity ? traceBar(f.clarity) : null,
+          verdictList(v.slice(0, 1)),
+          h('a', { class: 'fl-go', href: `#/fund/${f.id}`, 'aria-label': `See how the money moved: ${f.title}` }, v.length > 1 ? `See ${v.length - 1} more and how the money moved →` : 'See how the money moved →'));
       })),
       symbolKey(),
       h('section', { class: 'home-foot' },
@@ -507,6 +525,25 @@
       '. "For every Nigerian" uses a population of about ', `${Math.round((CONFIG.population || 0) / 1e5) / 10} million`,
       CONFIG.populationNote ? ` (${CONFIG.populationNote})` : '', '. ',
       CONFIG.rateAuto ? 'These update automatically. ' : '', 'They are rough guides only.');
+  }
+
+  // The answer list: the most important line shows, the rest are one tap away under "N more"
+  function answerList(items, chipOf) {
+    if (!items || !items.length) return null;
+    const li = x => h('li', { class: `tone-${x.tone}` }, h('span', { class: 'v-icon', 'aria-hidden': 'true' }, (SYMBOLS[x.tone] || SYMBOLS.neutral)[0]),
+      h('span', null, x.text, chipOf ? [' ', chipOf(x)] : null));
+    const rest = items.slice(1);
+    return [h('ul', { class: 'verdict big' }, li(items[0])),
+      rest.length ? h('details', { class: 'verdict-more' }, h('summary', null, `${rest.length} more`), h('ul', { class: 'verdict big' }, rest.map(li))) : null];
+  }
+  // The balance: label on the left, amount on the right, read like a bank statement.
+  // A row can carry a Source button, a coloured dot (to match a bar elsewhere) and a small note.
+  function balance(rows, label) {
+    return h('section', { class: 'balance', 'aria-label': label || 'At a glance' }, h('dl', null, rows.filter(Boolean).map(r => r.heading
+      ? h('div', { class: 'bal-head' }, h('dt', null, r.heading))
+      : h('div', { class: `bal-row ${r.cls || ''}` },
+        h('dt', null, r.dot ? h('i', { class: `dot ${r.dot}`, 'aria-hidden': 'true' }) : null, r.label, r.chip ? [' ', r.chip] : null),
+        h('dd', null, r.value, r.small ? h('small', null, r.small) : null)))));
   }
 
   // National budget: answer first, then one chart that puts the plan beside what was spent, then "Go further"
@@ -527,30 +564,22 @@
       years.map(y => h('a', { href: `#/budget?year=${y}`, class: y === yr ? 'on' : null, 'aria-current': y === yr ? 'page' : null }, String(y)))) : null;
 
     // The balance, like a bank statement: the budget, then what came in, what was spent and what is left
-    const balance = () => {
+    const bal = () => {
       const TR = Y.trees; if (!TR) return figure({ label: Y.title, value: naira(Y.total), context: pp ? `About ${pp} for every Nigerian` : '', note: Y.totalNote || `Signed into law on ${fmtDate(Y.signed)}.` });
       const inn = TR.spent.in.amount, out = TR.spent.out.amount, left = inn - out;
       const per = TR.period.replace(/ \d{4}$/, '').replace(/([A-Z][a-z]{2})[a-z]*/g, '$1').replace(' to ', '–'); // "Jan–Jun"
-      const row = (label, value, cls, chipEl) => h('div', { class: `bal-row ${cls || ''}` }, h('dt', null, label, chipEl ? [' ', chipEl] : null), h('dd', null, value));
-      return h('section', { class: 'balance', 'aria-label': 'The budget balance' },
-        h('dl', null,
-          row(`Budget for ${Y.year}`, naira(Y.total), 'bal-total'),
-          row(`Came in, ${per}`, naira(inn), 'bal-in', chip(TR.spent.in.ev, `Money that came in, ${TR.period}`)),
-          row(`Spent, ${per}`, `− ${naira(out)}`, 'bal-out', chip(TR.spent.out.ev, `Money spent, ${TR.period}`)),
-          row(left >= 0 ? 'Left over' : 'Short by', naira(Math.abs(left)), 'bal-left')),
-        null);
+      return balance([
+        { label: `Budget for ${Y.year}`, value: naira(Y.total), cls: 'bal-total' },
+        { label: `Came in, ${per}`, value: naira(inn), chip: chip(TR.spent.in.ev, `Money that came in, ${TR.period}`) },
+        { label: `Spent, ${per}`, value: `− ${naira(out)}`, cls: 'bal-out', chip: chip(TR.spent.out.ev, `Money spent, ${TR.period}`) },
+        { label: left >= 0 ? 'Left over' : 'Short by', value: naira(Math.abs(left)), cls: 'bal-left' }], 'The budget balance');
     };
     const head = [
       h('nav', { class: 'crumbs', 'aria-label': 'Breadcrumb' }, h('a', { href: '#/' }, '← All funds')),
       h('div', { class: 'budget-title' }, h('h1', null, 'The national budget'), yearNav),
-      balance(),
+      bal(),
       h('h2', { class: 'small-h' }, 'The short answer'),
-      // The most important line shows; the rest are one tap away, so the tree comes sooner
-      (() => { const li = x => h('li', { class: `tone-${x.tone}` },
-        h('span', { class: 'v-icon', 'aria-hidden': 'true' }, (SYMBOLS[x.tone] || SYMBOLS.neutral)[0]), h('span', null, x.text, ' ', chip(x.evidence, x.text)));
-        const rest = Y.verdict.slice(1);
-        return [h('ul', { class: 'verdict big' }, li(Y.verdict[0])),
-          rest.length ? h('details', { class: 'verdict-more' }, h('summary', null, `${rest.length} more`), h('ul', { class: 'verdict big' }, rest.map(li))) : null]; })()];
+      answerList(Y.verdict, x => chip(x.evidence, x.text))];
 
     // Main chart: spent against planned, for the money going out and the money coming in
     const charts = [];
@@ -721,8 +750,8 @@
   }
 
   function preferredView() {
-    try { const v = localStorage.getItem('kt-view'); if (v === 'steps' || v === 'diagram') return v; } catch (_) { }
-    return window.matchMedia('(max-width: 760px)').matches ? 'steps' : 'diagram';
+    try { const v = localStorage.getItem('kt-trail-view'); if (v === 'tree' || v === 'steps' || v === 'diagram') return v; } catch (_) { }
+    return 'tree';
   }
 
   // depth of each node = longest path from a source
@@ -767,6 +796,7 @@
     let view = preferredView();
     const graphBox = h('div', { class: 'graph', tabindex: -1 });
     const stepsBox = h('div', { class: 'steps' });
+    const treeBox = h('div', { class: 'ftree' });
     const panel = h('aside', { class: 'panel', 'aria-live': 'polite' });
     const backdrop = h('div', { class: 'sheet-backdrop', 'aria-hidden': 'true', onclick: () => selectNode(null) });
     const updatesBox = h('div', { class: 'updates' });
@@ -878,36 +908,73 @@
       h('button', { class: 'icon-btn wide', title: 'Put boxes back', onclick: () => currentGraph.resetLayout() }, 'Reset'));
     const legendEl = legend();
     const toggle = h('div', { class: 'view-toggle', role: 'tablist', 'aria-label': 'How to show the money trail' },
+      h('button', { role: 'tab', dataset: { v: 'tree' } }, 'Tree'),
       h('button', { role: 'tab', dataset: { v: 'steps' } }, 'Steps'),
       h('button', { role: 'tab', dataset: { v: 'diagram' } }, 'Diagram'));
-    const wrap = h('div', { class: 'graph-wrap' }, h('div', { class: 'graph-tools' }, toggle, diagramTools), stepsBox, graphBox, legendEl);
+    const wrap = h('div', { class: 'graph-wrap' }, h('div', { class: 'graph-tools' }, toggle, diagramTools), treeBox, stepsBox, graphBox, legendEl);
     const setView = v => {
-      view = v; try { localStorage.setItem('kt-view', v); } catch (_) { }
-      wrap.classList.toggle('view-steps', v === 'steps'); wrap.classList.toggle('view-diagram', v === 'diagram');
+      view = v; try { localStorage.setItem('kt-trail-view', v); } catch (_) { }
+      wrap.classList.toggle('view-steps', v === 'steps'); wrap.classList.toggle('view-diagram', v === 'diagram'); wrap.classList.toggle('view-tree', v === 'tree');
       toggle.querySelectorAll('button').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
       if (currentGraph && !currentGraph.selected) renderPanel(null);
     };
     toggle.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); });
 
     const ngn = nairaHint(fund.amount, fund.currency); const pp = perPerson(fund.amount, fund.currency); const live = liveBox(fund);
+
+    // The money trail as a tree: the money on top, then where it went, step by step.
+    // A step that got money from two places shows under each of them, with the amount from that one.
+    const grow = (nid, amount, estimated) => { const n = nodeById.get(nid);
+      return { label: n.label, amount: amount != null ? amount : nodeValue(nid), estimated, ev: n.evidence, node: n,
+        children: outflow(nid).map(l => grow(l.to, l.amount, l.estimated)) }; };
+    const starts = fund.nodes.filter(n => !inflow(n.id).length);
+    const startKids = starts.map(n => grow(n.id)), startSum = startKids.reduce((a, k) => a + k.amount, 0);
+    // When more went in than the fund itself (Nigeria adding its own money to a loan), the top box shows all of it, so the shares add up
+    const treeRoot = { label: fund.title, amount: Math.max(fund.amount, startSum), ev: fund.evidence, children: startKids };
+    const autoOpen = []; for (let n = treeRoot; n.children.length === 1 && n.children[0].children.length;) { n = n.children[0]; autoOpen.push(n.label); }
+    const boxContent = (t, parent) => {
+      if (!parent) { const all = t.amount > fund.amount; const hint = nairaHint(t.amount, fund.currency);
+        return [h('span', { class: 'tn-name' }, all ? 'All the money that went in' : 'The money'), h('span', { class: 'tn-amt' }, money(t.amount, fund.currency)), hint ? h('span', { class: 'tn-share' }, hint) : null]; }
+      const n = t.node, hidden = n.amountDisclosed === false || t.estimated;
+      return [h('span', { class: 'n-type-tag' }, typeLabel(n.type)), h('span', { class: 'tn-name' }, n.label),
+        h('span', { class: 'tn-amt' }, hidden ? 'Amount not disclosed' : money(t.amount, fund.currency)),
+        !hidden && parent.amount ? h('span', { class: 'tn-share' }, `${pctTxt(t.amount / parent.amount)}% of ${parent === treeRoot ? 'the money' : parent.label.length <= 24 ? parent.label : 'the box above'}`) : null,
+        n.status !== 'passed_on' || ['unclear', 'pending'].includes(n.clarity) ? h('span', { class: 'tn-tags' }, n.status !== 'passed_on' ? pill(n.status) : null, ['unclear', 'pending'].includes(n.clarity) && !['unclear', 'pending_data'].includes(n.status) ? clarityTag(n.clarity) : null) : null];
+    };
+    treeBox.append(budgetTree(treeRoot, { content: boxContent, open: autoOpen, chipFor: (ev, about) => sourceChip(ev, about), onLeaf: t => selectNode(t.node.id) }));
+
+    // The fund balance: how much, how much has been paid out, and where it ended up
+    const endTotals = { documented: 0, reported: 0, pending: 0, unclear: 0 };
+    fund.links.forEach(l => { if (!outflow(l.to).length) endTotals[nodeById.get(l.to).clarity] += l.amount; });
+    const endSum = Object.values(endTotals).reduce((a, b) => a + b, 0) || 1;
+    const w = fund.liveData && fund.liveData.worldbank;
+    const wbSource = w ? sourceChip([{ title: 'World Bank loan record', publisher: 'World Bank', type: 'dataset', url: w.sourcePage, date: w.asOf }], 'Paid out so far') : null;
+    const fundBalance = balance([
+      { label: 'The money', value: money(fund.amount, fund.currency), small: ngn ? ngn : null, cls: 'bal-total' },
+      w ? { label: 'Paid out so far', value: money(w.disbursed, 'USD'), chip: wbSource } : null,
+      w && w.undisbursed > 0 ? { label: 'Still to be paid out', value: money(w.undisbursed, 'USD') } : null,
+      w && w.repaid > 0 ? { label: 'Paid back so far', value: money(w.repaid, 'USD') } : null,
+      { heading: 'Where it ended up' },
+      ...['documented', 'reported', 'pending', 'unclear'].filter(k => endTotals[k] > 0).map(k => ({
+        label: CLARITY[k].label, dot: `clarity-${k}`, value: money(endTotals[k], fund.currency), small: `${pctTxt(endTotals[k] / endSum)}%` }))], 'The money at a glance');
     const main = h('div', { class: 'fund-page' },
       h('nav', { class: 'crumbs container', 'aria-label': 'Breadcrumb' }, h('a', { href: '#/' }, '← All funds')),
       h('header', { class: 'fund-head container narrow-left' },
         h('h1', null, fund.title),
-        figure({ value: money(fund.amount, fund.currency), context: [ngn ? `About ${ngn.replace('≈ ', '')}` : '', pp ? `${ngn ? ', or a' : 'A'}bout ${pp} for every Nigerian` : ''].join('') || null,
-          note: `From ${fund.source}, ${fmtDate(fund.date)}.` }),
+        fundBalance,
         h('h2', { class: 'small-h' }, 'The short answer'),
-        verdictList(fund.verdict, 'big'),
+        answerList(fund.verdict),
         stamp({ date: fund.asOf, extra: ['Built from public reports. ', h('a', { href: '#/disclaimer' }, 'Read the disclaimer'), '.'] })),
       h('h2', { class: 'container section-h' }, 'How the money moved'),
       h('section', { class: 'explorer container' }, wrap, panel, backdrop),
-      live ? h('div', { class: 'container narrow-left' }, live) : null,
       h('section', { class: 'container narrow-left more-about further' },
         h('h2', { class: 'section-h' }, 'Go further'),
         h('details', null, h('summary', null, 'The story in short'),
+          h('p', { class: 'more-lead' }, `From ${fund.source}, ${fmtDate(fund.date)}.`, pp ? ` That is about ${pp} for every Nigerian.` : ''),
           fund.simple ? h('p', null, fund.simple) : null,
           h('p', null, fund.summary),
           h('p', { class: 'fine' }, 'How much of the money can be traced:'), clarityBar(fund.clarityBreakdown)),
+        live ? h('details', null, h('summary', null, 'The lender\'s own record'), live) : null,
         h('details', null, h('summary', null, `What we could not find (${fund.gaps.length})`),
           h('ul', { class: 'gaps' }, fund.gaps.map(g => h('li', null, g))),
           h('p', null, h('a', { href: `#/contact?type=new_evidence&fund=${fund.id}` }, 'Can you help fill a gap? Tell us.'))),

@@ -779,8 +779,8 @@ details[open] > summary .pb-open::after { content: "Close ▾"; }
 .pb-row { gap: 6px; }
 .pb-src { margin: -4px 0 10px; }
 .pb-open { align-self: flex-start; }
-.tnode.has-kids .tn-src { position: absolute; right: 10px; bottom: 6px; margin: 0; }
-.tnode.has-kids.on .tn-src { right: 8.5px; bottom: 4.5px; }
+.tnode.kids .tn-src { position: absolute; right: 10px; bottom: 6px; margin: 0; }
+.tnode.kids.on .tn-src { right: 8.5px; bottom: 4.5px; }
 .tnode.has-kids .tn-more { min-height: var(--tap-min); display: inline-flex; align-items: center; }
 
 /* Budget page: keep the balance and the short answer compact, so the tree comes sooner */
@@ -808,3 +808,29 @@ details[open] > summary .pb-open::after { content: "Close ▾"; }
   .budget-title .view-toggle a { flex: none; padding: 4px 10px; min-height: 36px; font-size: .88rem; }
   .budget-page .crumbs { padding-top: 8px; }
 }
+
+/* Fund page: the money trail as a tree */
+.graph-wrap:not(.view-tree) .ftree { display: none; }
+.graph-wrap.view-tree .graph, .graph-wrap.view-tree .legend, .graph-wrap.view-tree .gt-btns, .graph-wrap.view-tree .steps { display: none; }
+.ftree { padding: 16px; }
+.tn-amt { font-weight: 800; font-size: var(--fs-md); font-variant-numeric: tabular-nums; }
+.tn-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tnode .n-type-tag { margin-bottom: -4px; }
+/* Balance: a small heading row, dots that match colours elsewhere, and a note under an amount */
+.bal-head dt { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); padding: 10px 0 0; }
+.bal-row dt .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; flex: none; }
+.bal-row dd small { display: block; text-align: right; font-size: var(--fs-xs); font-weight: 500; color: var(--ink-3); }
+.bal-head + .bal-row { border-top: 0; }
+.home .balance { margin: 10px 0 14px; }
+.trace-mini { height: 8px; margin: 2px 0 10px; max-width: 360px; }
+.fund-list > li { padding: 16px 0 14px; }
+.fl-go { margin-top: 6px; }
+
+/* A step with only one next step: straight down, no extra panel or indent */
+.tgrid.solo { padding-left: 0; grid-template-columns: minmax(0, 1fr) !important; display: grid; justify-content: stretch; }
+.tpanel.solo { background: none; border: 0; padding: 0; margin-top: 0; }
+.tpanel.solo > .tgrid { margin-top: 18px; }
+.tree.wide .tgrid.solo { display: flex; justify-content: center; }
+.tree.wide .tpanel.solo { margin-top: 0; padding: 0; }
+@container (min-width: 620px) { .tgrid.solo > .tnode { max-width: 360px; } }
+.further .section-h { margin-left: 0; margin-right: 0; }
