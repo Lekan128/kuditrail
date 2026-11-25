@@ -107,7 +107,7 @@ async function handle(request, env, url) {
   const FUNDS = DATA.funds;
 
   if (m === 'GET' && parts[0] === 'config') {
-    return json(200, { ...DATA.settings, contactEmail: env.CONTACT_EMAIL || 'corrections@kuditrail.example',
+    return json(200, { ...DATA.settings, contactEmail: env.CONTACT_EMAIL || 'kuditrail@gmail.com',
       statuses: STATUSES, observedStatuses: OBSERVED_STATUS, contactTypes: CONTACT_TYPES });
   }
 
