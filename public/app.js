@@ -262,8 +262,9 @@
         const els = tnodes(g); if (!els.length) return;
         const G = r(g), cls = lv === 0 ? null : 'branch';
         // Phones: one box per line, the trunk runs down the left and a branch goes into the side of each box
-        if (g.classList.contains('solo')) { const E = r(els[0]); const tx = Math.min(P.l, E.l) + 24;
-          line(`M${tx},${P.b} V${E.t}`, cls); if (els[0].classList.contains('on')) line(`M${tx},${P.b} V${E.t}`, 'hot'); return; }
+        if (g.classList.contains('solo')) { const E = r(els[0]);
+          const d = Math.abs(P.l - E.l) < 40 ? `M${Math.min(P.l, E.l) + 24},${P.b} V${E.t}` : `M${P.cx},${P.b} V${E.t - 12} H${E.cx} V${E.t}`;
+          line(d, cls); if (els[0].classList.contains('on')) line(d, 'hot'); return; }
         if (!wide && new Set(els.map(e => Math.round(r(e).l))).size === 1) {
           const tx = G.l + 14, y = E => E.t + 22;
           const ends = els.map(e => r(e));
@@ -527,6 +528,87 @@
       CONFIG.rateAuto ? 'These update automatically. ' : '', 'They are rough guides only.');
   }
 
+  // Family tree: every branch open, top-down, joined by lines. Where a step splits into more than 2 end points,
+  // those stack in a column under it, so the tree stays narrow enough for a phone.
+  // feeders: boxes drawn above the top box whose lines join into it (several sources paying into one place).
+  function familyTree(root, { content, chipFor, onLeaf, feeders = [] } = {}) {
+    const wrap = h('div', { class: 'ftree-wrap' });
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'tree-lines'); svg.setAttribute('aria-hidden', 'true');
+    const evOf = new Map(); (function walk(n, acc) { const e = n.ev && n.ev.length ? n.ev : acc; evOf.set(n, e); (n.children || []).forEach(c => walk(c, e)); })(root, null);
+    const links = [];
+    const sub = (n, parent) => {
+      const kids = n.children || [];
+      const body = content(n, parent);
+      // every box that is a real step opens its details (onLeaf is called for any box, not only end boxes)
+      const can = onLeaf && n.node;
+      const hit = can ? h('button', { type: 'button', class: 'tn-hit', 'aria-label': `${n.label}: see details`, onclick: () => onLeaf(n) }, body) : h('div', { class: 'tn-hit' }, body);
+      const box = h('div', { class: `tnode fnode${parent ? '' : ' troot'}${can ? ' tappable' : ''}` }, hit,
+        chipFor && evOf.get(n) ? h('span', { class: 'tn-src' }, chipFor(evOf.get(n), n.label)) : null);
+      const stack = kids.length > 2 && kids.every(k => !(k.children || []).length);
+      const kidEls = kids.map(k => sub(k, n));
+      const kidBox = kids.length ? h('div', { class: `fkids${stack ? ' stack' : ''}` }, kidEls) : null;
+      if (kids.length) links.push({ box, kids: kidEls.map(e => e.firstChild), stack });
+      return h('div', { class: 'fsub' }, box, kidBox);
+    };
+    const feedEls = feeders.map(f => h('div', { class: `tnode fnode${onLeaf ? ' tappable' : ''}` }, onLeaf ? h('button', { type: 'button', class: 'tn-hit', 'aria-label': `${f.label}: see details`, onclick: () => onLeaf(f) }, content(f, 'feeder')) : h('div', { class: 'tn-hit' }, content(f, 'feeder')),
+      chipFor && f.ev && f.ev.length ? h('span', { class: 'tn-src' }, chipFor(f.ev, f.label)) : null));
+    const top = sub(root, null);
+    wrap.append(svg, feedEls.length ? h('div', { class: 'fkids feeders' }, feedEls) : null, top);
+    const draw = () => {
+      const W = wrap.getBoundingClientRect(); if (!W.width) return;
+      const k = W.width / (wrap.offsetWidth || W.width);
+      const r = el => { const b = el.getBoundingClientRect(); return { l: (b.left - W.left) / k, r: (b.right - W.left) / k, t: (b.top - W.top) / k, b: (b.bottom - W.top) / k, cx: ((b.left + b.right) / 2 - W.left) / k }; };
+      svg.setAttribute('width', wrap.offsetWidth); svg.setAttribute('height', wrap.offsetHeight); svg.setAttribute('viewBox', `0 0 ${wrap.offsetWidth} ${wrap.offsetHeight}`);
+      const ds = [];
+      if (feedEls.length) { const F = feedEls.map(r), T = r(top.firstChild), bus = (Math.max(...F.map(E => E.b)) + T.t) / 2;
+        F.forEach(E => ds.push(`M${E.cx},${E.b} V${bus}`)); ds.push(`M${Math.min(...F.map(E => E.cx), T.cx)},${bus} H${Math.max(...F.map(E => E.cx), T.cx)}`); ds.push(`M${T.cx},${bus} V${T.t}`); }
+      for (const { box, kids, stack } of links) {
+        const P = r(box), K = kids.map(r);
+        if (stack) { const x = K[0].l - 16, y = E => E.t + 26;
+          ds.push(`M${P.cx},${P.b} V${K[0].t - 14} H${x} V${y(K[K.length - 1])}`); K.forEach(E => ds.push(`M${x},${y(E)} H${E.l}`)); }
+        else { const bus = (P.b + Math.min(...K.map(E => E.t))) / 2;
+          ds.push(`M${P.cx},${P.b} V${bus}`); if (K.length > 1) ds.push(`M${K[0].cx},${bus} H${K[K.length - 1].cx}`);
+          K.forEach(E => ds.push(`M${E.cx},${bus} V${E.t}`)); }
+      }
+      svg.replaceChildren(...ds.map(d => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); p.setAttribute('class', 'branch'); return p; }));
+    };
+    if (window.ResizeObserver) new ResizeObserver(draw).observe(wrap);
+    return wrap;
+  }
+  // A view you can drag, pinch and zoom, with − / + / See all buttons. A drag never counts as a tap.
+  function panZoom(canvas, { height } = {}) {
+    const view = h('div', { class: 'tx-view' }, canvas);
+    if (height) view.style.height = height;
+    canvas.classList.add('tx-canvas');
+    let x = 0, y = 0, k = 1;
+    const apply = () => { canvas.style.transform = `translate(${x}px, ${y}px) scale(${k})`; };
+    const clampK = v => Math.max(0.25, Math.min(1.5, v));
+    const zoomAt = (f, cx, cy) => { const nk = clampK(k * f); x = cx - (cx - x) * nk / k; y = cy - (cy - y) * nk / k; k = nk; apply(); };
+    // Show it all if it fits; if not, stay readable and start centred on the top box
+    const fit = (minK = 0.25) => { const V = view.getBoundingClientRect(); k = clampK(Math.max(minK, Math.min(1, (V.width - 16) / canvas.offsetWidth, (V.height - 16) / canvas.offsetHeight)));
+      const top = canvas.querySelector('.troot'); const topX = top ? (top.offsetLeft + top.offsetWidth / 2) : canvas.offsetWidth / 2;
+      x = canvas.offsetWidth * k <= V.width ? (V.width - canvas.offsetWidth * k) / 2 : V.width / 2 - topX * k; y = 8; apply(); };
+    const pts = new Map(); let moved = 0, pinch = null;
+    view.addEventListener('pointerdown', e => { pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); moved = 0; if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); } });
+    view.addEventListener('pointermove', e => {
+      const p = pts.get(e.pointerId); if (!p) return;
+      const dx = e.clientX - p.x, dy = e.clientY - p.y; pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 1) { moved += Math.abs(dx) + Math.abs(dy); if (moved > 6) { view.setPointerCapture(e.pointerId); view.classList.add('dragging'); } x += dx; y += dy; apply(); }
+      else if (pts.size === 2 && pinch) { const [a, b] = [...pts.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); const V = view.getBoundingClientRect();
+        zoomAt(d / pinch, (a.x + b.x) / 2 - V.left, (a.y + b.y) / 2 - V.top); pinch = d; moved = 99; }
+    });
+    const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; view.classList.remove('dragging'); };
+    view.addEventListener('pointerup', up); view.addEventListener('pointercancel', up);
+    view.addEventListener('click', e => { if (moved > 6) { e.stopPropagation(); e.preventDefault(); } }, true);
+    view.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); const V = view.getBoundingClientRect(); zoomAt(Math.exp(-e.deltaY / 200), e.clientX - V.left, e.clientY - V.top); }, { passive: false });
+    const centre = () => { const V = view.getBoundingClientRect(); return [V.width / 2, V.height / 2]; };
+    view.append(h('div', { class: 'tx-tools' },
+      h('button', { class: 'icon-btn', 'aria-label': 'Zoom out', onclick: () => zoomAt(1 / 1.25, ...centre()) }, '−'),
+      h('button', { class: 'icon-btn', 'aria-label': 'Zoom in', onclick: () => zoomAt(1.25, ...centre()) }, '+'),
+      h('button', { class: 'icon-btn wide', onclick: () => fit() }, 'See all')));
+    return { view, fit };
+  }
+
   // The answer list: the most important line shows, the rest are one tap away under "N more"
   function answerList(items, chipOf) {
     if (!items || !items.length) return null;
@@ -705,6 +787,7 @@
     const tree = budgetTree(T, { wide: true, open, chipFor: (idxs, about) => sourceChip((idxs || []).map(i => Y.evidence[i]), about), shareWord: side === 'in' ? 'money in' : 'spending', actual: side === 'in' ? 'Came in' : 'Spent',
       rootTitle: side === 'in' ? `Money that came in, ${period}` : `The ${yr} budget, ${period}`,
       onPick: (n, labels) => { showInfo(n); history.replaceState(null, '', q(labels.length ? { open: labels.join('>') } : {})); },
+      onLeaf: n => { showInfo(n); requestAnimationFrame(() => info.scrollIntoView({ behavior: 'smooth', block: 'nearest' })); },
       onRender: el => { if (ready) requestAnimationFrame(() => focusOn(el || canvas.querySelector('.troot'))); } });
     canvas.append(tree); view.append(canvas);
 
@@ -915,6 +998,7 @@
     const setView = v => {
       view = v; try { localStorage.setItem('kt-trail-view', v); } catch (_) { }
       wrap.classList.toggle('view-steps', v === 'steps'); wrap.classList.toggle('view-diagram', v === 'diagram'); wrap.classList.toggle('view-tree', v === 'tree');
+      if (v === 'tree') fitTree();
       toggle.querySelectorAll('button').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
       if (currentGraph && !currentGraph.selected) renderPanel(null);
     };
@@ -924,15 +1008,22 @@
 
     // The money trail as a tree: the money on top, then where it went, step by step.
     // A step that got money from two places shows under each of them, with the amount from that one.
-    const grow = (nid, amount, estimated) => { const n = nodeById.get(nid);
-      return { label: n.label, amount: amount != null ? amount : nodeValue(nid), estimated, ev: n.evidence, node: n,
-        children: outflow(nid).map(l => grow(l.to, l.amount, l.estimated)) }; };
+    // When a step got money from two places, each branch carries only its own share of what happens next
+    const grow = (nid, amount, estimated) => { const n = nodeById.get(nid); const full = nodeValue(nid), amt = amount != null ? amount : full, f = full ? amt / full : 1;
+      return { label: n.label, amount: amt, estimated, ev: n.evidence, node: n,
+        children: outflow(nid).map(l => grow(l.to, l.amount * f, l.estimated)) }; };
     const starts = fund.nodes.filter(n => !inflow(n.id).length);
+    // Several sources paying straight into the same place: draw them on top, joining into that one box
+    const joinTo = starts.length > 1 && starts.every(n => outflow(n.id).length === 1) && new Set(starts.map(n => outflow(n.id)[0].to)).size === 1 ? outflow(starts[0].id)[0].to : null;
+    const feeders = joinTo ? starts.map(n => ({ label: n.label, amount: nodeValue(n.id), ev: n.evidence, node: n })) : [];
     const startKids = starts.map(n => grow(n.id)), startSum = startKids.reduce((a, k) => a + k.amount, 0);
     // When more went in than the fund itself (Nigeria adding its own money to a loan), the top box shows all of it, so the shares add up
     const treeRoot = { label: fund.title, amount: Math.max(fund.amount, startSum), ev: fund.evidence, children: startKids };
-    const autoOpen = []; for (let n = treeRoot; n.children.length === 1 && n.children[0].children.length;) { n = n.children[0]; autoOpen.push(n.label); }
     const boxContent = (t, parent) => {
+      if (parent === 'feeder' || (!parent && t.node)) { const n = t.node, sum = feeders.reduce((a, f) => a + f.amount, 0);
+        return [h('span', { class: 'n-type-tag' }, typeLabel(n.type)), h('span', { class: 'tn-name' }, n.label), h('span', { class: 'tn-amt' }, money(t.amount, fund.currency)),
+          parent === 'feeder' ? h('span', { class: 'tn-share' }, `${pctTxt(t.amount / (sum || 1))}% of all the money`) : h('span', { class: 'tn-share' }, 'All the money from the boxes above'),
+          n.status !== 'passed_on' ? h('span', { class: 'tn-tags' }, pill(n.status)) : null]; }
       if (!parent) { const all = t.amount > fund.amount; const hint = nairaHint(t.amount, fund.currency);
         return [h('span', { class: 'tn-name' }, all ? 'All the money that went in' : 'The money'), h('span', { class: 'tn-amt' }, money(t.amount, fund.currency)), hint ? h('span', { class: 'tn-share' }, hint) : null]; }
       const n = t.node, hidden = n.amountDisclosed === false || t.estimated;
@@ -941,7 +1032,11 @@
         !hidden && parent.amount ? h('span', { class: 'tn-share' }, `${pctTxt(t.amount / parent.amount)}% of ${parent === treeRoot ? 'the money' : parent.label.length <= 24 ? parent.label : 'the box above'}`) : null,
         n.status !== 'passed_on' || ['unclear', 'pending'].includes(n.clarity) ? h('span', { class: 'tn-tags' }, n.status !== 'passed_on' ? pill(n.status) : null, ['unclear', 'pending'].includes(n.clarity) && !['unclear', 'pending_data'].includes(n.status) ? clarityTag(n.clarity) : null) : null];
     };
-    treeBox.append(budgetTree(treeRoot, { content: boxContent, open: autoOpen, chipFor: (ev, about) => sourceChip(ev, about), onLeaf: t => selectNode(t.node.id) }));
+    const fam = familyTree(joinTo ? grow(joinTo) : treeRoot, { feeders, content: boxContent, chipFor: (ev, about) => sourceChip(ev, about), onLeaf: t => selectNode(t.node.id) });
+    const famView = panZoom(fam, { height: 'min(78vh, 620px)' });
+    treeBox.append(h('p', { class: 'tx-hint ftree-hint' }, 'Drag to move. Tap a box for its details.'), famView.view);
+    // Start by showing the whole tree, but never so small it can't be read; then it can be dragged and zoomed
+    const fitTree = () => requestAnimationFrame(() => famView.fit(0.6));
 
     // The fund balance: how much, how much has been paid out, and where it ended up
     const endTotals = { documented: 0, reported: 0, pending: 0, unclear: 0 };

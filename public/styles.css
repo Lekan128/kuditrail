@@ -834,3 +834,21 @@ details[open] > summary .pb-open::after { content: "Close ▾"; }
 .tree.wide .tpanel.solo { margin-top: 0; padding: 0; }
 @container (min-width: 620px) { .tgrid.solo > .tnode { max-width: 360px; } }
 .further .section-h { margin-left: 0; margin-right: 0; }
+
+/* Fund family tree: top-down, every branch open, inside a drag-and-zoom view */
+.ftree { padding: 10px; }
+.ftree-hint { margin: 0 0 8px; }
+.ftree .tx-view { min-height: 360px; }
+.ftree-wrap { position: relative; display: inline-block; padding: 8px 12px 24px; }
+.fsub { display: flex; flex-direction: column; align-items: center; }
+.fkids { display: flex; gap: 14px; margin-top: 30px; align-items: flex-start; }
+.fkids.stack { flex-direction: column; gap: 12px; margin-top: 28px; padding-left: 32px; align-self: flex-start; margin-left: calc(50% - 110px); }
+.fnode { width: 200px; flex: none; }
+.fnode.troot { width: 220px; max-width: none; margin: 0; }
+.fnode .tn-name { font-size: .9rem; }
+.fnode .tn-amt { font-size: 1.05rem; }
+.fnode.tappable:hover { border-color: var(--brand); }
+.fnode .tn-src { margin-top: 6px; }
+.ftree-wrap .tree-lines path.branch { stroke: color-mix(in srgb, var(--brand) 55%, var(--line-2)); stroke-width: 2; }
+.fkids.feeders { margin: 0 0 30px; justify-content: center; }
+.fnode.troot .tn-name { text-align: left; }

@@ -13,6 +13,13 @@ for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.json'))) {
     for (const i of t.evidence || []) if (!d.evidence[i]) say(`timeline ${t.date} points to missing source #${i}`);
   }
   for (const k of ['simple', 'verdict', 'asOf']) if (!d[k] || (Array.isArray(d[k]) && !d[k].length)) say(`missing ${k}`);
+  // The fund tree (public/app.js, familyTree) can show money joining up in one shape only: several sources
+  // that each pay straight into the same step. Any other step with two or more payers would be drawn twice.
+  const into = id => d.links.filter(l => l.to === id), from = id => d.links.filter(l => l.from === id);
+  const starts = d.nodes.filter(n => !into(n.id).length);
+  const joinTo = starts.length > 1 && starts.every(n => from(n.id).length === 1) && new Set(starts.map(n => from(n.id)[0].to)).size === 1 ? from(starts[0].id)[0].to : null;
+  for (const n of d.nodes) if (into(n.id).length > 1 && n.id !== joinTo)
+    say(`step "${n.label}" gets money from ${into(n.id).length} places in a way the tree cannot draw (only sources paying straight into one step are supported)`);
 }
 // National budget page: every figure and statement must point to a source
 const B = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'budget.json'), 'utf8'));
