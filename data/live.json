@@ -1,13 +1,13 @@
 {
   "rate": {
-    "value": 1387.39,
-    "date": "2026-11-26",
-    "fetchedAt": "2026-11-27T01:00:26.359Z"
+    "value": 1366.95,
+    "date": "2026-11-27",
+    "fetchedAt": "2026-11-28T00:32:57.551Z"
   },
   "population": {
     "value": 237527782,
     "year": "2025",
-    "fetchedAt": "2026-11-27T01:00:26.444Z"
+    "fetchedAt": "2026-11-28T00:32:57.980Z"
   },
   "worldbank": {
     "P176935": {
@@ -29,9 +29,9 @@
       "lastRepayment": "2051-07-15",
       "sourcePage": "https://financesone.worldbank.org/ida-statement-of-credits-grants-and-guarantees-historical-data/DS00976",
       "projectPage": "https://projects.worldbank.org/en/projects-operations/project-detail/P176935",
-      "fetchedAt": "2026-11-27T01:00:27.038Z"
+      "fetchedAt": "2026-11-28T00:32:58.634Z"
     }
   },
   "errors": {},
-  "lastRun": "2026-11-27T01:00:27.038Z"
+  "lastRun": "2026-11-28T00:32:58.634Z"
 }
